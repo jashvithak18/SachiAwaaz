@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+speechbrain
+transformers
+torch
+torchaudio
+soundfile
+python-multipart
