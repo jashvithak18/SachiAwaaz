@@ -1,421 +1,475 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const TRANSLATIONS = {
+  en: {
+    heroTitle: "Every day, thousands of people trust something they shouldn't.",
+    heroSub1: "A fake voice.",
+    heroSub2: "A fake document.",
+    heroSub3: "A fake screenshot.",
+    heroSub4: "A fake identity.",
+    heroSub5: "Sometimes, it looks completely real.",
+    heroSub6: "That's why PARAKH exists.",
+    heroCta1: "Verify Before You Trust",
+    heroCta2: "See How It Works",
+    
+    questionWhatIf: "What if...",
+    question1: "What if that internship offer wasn't real?",
+    question2: "What if the payment screenshot was edited?",
+    question3: "What if the voice wasn't actually theirs?",
+    question4: "What if the document was forged?",
+    
+    scenarioTitle: "Real-life moments where trust is compromised.",
+    scenario1Title: "The Internship Offer",
+    scenario1Desc: "An official-looking PDF with digital signatures, claiming you got the role. But the company has never heard of it.",
+    scenario2Title: "The Transfer Screenshot",
+    scenario2Desc: "A payment verification image showing the funds are on the way. The numbers were adjusted on a phone app.",
+    scenario3Title: "The Cloned Voice",
+    scenario3Desc: "A voice note from a family member asking for urgent help. The accent and tone match perfectly, but the person didn't record it.",
+    scenario4Title: "The Forged Certificate",
+    scenario4Desc: "A medical report or graduation diploma. The digital seal was compiled using an AI image editor.",
+    scenario5Title: "The Payment QR Code",
+    scenario5Desc: "A physical sticker covering the shop's scanner, directing transfer details to an unverified private wallet.",
+    
+    introTitle: "So we built something different.",
+    introDesc: "PARAKH helps you verify digital content before you make decisions. We translate complex metadata, pixels, and audio patterns into a simple verdict. So you don't have to guess.",
+    
+    demoTitle: "Experience it yourself.",
+    demoUpload: "Click here to run a simulated verification test",
+    demoAnalyzing: "Verifying files...",
+    demoAuthentic: "✓ Authentic",
+    demoManipulated: "⚠ Possible Manipulation Detected",
+    demoExplanation: "We analyzed the noise patterns and verified the audio hash against our biometric index.",
+    
+    verifyTitle: "What PARAKH verifies",
+    verifyVoice: "Voice",
+    verifyDoc: "Document",
+    verifyImg: "Image",
+    verifyVid: "Video",
+    verifyQr: "QR Code",
+    verifyVoiceDesc: "Biometric authentication against registered voice profiles to verify identity claims.",
+    verifyDocDesc: "Structure auditing, author strings extraction, and digital signature checks.",
+    verifyImgDesc: "Pixel compression forensics, EXIF metadata history scans, and quantization checks.",
+    verifyVidDesc: "Lip-sync alignment, frame consistency, and source hash validations.",
+    verifyQrDesc: "Target link verification, domain risk checking, and redirection tracking.",
+    
+    outcomeTitle: "You don't need to understand digital forensics.",
+    outcomeDesc: "You just need to know whether you can trust what you're looking at.",
+    
+    finalTitle: "If something feels off...",
+    finalSub: "Check before you believe.",
+    finalButton: "Start Verifying",
+    footerText: "PARAKH Digital Authenticity Platform. Dedicated to digital trust.",
+    footerPrivacy: "Privacy Policy",
+    footerTerms: "Terms of Use",
+    footerContact: "Contact Support"
+  },
+  hi: {
+    heroTitle: "हर दिन, हजारों लोग ऐसी चीज़ों पर भरोसा करते हैं जिन पर उन्हें नहीं करना चाहिए।",
+    heroSub1: "एक नकली आवाज़।",
+    heroSub2: "एक नकली दस्तावेज़।",
+    heroSub3: "एक नकली स्क्रीनशॉट।",
+    heroSub4: "एक नकली पहचान।",
+    heroSub5: "कभी-कभी, यह पूरी तरह से असली लगता है।",
+    heroSub6: "इसीलिए परख (PARAKH) अस्तित्व में है।",
+    heroCta1: "भरोसा करने से पहले परखें",
+    heroCta2: "देखें कि यह कैसे काम करता है",
+    
+    questionWhatIf: "क्या हो अगर...",
+    question1: "क्या हो अगर वह इंटर्नशिप ऑफर असली नहीं था?",
+    question2: "क्या हो अगर भुगतान स्क्रीनशॉट एडिट किया गया था?",
+    question3: "क्या हो अगर वह आवाज़ वास्तव में उनकी नहीं थी?",
+    question4: "क्या हो अगर वह दस्तावेज़ जाली था?",
+    
+    scenarioTitle: "वास्तविक जीवन के क्षण जहाँ विश्वास टूटता है।",
+    scenario1Title: "इंटर्नशिप प्रस्ताव पत्र",
+    scenario1Desc: "डिजिटल हस्ताक्षरों वाला एक आधिकारिक दिखने वाला पीडीएफ। लेकिन कंपनी ने ऐसा कोई पत्र कभी जारी ही नहीं किया था।",
+    scenario2Title: "भुगतान का स्क्रीनशॉट",
+    scenario2Desc: "एक लेन-देन पुष्टिकरण छवि जिसमें दर्शाया गया है कि पैसा भेजा जा चुका है। एक ऐप पर नंबर बदल दिए गए थे।",
+    scenario3Title: "क्लोन की गई आवाज़",
+    scenario3Desc: "किसी प्रियजन का वॉयस नोट जिसमें पैसे की मांग की गई है। आवाज़ और लहजा बिल्कुल वैसा ही है, पर उन्होंने इसे रिकॉर्ड नहीं किया था।",
+    scenario4Title: "जाली प्रमाण पत्र",
+    scenario4Desc: "एक मेडिकल रिपोर्ट या ग्रेजुएशन डिप्लोमा। डिजिटल सील को एआई इमेज एडिटर का उपयोग करके बनाया गया था।",
+    scenario5Title: "भुगतान क्यूआर कोड",
+    scenario5Desc: "दुकान के स्कैनर पर चिपकाया गया एक भौतिक स्टिकर, जो भुगतान विवरण को असत्यापित वॉलेट में स्थानांतरित करता है।",
+    
+    introTitle: "इसलिए हमने कुछ अलग बनाया।",
+    introDesc: "परख निर्णय लेने से पहले डिजिटल सामग्री को सत्यापित करने में आपकी सहायता करता है। हम जटिल मेटाडेटा, पिक्सल और ऑडियो पैटर्न को एक सरल परिणाम में अनुवादित करते हैं। ताकि आपको अनुमान न लगाना पड़े।",
+    
+    demoTitle: "स्वयं इसका अनुभव करें।",
+    demoUpload: "एक सिम्युलेटेड सत्यापन परीक्षण चलाने के लिए यहाँ क्लिक करें",
+    demoAnalyzing: "फ़ाइलों का विश्लेषण किया जा रहा है...",
+    demoAuthentic: "✓ प्रामाणिक",
+    demoManipulated: "⚠ संभावित हेरफेर का पता चला",
+    demoExplanation: "हमने शोर पैटर्न का विश्लेषण किया और अपने बायोमेट्रिक इंडेक्स के खिलाफ ऑडियो हैश को सत्यापित किया।",
+    
+    verifyTitle: "परख क्या सत्यापित करता है",
+    verifyVoice: "आवाज़",
+    verifyDoc: "दस्तावेज़",
+    verifyImg: "छवि",
+    verifyVid: "वीडियो",
+    verifyQr: "क्यूआर कोड",
+    verifyVoiceDesc: "पहचान के दावों को सत्यापित करने के लिए पंजीकृत वॉयस प्रोफाइल के खिलाफ बायोमेट्रिक सत्यापन।",
+    verifyDocDesc: "पीडीएफ संरचना ऑडिटिंग, लेखक डेटा निष्कर्षण, और डिजिटल हस्ताक्षर की जाँच।",
+    verifyImgDesc: "पिक्सेल कंप्रेशन फॉरेंसिक, एक्ज़िफ़ मेटाडेटा इतिहास स्कैन और हेरफेर चेक्स।",
+    verifyVidDesc: "लिप-सिंक संरेखण, फ़्रेम संगति, और स्रोत हैश सत्यापन।",
+    verifyQrDesc: "लक्षित लिंक सत्यापन, डोमेन जोखिम जाँच, और रीडायरेक्शन ट्रैकिंग।",
+    
+    outcomeTitle: "आपको डिजिटल फॉरेंसिक को समझने की आवश्यकता नहीं है।",
+    outcomeDesc: "आपको बस यह जानने की जरूरत है कि आप जो देख रहे हैं उस पर भरोसा कर सकते हैं या नहीं।",
+    
+    finalTitle: "अगर कुछ अजीब लगता है...",
+    finalSub: "विश्वास करने से पहले जांचें।",
+    finalButton: "परखना शुरू करें",
+    footerText: "परख (PARAKH) डिजिटल प्रामाणिकता मंच। डिजिटल विश्वास के लिए समर्पित।",
+    footerPrivacy: "गोपनीयता नीति",
+    footerTerms: "उपयोग की शर्तें",
+    footerContact: "सहायता केंद्र"
+  }
+};
 
 export default function Landing() {
   const { setActiveTab } = useStore();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [lang, setLang] = useState<'en' | 'hi'>('en');
+  const t = TRANSLATIONS[lang];
 
-  // Mouse Parallax movement
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!heroRef.current) return;
-    const { clientX, clientY } = e;
-    const { innerWidth, innerHeight } = window;
-    const x = (clientX - innerWidth / 2) / 30;
-    const y = (clientY - innerHeight / 2) / 30;
-    setMousePos({ x, y });
+  // Tab selections in engine details
+  const [activeEngine, setActiveEngine] = useState<'voice' | 'doc' | 'img' | 'vid' | 'qr'>('voice');
+
+  // Dry-run simulation state
+  const [simState, setSimState] = useState<'idle' | 'analyzing' | 'done'>('idle');
+  const [simResult, setSimResult] = useState<'authentic' | 'manipulated'>('authentic');
+
+  const startSimulation = () => {
+    setSimState('analyzing');
+    setTimeout(() => {
+      setSimResult(Math.random() > 0.5 ? 'authentic' : 'manipulated');
+      setSimState('done');
+    }, 2500);
   };
-
-  useEffect(() => {
-    if (titleRef.current) {
-      gsap.fromTo(titleRef.current, 
-        { opacity: 0, y: 40 }, 
-        { opacity: 1, y: 0, duration: 1.5, ease: 'power4.out' }
-      );
-    }
-  }, []);
 
   return (
     <div 
-      onMouseMove={handleMouseMove}
-      className="bg-brand-100 text-brand-800 min-h-screen font-sans selection:bg-accent-blue/10 overflow-x-hidden relative"
-      style={{ backgroundColor: '#FFF8F2' }}
+      className="min-h-screen font-sans selection:bg-[#B45309]/15 overflow-x-hidden antialiased text-[#171717] relative"
+      style={{ backgroundColor: '#F6F3EE' }}
     >
-      {/* Decorative luxury gradient ambient spots */}
-      <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] rounded-full bg-accent-blue/5 blur-[100px] pointer-events-none"></div>
-      <div className="absolute top-[40%] right-[5%] w-[450px] h-[450px] rounded-full bg-accent-amber/5 blur-[90px] pointer-events-none"></div>
-
-      {/* Top Navigation (Sticky) */}
-      <header className="border-b border-brand-200/50 backdrop-blur-md sticky top-0 z-50 bg-white/60 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Left: Logo */}
-          <div className="flex items-center space-x-3">
-            <span className="text-3xl">🛡️</span>
-            <div>
-              <h1 className="text-2xl font-black text-accent-blue tracking-wider leading-none">परख</h1>
-              <span className="text-[9px] font-bold text-accent-amber tracking-widest uppercase mt-0.5 block">PARAKH Platform</span>
-            </div>
+      
+      {/* Navbar */}
+      <header className="border-b border-[#E5DED5]/40 sticky top-0 z-50 backdrop-blur-md bg-[#F6F3EE]/80 transition">
+        <div className="max-w-5xl mx-auto px-6 py-4.5 flex justify-between items-center">
+          {/* Logo */}
+          <div className="flex items-center space-x-2.5">
+            <span className="font-semibold text-lg tracking-tight">PARAKH</span>
+            <span className="text-[10px] bg-[#EFE9DF] text-[#5F5F5F] px-2 py-0.5 rounded-md font-bold uppercase tracking-widest font-mono">
+              {lang === 'en' ? 'Authenticity' : 'परख'}
+            </span>
           </div>
 
-          {/* Center: Menu in Hindi */}
-          <nav className="hidden lg:flex items-center space-x-6 text-xs font-bold text-brand-600 font-devanagari">
-            <a href="#hero" className="hover:text-accent-blue transition">होम</a>
-            <a href="#features" className="hover:text-accent-blue transition">विशेषताएँ</a>
-            <a href="#how-it-works" className="hover:text-accent-blue transition">समाधान</a>
-            <a href="#use-cases" className="hover:text-accent-blue transition">केस स्टडी</a>
-            <a href="#cta" className="hover:text-accent-blue transition">संपर्क करें</a>
-          </nav>
-
-          {/* Right: Actions */}
-          <div className="flex items-center space-x-4">
+          {/* Language Switcher & Action */}
+          <div className="flex items-center space-x-6 text-xs font-semibold">
+            <div className="flex items-center bg-[#EFE9DF] rounded-lg p-0.5 border border-[#E5DED5]">
+              <button 
+                onClick={() => setLang('en')}
+                className={`px-3 py-1 rounded-md transition ${lang === 'en' ? 'bg-white text-[#171717] shadow-sm' : 'text-[#5F5F5F]'}`}
+              >
+                English
+              </button>
+              <button 
+                onClick={() => setLang('hi')}
+                className={`px-3 py-1 rounded-md transition font-devanagari ${lang === 'hi' ? 'bg-white text-[#171717] shadow-sm font-bold' : 'text-[#5F5F5F]'}`}
+              >
+                हिन्दी
+              </button>
+            </div>
+            
             <button 
               onClick={() => setActiveTab('auth_login')}
-              className="text-xs font-bold text-brand-600 hover:text-brand-900 transition px-4 py-2"
+              className="text-[#171717] hover:underline"
             >
-              लॉग इन
-            </button>
-            <button 
-              onClick={() => setActiveTab('auth_signup')}
-              className="bg-accent-blue hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-md shadow-accent-blue/15"
-            >
-              शुरू करें
+              {lang === 'en' ? 'Sign In' : 'लॉग इन'}
             </button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section 
-        ref={heroRef}
-        id="hero"
-        className="max-w-6xl mx-auto px-6 pt-16 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]"
-      >
-        {/* Left Content */}
-        <div className="space-y-8 text-left">
-          <div className="inline-flex items-center space-x-2.5 bg-accent-blue/5 border border-accent-blue/10 px-4 py-1.5 rounded-full text-[10px] font-bold text-accent-blue uppercase tracking-widest shadow-sm">
-            <span>🛡️ AI EVIDENCE FORENSIC PLATFORM</span>
-          </div>
-
-          <h2 
-            ref={titleRef}
-            className="text-4xl sm:text-5xl md:text-6xl font-black font-devanagari text-brand-900 leading-tight tracking-tight"
-          >
-            हर डिजिटल प्रमाण की परख। <br />
-            <span className="bg-gradient-to-r from-accent-blue to-accent-amber bg-clip-text text-transparent">
-              हर सच की पुष्टि।
-            </span>
+      <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center min-h-[90vh] flex flex-col justify-center items-center space-y-10">
+        <div className="space-y-4">
+          <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block">
+            {lang === 'en' ? 'Human-First Digital Integrity' : 'मानव-केंद्रित डिजिटल प्रामाणिकता'}
+          </span>
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-normal leading-[1.1] tracking-tight text-[#171717] max-w-3xl mx-auto font-devanagari">
+            {t.heroTitle}
           </h2>
-          
-          <p className="text-brand-500 text-sm sm:text-base leading-relaxed max-w-xl font-devanagari">
-            AI की मदद से आवाज़, तस्वीर, दस्तावेज़ और वीडियो की प्रमाणिकता की जाँच करें और जाली पहचान का पर्दाफ़ाश करें।
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <button 
-              onClick={() => setActiveTab('auth_signup')}
-              className="w-full sm:w-auto bg-accent-blue hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl transition duration-150 text-xs shadow-lg shadow-accent-blue/15 min-h-[44px] font-devanagari"
-            >
-              सबूत की जाँच करें
-            </button>
-            <a 
-              href="#how-it-works"
-              className="w-full sm:w-auto border border-brand-300 hover:bg-white text-brand-650 hover:text-brand-800 font-semibold py-3.5 px-8 rounded-xl transition text-xs text-center min-h-[44px] block font-devanagari"
-            >
-              कैसे काम करता है?
-            </a>
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="pt-4 border-t border-brand-200 grid grid-cols-3 gap-4 text-xs font-devanagari">
-            <div className="flex items-center space-x-2">
-              <span className="text-accent-blue font-bold">✓</span>
-              <span className="text-brand-600">50K+ केस जांचे गए</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-accent-blue font-bold">✓</span>
-              <span className="text-brand-600">98.7% सटीकता</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-accent-blue font-bold">✓</span>
-              <span className="text-brand-600">24/7 सुरक्षित और गोपनीय</span>
-            </div>
-          </div>
         </div>
 
-        {/* Right Visual: 3D-ish Dashboard Mockup */}
-        <div className="relative h-[400px] w-full flex items-center justify-center pointer-events-none select-none">
-          <div 
-            className="absolute w-40 h-40 rounded-full bg-accent-blue/10 blur-3xl transition duration-355"
-            style={{ transform: `translate(${mousePos.x * 0.2}px, ${mousePos.y * 0.2}px)` }}
-          ></div>
-          <div 
-            className="absolute text-8xl z-20 animate-bounce"
-            style={{ transform: `translate(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px)` }}
-          >
-            🛡️
-          </div>
-
-          {/* Voice analysis card */}
-          <div 
-            className="absolute top-[10%] left-[5%] bg-white border border-brand-200 p-4 rounded-2xl shadow-xl w-48 transition-transform duration-200"
-            style={{ transform: `translate(${mousePos.x * -0.6}px, ${mousePos.y * -0.6}px) rotate(-3deg)` }}
-          >
-            <p className="text-[10px] font-bold text-accent-blue uppercase">🎙️ Voice analysis</p>
-            <p className="text-xs font-black text-brand-800 mt-1">Biometric Waveform</p>
-            <div className="flex items-center space-x-1 mt-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-teal animate-ping"></span>
-              <span className="text-[9px] text-brand-500">98.7% Real Speech</span>
-            </div>
-          </div>
-
-          {/* Image card */}
-          <div 
-            className="absolute bottom-[15%] left-[5%] bg-white border border-brand-200 p-4 rounded-2xl shadow-xl w-44 transition-transform duration-200"
-            style={{ transform: `translate(${mousePos.x * 0.8}px, ${mousePos.y * -0.8}px) rotate(4deg)` }}
-          >
-            <p className="text-[10px] font-bold text-accent-amber uppercase">🖼️ Image authenticity</p>
-            <p className="text-xs font-black text-accent-red mt-1">Altered metadata</p>
-            <span className="text-[8px] bg-accent-red/10 text-accent-red px-2 py-0.5 rounded-full font-bold mt-2 inline-block">Quantized</span>
-          </div>
-
-          {/* Document card */}
-          <div 
-            className="absolute top-[20%] right-[5%] bg-white border border-brand-200 p-4 rounded-2xl shadow-xl w-48 transition-transform duration-200"
-            style={{ transform: `translate(${mousePos.x * -0.7}px, ${mousePos.y * 0.7}px) rotate(2deg)` }}
-          >
-            <p className="text-[10px] font-bold text-accent-teal uppercase">📄 Document forensics</p>
-            <p className="text-xs font-black text-brand-800 mt-1">Signature Matched</p>
-            <div className="w-full bg-brand-200 h-1.5 rounded-full mt-2">
-              <div className="bg-accent-teal h-1.5 rounded-full" style={{ width: '92%' }}></div>
-            </div>
-          </div>
-
-          {/* Video analysis card */}
-          <div 
-            className="absolute bottom-[5%] right-[10%] bg-white border border-brand-200 p-4 rounded-2xl shadow-xl w-40 transition-transform duration-200"
-            style={{ transform: `translate(${mousePos.x * 0.9}px, ${mousePos.y * 0.9}px) rotate(-5deg)` }}
-          >
-            <p className="text-[9px] font-bold text-brand-400 uppercase">📽️ Video analysis</p>
-            <p className="text-2xl font-black text-accent-blue mt-1">98%</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Key Features Section */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-20 border-t border-brand-200/50">
-        <div className="text-center mb-16">
-          <span className="text-[10px] font-bold text-accent-blue uppercase tracking-widest">Platform capabilities</span>
-          <h3 className="text-3xl font-black text-brand-850 font-devanagari mt-2">
-            परख की शक्तिशाली विशेषताएँ
-          </h3>
-          <p className="text-brand-500 text-sm max-w-xl mx-auto mt-2 font-devanagari">
-            गहराई से जानें, सटीक परिणाम पायें
-          </p>
+        {/* Cinematic subtle textual indicators */}
+        <div className="text-center space-y-2 text-[#5F5F5F] max-w-md mx-auto text-sm sm:text-base border-l border-r border-[#E5DED5] px-6 py-3 bg-[#EFE9DF]/30 rounded-xl font-devanagari">
+          <p className="font-semibold">{t.heroSub1}</p>
+          <p className="font-semibold">{t.heroSub2}</p>
+          <p className="font-semibold">{t.heroSub3}</p>
+          <p className="font-semibold">{t.heroSub4}</p>
+          <div className="w-1.5 h-1.5 bg-[#B45309] rounded-full mx-auto my-3"></div>
+          <p className="text-xs">{t.heroSub5}</p>
+          <p className="text-xs text-[#171717] font-bold">{t.heroSub6}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <FeatureCard icon="🎙️" title="आवाज़ विश्लेषण (Voice Analysis)" desc="बायोमेट्रिक मिलान और पिच विश्लेषण के द्वारा डीपफेक और वॉयस क्लोनिंग का पता लगाएं।" />
-          <FeatureCard icon="📄" title="दस्तावेज़ सत्यापन (Document Forensics)" desc="PDF संरचना, क्रिएटर हिस्ट्री, और टेक्स्ट अलाइनमेंट के साथ छेड़छाड़ की जाँच करें।" />
-          <FeatureCard icon="🖼️" title="छवि प्रामाणिकता (Image Authentication)" desc="डबल कंप्रेशन आर्टिफैक्ट्स और अवांछित संपादन निशानों की पहचान करें।" />
-          <FeatureCard icon="📽️" title="वीडियो विश्लेषण (Video Analysis)" desc="फ्रेम-बाय-फ्रेम विसंगति और लिप-सिंक हेरफेर का व्यापक विश्लेषण।" />
-          <FeatureCard icon="🧬" title="बायोमेट्रिक मेल (Biometric Match)" desc="सुरक्षित व्यक्तिगत बायोमेट्रिक हस्ताक्षरों का उपयोग कर वॉयस प्रोफाइल मैचिंग।" />
-          <FeatureCard icon="🔑" title="क्रिप्टोग्राफिक जाँच (Cryptographic Check)" desc="दस्तावेजों में एम्बेडेड सुरक्षा प्रमाण पत्र और डिजिटल हस्ताक्षर जांचें।" />
-        </div>
-      </section>
-
-      {/* How It Works (Steps) */}
-      <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-20 border-t border-brand-200/50">
-        <div className="text-center mb-16">
-          <span className="text-[10px] font-bold text-accent-teal uppercase tracking-widest">Process Flow</span>
-          <h3 className="text-3xl font-black text-brand-850 font-devanagari mt-2">परख कैसे काम करता है?</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative font-devanagari">
-          <WorkflowStep number="1" title="सबूत अपलोड करें" desc="जांच वाली आवाज़, दस्तावेज़ या छवि अपलोड करें।" />
-          <WorkflowStep number="2" title="AI विश्लेषण" desc="हमारा डीप-लर्निंग मॉडल विसंगतियों की स्कैनिंग करता है।" />
-          <WorkflowStep number="3" title="सत्यापन और मिलान" desc="बायोमेट्रिक हस्ताक्षरों और संपादन निशानों की जाँच की जाती है।" />
-          <WorkflowStep number="4" title="विस्तृत रिपोर्ट प्राप्त करें" desc="क्रिप्टोग्राफिक रूप से हस्ताक्षरित पीडीएफ रिपोर्ट डाउनलोड करें।" />
-        </div>
-      </section>
-
-      {/* Use Cases / Who It's For */}
-      <section id="use-cases" className="max-w-5xl mx-auto px-6 py-20 border-t border-brand-200/50">
-        <div className="text-center mb-16">
-          <span className="text-[10px] font-bold text-accent-amber uppercase tracking-widest">Target Audience</span>
-          <h3 className="text-3xl font-black text-brand-850 font-devanagari mt-2">किसके लिए परख?</h3>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 text-center font-devanagari">
-          <UseCaseCard icon="⚖️" title="पुलिस और जांच एजेंसियां" />
-          <UseCaseCard icon="💼" title="कानूनी विशेषज्ञ" />
-          <UseCaseCard icon="🏢" title="कॉर्पोरेट सुरक्षा टीमें" />
-          <UseCaseCard icon="🔬" title="फॉरेंसिक प्रोफेशनल्स" />
-          <UseCaseCard icon="🏦" title="बीमा और बैंकिंग क्षेत्र" />
-        </div>
-      </section>
-
-      {/* Case Study / Stats Section */}
-      <section className="max-w-5xl mx-auto px-6 py-20 border-t border-brand-200/50">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center font-devanagari">
-          {/* Left stats */}
-          <div className="space-y-8">
-            <span className="text-[10px] font-bold text-accent-blue uppercase tracking-widest">Platform Records</span>
-            <div className="space-y-6">
-              <div>
-                <span className="text-5xl font-black text-accent-blue">1,25,000+</span>
-                <p className="text-sm font-bold text-brand-800 mt-1">सबूतों की जांच</p>
-              </div>
-              <div className="border-t border-brand-200 pt-4">
-                <span className="text-5xl font-black text-accent-blue">98.7%</span>
-                <p className="text-sm font-bold text-brand-800 mt-1">सटीकता दर</p>
-              </div>
-              <div className="border-t border-brand-200 pt-4">
-                <span className="text-5xl font-black text-accent-blue">75+</span>
-                <p className="text-sm font-bold text-brand-800 mt-1">संस्थानों का विश्वास</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Case study card */}
-          <div className="bg-white border border-brand-200 p-8 rounded-3xl shadow-xl space-y-4">
-            <div className="flex justify-between items-center text-xs">
-              <span className="bg-accent-blue/10 text-accent-blue px-2.5 py-1 rounded-full font-bold">Case Study #201</span>
-              <span className="text-brand-500">2026</span>
-            </div>
-            <h4 className="font-bold text-brand-850 text-lg">वॉयस क्लोनिंग घोटाला पहचान</h4>
-            <p className="text-brand-550 text-xs leading-relaxed">
-              एक प्रमुख वित्तीय संस्थान को भेजी गई आपातकालीन वॉयस नोट की परख की गई। बायोमेट्रिक मिलान में 42% समानता मिली, जिससे एक बड़ी धोखाधड़ी रोकी गई।
-            </p>
-            <div className="border-t border-brand-200 pt-4 flex justify-between items-center text-xs">
-              <span className="font-bold text-brand-800">Result Metric:</span>
-              <span className="text-accent-teal font-black">₹50 लाख+ की बचत</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials / Quotes */}
-      <section className="max-w-5xl mx-auto px-6 py-20 border-t border-brand-200/50">
-        <div className="text-center mb-16">
-          <span className="text-[10px] font-bold text-accent-blue uppercase tracking-widest">Reviews</span>
-          <h3 className="text-3xl font-black text-brand-850 font-devanagari mt-2">वे हमारे बारे में क्या कहते हैं</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-devanagari">
-          <TestimonialCard 
-            quote="परख ने हमारे कानूनी दस्तावेजों की प्रमाणिकता जांचने में मदद की। सटीक क्वांटाइजेशन रिपोर्ट अविश्वसनीय है।" 
-            author="डॉ. विकास शर्मा" 
-            role="फॉरेंसिक विशेषज्ञ" 
-            org="फॉरेंसिक लैब इंडिया" 
-          />
-          <TestimonialCard 
-            quote="बायोमेट्रिक वॉयस चेकर घोटाला कॉल्स को रोकने के लिए सबसे विश्वसनीय सुरक्षा कवच है। अद्भुत डिज़ाइन।" 
-            author="श्रीमती रेणुका" 
-            role="मुख्य सुरक्षा अधिकारी" 
-            org="ग्लोबल फिनटेक कॉर्प" 
-          />
-          <TestimonialCard 
-            quote="दस्तावेज़ और छवि मेटाडाटा अलाइनमेंट जांच बेहद तेज़ी से होती है। SaaS इंटरफ़ेस बेहद ही शानदार है।" 
-            author="राजेश मल्होत्रा" 
-            role="वरिष्ठ अधिवक्ता" 
-            org="मल्होत्रा एंड एसोसिएट्स" 
-          />
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section id="cta" className="bg-gradient-to-br from-accent-blue/15 to-accent-amber/5 border-t border-b border-brand-200/50 py-20 text-center relative overflow-hidden">
-        <div className="max-w-3xl mx-auto px-6 space-y-8 relative z-10 font-devanagari">
-          <h3 className="text-3xl sm:text-5xl font-black text-brand-900 leading-tight">
-            सच की पुष्टि करें, खुद को बेनकाब करें।
-          </h3>
-          <p className="text-brand-550 text-base max-w-xl mx-auto leading-relaxed">
-            परख के साथ डिजिटल फॉरेंसिक की नई पहचान बनायें।
-          </p>
+        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
           <button 
             onClick={() => setActiveTab('auth_signup')}
-            className="bg-white hover:bg-brand-100 text-accent-blue font-bold py-3.5 px-8 rounded-xl transition duration-150 text-xs shadow-md border border-brand-200 min-h-[44px]"
+            className="w-full sm:w-auto bg-[#171717] hover:bg-[#2A2A2A] text-white font-bold py-3.5 px-8 rounded-2xl transition duration-150 text-xs shadow-md min-h-[44px]"
           >
-            अभी शुरू करें
+            {t.heroCta1}
           </button>
+          <a 
+            href="#storytelling"
+            className="w-full sm:w-auto border border-[#E5DED5] hover:bg-white text-[#5F5F5F] hover:text-[#171717] font-semibold py-3.5 px-8 rounded-2xl transition text-xs text-center min-h-[44px] block"
+          >
+            {t.heroCta2}
+          </a>
         </div>
       </section>
 
-      {/* Footer / Bottom Bar */}
-      <footer className="max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6 text-brand-500 text-xs font-devanagari">
-        <div className="flex items-center space-x-3">
-          <span className="text-2xl">🛡️</span>
-          <span className="font-bold text-accent-blue tracking-widest uppercase">परख</span>
+      {/* Section 2: Scroll Storytelling Questions */}
+      <section id="storytelling" className="bg-[#EFE9DF] py-28 border-t border-b border-[#E5DED5] text-[#171717]">
+        <div className="max-w-3xl mx-auto px-6 text-center space-y-16">
+          <span className="text-[10px] font-bold tracking-widest text-[#556B2F] uppercase block">
+            {t.questionWhatIf}
+          </span>
+          
+          <div className="space-y-12 font-devanagari">
+            <p className="text-xl sm:text-2xl font-light text-[#5F5F5F] hover:text-[#171717] transition duration-300">
+              "{t.question1}"
+            </p>
+            <p className="text-xl sm:text-2xl font-light text-[#5F5F5F] hover:text-[#171717] transition duration-300 border-t border-b border-[#E5DED5]/60 py-6">
+              "{t.question2}"
+            </p>
+            <p className="text-xl sm:text-2xl font-light text-[#5F5F5F] hover:text-[#171717] transition duration-300">
+              "{t.question3}"
+            </p>
+            <p className="text-xl sm:text-2xl font-light text-[#5F5F5F] hover:text-[#171717] transition duration-300 border-t border-[#E5DED5]/60 pt-6">
+              "{t.question4}"
+            </p>
+          </div>
         </div>
-        <p>© 2025 PARAKH. सभी अधिकार सुरक्षित हैं</p>
-        <div className="flex space-x-4">
-          <a href="#" className="hover:text-brand-850 transition">गोपनीयता नीति</a>
+      </section>
+
+      {/* Section 3: Relatable Real-Life Scenarios */}
+      <section className="max-w-4xl mx-auto px-6 py-28 space-y-16">
+        <div className="text-center">
+          <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block mb-3">Real Incidents</span>
+          <h3 className="text-2xl sm:text-3xl font-normal tracking-tight text-[#171717] font-devanagari">
+            {t.scenarioTitle}
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-devanagari">
+          <ScenarioCard number="01" title={t.scenario1Title} desc={t.scenario1Desc} />
+          <ScenarioCard number="02" title={t.scenario2Title} desc={t.scenario2Desc} />
+          <ScenarioCard number="03" title={t.scenario3Title} desc={t.scenario3Desc} />
+          <ScenarioCard number="04" title={t.scenario4Title} desc={t.scenario4Desc} />
+          
+          <div className="md:col-span-2">
+            <ScenarioCard number="05" title={t.scenario5Title} desc={t.scenario5Desc} />
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4: Introducing PARAKH */}
+      <section className="bg-[#EFE9DF] py-24 border-t border-b border-[#E5DED5] text-[#171717]">
+        <div className="max-w-2xl mx-auto px-6 text-center space-y-6">
+          <h3 className="text-3xl font-normal tracking-tight text-[#171717] font-devanagari">
+            {t.introTitle}
+          </h3>
+          <p className="text-[#5F5F5F] text-sm sm:text-base leading-relaxed font-devanagari font-light">
+            {t.introDesc}
+          </p>
+        </div>
+      </section>
+
+      {/* Section 5: Interactive Storytelling Upload Sandbox */}
+      <section className="max-w-2xl mx-auto px-6 py-24 space-y-8 text-center">
+        <div>
+          <span className="text-[10px] font-bold tracking-widest text-[#556B2F] uppercase block mb-2">Simulated sandbox</span>
+          <h3 className="text-xl font-normal text-[#171717] font-devanagari">{t.demoTitle}</h3>
+        </div>
+
+        <div className="bg-white border border-[#E5DED5] rounded-3xl p-8 shadow-sm space-y-6">
+          {simState === 'idle' && (
+            <button 
+              onClick={startSimulation}
+              className="w-full border border-dashed border-[#B45309]/30 hover:border-[#B45309] bg-[#F6F3EE] p-10 rounded-2xl text-center cursor-pointer transition flex flex-col items-center justify-center space-y-3 focus:outline-none min-h-[160px]"
+            >
+              <span className="text-3xl text-[#B45309]">🗂️</span>
+              <span className="text-xs font-semibold text-[#5F5F5F] font-devanagari">{t.demoUpload}</span>
+            </button>
+          )}
+
+          {simState === 'analyzing' && (
+            <div className="p-8 text-center space-y-4">
+              <div className="relative w-12 h-12 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-[#E5DED5] border-t-[#B45309] animate-spin"></div>
+              </div>
+              <p className="text-xs text-[#5F5F5F] animate-pulse font-devanagari font-bold">{t.demoAnalyzing}</p>
+            </div>
+          )}
+
+          {simState === 'done' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-6 rounded-2xl border text-center space-y-3"
+              style={{
+                backgroundColor: simResult === 'authentic' ? '#F0FDF4' : '#FEF2F2',
+                borderColor: simResult === 'authentic' ? '#BBF7D0' : '#FCA5A5'
+              }}
+            >
+              <p className={`text-sm font-black uppercase font-devanagari ${
+                simResult === 'authentic' ? 'text-green-700' : 'text-red-700'
+              }`}>
+                {simResult === 'authentic' ? t.demoAuthentic : t.demoManipulated}
+              </p>
+              <p className="text-xs text-[#5F5F5F] leading-normal font-devanagari">{t.demoExplanation}</p>
+              <button 
+                onClick={() => setSimState('idle')}
+                className="text-[10px] text-[#B45309] hover:underline font-bold"
+              >
+                Reset Test
+              </button>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* Section 6: Elegant tab-based supported engines experience */}
+      <section className="max-w-4xl mx-auto px-6 py-20 border-t border-[#E5DED5]">
+        <div className="text-center mb-12">
+          <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block mb-2">Supported Categories</span>
+          <h3 className="text-2xl font-normal text-[#171717] font-devanagari">{t.verifyTitle}</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          {/* Left Tab List */}
+          <div className="flex flex-col space-y-1 bg-white border border-[#E5DED5] p-2 rounded-2xl shadow-sm">
+            <TabButton label={t.verifyVoice} active={activeEngine === 'voice'} onClick={() => setActiveEngine('voice')} />
+            <TabButton label={t.verifyDoc} active={activeEngine === 'doc'} onClick={() => setActiveEngine('doc')} />
+            <TabButton label={t.verifyImg} active={activeEngine === 'img'} onClick={() => setActiveEngine('img')} />
+            <TabButton label={t.verifyVid} active={activeEngine === 'vid'} onClick={() => setActiveEngine('vid')} />
+            <TabButton label={t.verifyQr} active={activeEngine === 'qr'} onClick={() => setActiveEngine('qr')} />
+          </div>
+
+          {/* Right Description Card */}
+          <div className="md:col-span-2 bg-[#EFE9DF] border border-[#E5DED5] p-8 rounded-3xl min-h-[180px] flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              {activeEngine === 'voice' && (
+                <motion.div key="voice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                  <h4 className="font-semibold text-[#171717] text-lg font-devanagari">{t.verifyVoice}</h4>
+                  <p className="text-xs text-[#5F5F5F] leading-relaxed font-devanagari font-light">{t.verifyVoiceDesc}</p>
+                </motion.div>
+              )}
+              {activeEngine === 'doc' && (
+                <motion.div key="doc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                  <h4 className="font-semibold text-[#171717] text-lg font-devanagari">{t.verifyDoc}</h4>
+                  <p className="text-xs text-[#5F5F5F] leading-relaxed font-devanagari font-light">{t.verifyDocDesc}</p>
+                </motion.div>
+              )}
+              {activeEngine === 'img' && (
+                <motion.div key="img" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                  <h4 className="font-semibold text-[#171717] text-lg font-devanagari">{t.verifyImg}</h4>
+                  <p className="text-xs text-[#5F5F5F] leading-relaxed font-devanagari font-light">{t.verifyImgDesc}</p>
+                </motion.div>
+              )}
+              {activeEngine === 'vid' && (
+                <motion.div key="vid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                  <h4 className="font-semibold text-[#171717] text-lg font-devanagari">{t.verifyVid}</h4>
+                  <p className="text-xs text-[#5F5F5F] leading-relaxed font-devanagari font-light">{t.verifyVidDesc}</p>
+                </motion.div>
+              )}
+              {activeEngine === 'qr' && (
+                <motion.div key="qr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                  <h4 className="font-semibold text-[#171717] text-lg font-devanagari">{t.verifyQr}</h4>
+                  <p className="text-xs text-[#5F5F5F] leading-relaxed font-devanagari font-light">{t.verifyQrDesc}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7: Outcome explanation */}
+      <section className="bg-[#EFE9DF] py-28 border-t border-b border-[#E5DED5] text-[#171717]">
+        <div className="max-w-2xl mx-auto px-6 text-center space-y-6">
+          <span className="text-[10px] font-bold tracking-widest text-[#556B2F] uppercase block">Clarity Over Forensics</span>
+          <h3 className="text-xl sm:text-2xl font-light text-[#5F5F5F] leading-normal font-devanagari">
+            "{t.outcomeTitle}"
+          </h3>
+          <p className="text-sm font-semibold text-[#171717] font-devanagari">
+            {t.outcomeDesc}
+          </p>
+        </div>
+      </section>
+
+      {/* Section 8: Final CTA */}
+      <section className="max-w-3xl mx-auto px-6 py-28 text-center space-y-8 font-devanagari">
+        <h3 className="text-3xl sm:text-4xl font-normal text-[#171717]">{t.finalTitle}</h3>
+        <p className="text-[#5F5F5F] text-base font-light">{t.finalSub}</p>
+        <button 
+          onClick={() => setActiveTab('auth_signup')}
+          className="bg-[#171717] hover:bg-[#2A2A2A] text-white font-bold py-4 px-10 rounded-2xl transition duration-150 text-xs shadow-md min-h-[44px]"
+        >
+          {t.finalButton}
+        </button>
+      </section>
+
+      {/* Minimal Footer */}
+      <footer className="border-t border-[#E5DED5] py-12 text-center text-xs text-[#5F5F5F] space-y-4 max-w-5xl mx-auto font-devanagari">
+        <p>{t.footerText}</p>
+        <div className="flex justify-center space-x-6">
+          <a href="#" className="hover:text-[#171717] transition">{t.footerPrivacy}</a>
           <span>|</span>
-          <a href="#" className="hover:text-brand-850 transition">उपयोग की शर्तें</a>
+          <a href="#" className="hover:text-[#171717] transition">{t.footerTerms}</a>
           <span>|</span>
-          <a href="#" className="hover:text-brand-850 transition">संपर्क करें</a>
+          <a href="#" className="hover:text-[#171717] transition">{t.footerContact}</a>
         </div>
       </footer>
     </div>
   );
 }
 
-interface FeatureCardProps {
-  icon: string;
-  title: string;
-  desc: string;
-}
-
-function FeatureCard({ icon, title, desc }: FeatureCardProps) {
-  return (
-    <div className="bg-white border border-brand-200 p-6 rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.01] transition duration-300 group cursor-pointer font-devanagari">
-      <span className="text-3xl block mb-4 group-hover:scale-110 transition duration-300">{icon}</span>
-      <h4 className="text-base font-black text-brand-800 mb-2">{title}</h4>
-      <p className="text-brand-500 text-xs leading-relaxed">{desc}</p>
-    </div>
-  );
-}
-
-interface WorkflowStepProps {
+interface ScenarioCardProps {
   number: string;
   title: string;
   desc: string;
 }
 
-function WorkflowStep({ number, title, desc }: WorkflowStepProps) {
+function ScenarioCard({ number, title, desc }: ScenarioCardProps) {
   return (
-    <div className="bg-white border border-brand-200 p-5 rounded-2xl shadow-sm relative space-y-2">
-      <span className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent-blue text-white font-black flex items-center justify-center text-xs shadow-md">
-        {number}
-      </span>
-      <h4 className="font-bold text-brand-800 text-sm pt-2">{title}</h4>
-      <p className="text-brand-550 text-[11px] leading-relaxed">{desc}</p>
+    <div className="bg-white border border-[#E5DED5] p-8 rounded-3xl shadow-sm space-y-4 hover:shadow-md transition duration-300">
+      <span className="font-mono text-xs font-bold text-[#B45309] block">{number}</span>
+      <h4 className="font-semibold text-[#171717] text-base leading-snug">{title}</h4>
+      <p className="text-[#5F5F5F] text-xs leading-relaxed font-light">{desc}</p>
     </div>
   );
 }
 
-interface UseCaseCardProps {
-  icon: string;
-  title: string;
+interface TabButtonProps {
+  label: string;
+  active: boolean;
+  onClick: () => void;
 }
 
-function UseCaseCard({ icon, title }: UseCaseCardProps) {
+function TabButton({ label, active, onClick }: TabButtonProps) {
   return (
-    <div className="bg-white border border-brand-200 p-5 rounded-xl shadow-sm flex flex-col items-center justify-center space-y-2 hover:border-accent-blue/30 transition duration-200">
-      <span className="text-3xl">{icon}</span>
-      <span className="text-xs font-bold text-brand-800">{title}</span>
-    </div>
-  );
-}
-
-interface TestimonialCardProps {
-  quote: string;
-  author: string;
-  role: string;
-  org: string;
-}
-
-function TestimonialCard({ quote, author, role, org }: TestimonialCardProps) {
-  return (
-    <div className="bg-white border border-brand-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between space-y-4">
-      <p className="text-brand-600 text-xs italic leading-relaxed">"{quote}"</p>
-      <div className="pt-2 border-t border-brand-100">
-        <p className="font-bold text-brand-800 text-xs">{author}</p>
-        <p className="text-[10px] text-brand-500">{role}, {org}</p>
-      </div>
-    </div>
+    <button 
+      onClick={onClick}
+      className={`w-full text-left px-4 py-3.5 rounded-xl font-bold text-xs transition font-devanagari focus:outline-none ${
+        active 
+          ? 'bg-[#171717] text-white shadow-sm' 
+          : 'text-[#5F5F5F] hover:bg-[#F6F3EE] hover:text-[#171717]'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
