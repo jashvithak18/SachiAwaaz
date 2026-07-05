@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import Logo from '../components/Logo';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -353,24 +354,14 @@ export default function Landing() {
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
             style={{ backgroundColor: '#F6F4EF' }}
           >
-            <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="text-[40px] font-extrabold tracking-tight text-[#181818]"
-              style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-[200px]"
             >
-              PARAKH
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-[14px] text-[#666] mt-1"
-              style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}
-            >
-              सच की पहचान
-            </motion.p>
+              <Logo />
+            </motion.div>
             <div className="mt-8 h-[24px] relative">
               <AnimatePresence mode="wait">
                 <motion.p
@@ -434,9 +425,8 @@ export default function Landing() {
               }}
             >
               <div className="max-w-[1080px] mx-auto px-6 h-[56px] flex items-center justify-between">
-                <div>
-                  <span className="text-[15px] font-bold tracking-tight text-[#181818]">PARAKH</span>
-                  <span className="text-[10px] text-[#666] ml-2" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>सच की पहचान</span>
+                <div className="cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                  <Logo className="w-24 h-auto" showTagline={false} />
                 </div>
                 <div className="flex items-center gap-4">
                   <button
@@ -465,8 +455,7 @@ export default function Landing() {
           {/* Top bar (inline, not fixed) */}
           <div className="max-w-[1080px] w-full mx-auto px-6 pt-8 flex items-center justify-between">
             <div>
-              <h2 className="text-[18px] font-bold tracking-tight text-[#181818]">PARAKH</h2>
-              <p className="text-[11px] text-[#3E5C4B] -mt-0.5" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>सच की पहचान</p>
+              <Logo className="w-28 h-auto" showTagline={false} />
             </div>
             <div className="flex items-center gap-4">
               <button
@@ -1099,10 +1088,10 @@ export default function Landing() {
         </section>
 
         {/* ─── FOOTER ─── */}
-        <footer className="relative z-10 py-12 text-center border-t border-[#E4E1DA]">
-          <p className="text-[14px] text-[#666]">
-            PARAKH <span style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>· सच की पहचान</span>
-          </p>
+        <footer className="relative z-10 py-12 text-center border-t border-[#E4E1DA] flex flex-col items-center justify-center">
+          <div className="max-w-[120px] mb-2">
+            <Logo showTagline={true} />
+          </div>
           <p className="text-[12px] text-[#666]/60 mt-2">
             Privacy · Terms · Contact
           </p>

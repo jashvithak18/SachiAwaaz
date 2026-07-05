@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useStore } from './store/useStore';
+import Logo from './components/Logo';
 import Landing from './pages/Landing';
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
@@ -38,15 +39,8 @@ export default function App() {
       <aside className="w-full md:w-64 bg-white border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
         <div>
           {/* Brand logo */}
-          <div className="p-6 border-b border-brand-200 flex items-center space-x-3 cursor-pointer" onClick={() => useStore.setState({ activeTab: 'dashboard' })}>
-            <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <div>
-              <h1 className="text-2xl font-black text-[#181818] tracking-wider leading-none">परख</h1>
-              <span className="text-[10px] font-bold text-[#666] tracking-widest uppercase mt-1 block">PARAKH</span>
-            </div>
+          <div className="p-5 border-b border-brand-200 flex items-center justify-center cursor-pointer" onClick={() => useStore.setState({ activeTab: 'dashboard' })}>
+            <Logo className="w-28 h-auto" showTagline={false} />
           </div>
 
           <nav className="p-4 space-y-1">

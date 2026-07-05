@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
+import Logo from '../components/Logo';
 import { useQuery } from '@tanstack/react-query';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -163,13 +164,9 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-brand-200 pb-6">
             <div className="flex items-center space-x-3">
-              <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Logo className="w-32 h-auto" showTagline={false} />
               <div>
-                <h1 className="text-2xl font-black text-brand-800 tracking-widest leading-none">परख</h1>
-                <span className="text-[9px] font-bold text-[#666] tracking-widest uppercase mt-1 block">PARAKH Forensics Unit</span>
+                <span className="text-[9px] font-bold text-[#666] tracking-widest uppercase mt-1 block">Forensics Unit</span>
               </div>
             </div>
             <div className="text-left sm:text-right space-y-1">
