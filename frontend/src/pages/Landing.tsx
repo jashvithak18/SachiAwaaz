@@ -294,12 +294,12 @@ export default function Landing() {
       setLoadLineIdx((prev) => {
         if (prev >= LOADING_LINES.length - 1) {
           clearInterval(interval);
-          setTimeout(() => setLoading(false), 800);
+          setTimeout(() => setLoading(false), 250);
           return prev;
         }
         return prev + 1;
       });
-    }, 1400);
+    }, 550);
     return () => clearInterval(interval);
   }, [loading]);
 
@@ -349,14 +349,14 @@ export default function Landing() {
         {loading && (
           <motion.div
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.3 }}
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
             style={{ backgroundColor: '#F6F4EF' }}
           >
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.4 }}
               className="text-[40px] font-extrabold tracking-tight text-[#181818]"
               style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
             >
@@ -365,7 +365,7 @@ export default function Landing() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
               className="text-[14px] text-[#666] mt-1"
               style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}
             >
@@ -378,7 +378,7 @@ export default function Landing() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 0.6, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ duration: 0.2 }}
                   className="text-[15px] text-[#666] absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
                   style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}
                 >
@@ -398,13 +398,26 @@ export default function Landing() {
           fontFamily: 'Inter, system-ui, sans-serif',
         }}
       >
-        {/* Subtle paper texture overlay */}
+        {/* Subtle dot grid background to fill the empty space */}
         <div
-          className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]"
+          className="fixed inset-0 pointer-events-none z-0 opacity-[0.25]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+            backgroundImage: `radial-gradient(#E4E1DA 1.5px, transparent 1.5px)`,
+            backgroundSize: '32px 32px',
           }}
         />
+
+        {/* Delicate structural vertical grid lines in the margin (desktop only) */}
+        <div className="hidden lg:block fixed left-[5%] top-0 bottom-0 w-[1px] bg-[#E4E1DA]/45 z-0 pointer-events-none" />
+        <div className="hidden lg:block fixed right-[5%] top-0 bottom-0 w-[1px] bg-[#E4E1DA]/45 z-0 pointer-events-none" />
+
+        {/* Small delicate top-corner margin label */}
+        <div className="hidden lg:block fixed left-[6%] top-[32px] text-[9px] text-[#666]/40 tracking-[0.2em] font-mono z-20 select-none uppercase">
+          SECURE PROTOCOL V1.2
+        </div>
+        <div className="hidden lg:block fixed right-[6%] top-[32px] text-[9px] text-[#666]/40 tracking-[0.2em] font-mono z-20 select-none uppercase text-right">
+          MONITORING FOR SCAMS LIVE
+        </div>
 
         {/* ─── FIXED NAV (on scroll) ─── */}
         <AnimatePresence>
@@ -537,14 +550,30 @@ export default function Landing() {
                     ↓ {t.btnStories}
                   </button>
                 </motion.div>
+
+                {/* Mobile real news clippings list */}
+                <div className="block md:hidden mt-12 space-y-3 pt-6 border-t border-[#E4E1DA]">
+                  <p className="text-[11px] font-bold text-[#A1493F] uppercase tracking-wider mb-2">Real Incidents</p>
+                  {[
+                    { text: t.heroNews1, src: t.heroNews1Src },
+                    { text: t.heroNews2, src: t.heroNews2Src },
+                    { text: t.heroNews3, src: t.heroNews3Src },
+                    { text: t.heroNews4, src: t.heroNews4Src },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-[#FBFAF8] border border-[#E4E1DA] rounded-lg p-3.5 text-left">
+                      <p className="text-[13px] font-semibold text-[#181818] leading-snug">{item.text}</p>
+                      <p className="text-[10px] text-[#666] mt-1">{item.src}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Right: Stacked real news clippings */}
+              {/* Right: Stacked real news clippings (Tablet & Desktop) */}
               <motion.div
                 initial={{ opacity: 0, x: 40 }}
                 animate={!loading ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.9, delay: 0.4 }}
-                className="space-y-4 hidden lg:block"
+                className="space-y-4 hidden md:block"
               >
                 {[
                   { text: t.heroNews1, src: t.heroNews1Src, rotate: '-1.5deg' },
