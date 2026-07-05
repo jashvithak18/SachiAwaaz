@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const dns = require('dns');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Fix DNS resolution issues on Windows for MongoDB Atlas SRV records
 try {
@@ -18,6 +20,30 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/verivoice';
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  }
+});
+
+app.set('io', io);
+
+// Socket.io Connection Handler
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  
+  socket.on('join', (userId) => {
+    socket.join(userId);
+    console.log(`Socket ${socket.id} joined room: ${userId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
 
 // Create required upload directories if they don't exist
 const dirs = ['uploads/temp', 'uploads/enrollments', 'uploads/checks'];
@@ -36,9 +62,15 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploads statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-const apiRoutes = require('./routes');
-app.use('/api', apiRoutes);
+// Mount Modular Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/voice', require('./routes/voice'));
+app.use('/api/image', require('./routes/image'));
+app.use('/api/document', require('./routes/document'));
+app.use('/api/reports', require('./routes/reports'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/settings', require('./routes/settings'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -52,7 +84,7 @@ app.use((err, req, res, next) => {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Successfully connected to MongoDB.');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Express server is running on port ${PORT}`);
     });
   })
