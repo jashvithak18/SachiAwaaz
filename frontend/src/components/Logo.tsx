@@ -22,7 +22,7 @@ export default function Logo({
       className={className}
       width={width}
       height={height}
-      viewBox="0 0 340 230"
+      viewBox="0 0 340 235"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -80,7 +80,7 @@ export default function Logo({
         <g id="fingerprint-ridges">
           {/* Ridge 1 (Outer) */}
           <path
-            d="M 170 82 C 170 54, 204 54, 204 82 C 204 90, 185 92, 185 97"
+            d="M 173 78 C 173 53, 203 53, 203 78 C 203 86, 185 86, 185 91"
             stroke={accentColor}
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -88,7 +88,7 @@ export default function Logo({
           />
           {/* Ridge 2 */}
           <path
-            d="M 174 84 C 174 61, 199 61, 199 84 C 199 89, 185 91, 185 94"
+            d="M 177 80 C 177 60, 199 60, 199 80 C 199 85, 185 85, 185 89"
             stroke={accentColor}
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -96,7 +96,7 @@ export default function Logo({
           />
           {/* Ridge 3 */}
           <path
-            d="M 178 86 C 178 68, 194 68, 194 86 C 194 88, 185 90, 185 91"
+            d="M 181 82 C 181 67, 195 67, 195 82 C 195 84, 185 84, 185 87"
             stroke={accentColor}
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -104,7 +104,7 @@ export default function Logo({
           />
           {/* Ridge 4 (Core) */}
           <path
-            d="M 182 88 C 182 74, 188 74, 188 88"
+            d="M 185 84 C 185 74, 191 74, 191 84 V 86"
             stroke={accentColor}
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -139,18 +139,18 @@ export default function Logo({
         <g id="tagline">
           {/* Divider line */}
           <path
-            d="M 130 192 H 210"
+            d="M 115 192 H 225"
             stroke={accentColor}
-            strokeWidth="1.2"
+            strokeWidth="1.5"
             strokeLinecap="round"
           />
           {/* Devanagari text 'सच की पहचान' */}
           <text
             x="170"
-            y="218"
+            y="222"
             textAnchor="middle"
             fill={accentColor}
-            fontSize="18"
+            fontSize="22"
             fontWeight="bold"
             style={{ fontFamily: 'Noto Sans Devanagari, system-ui, sans-serif' }}
           >
