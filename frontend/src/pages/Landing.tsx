@@ -74,6 +74,24 @@ const T = {
     ctaH1: "Don't verify because you're suspicious.",
     ctaH2: "Verify because the internet has changed.",
     ctaBtn: "Start Verifying",
+    // Hero headlines
+    heroNews1: "₹1.4 crore lost to AI voice clone scam in Lucknow",
+    heroNews1Src: "Times of India, 2024",
+    heroNews2: "Fake job offer racket busted — 3,200 students duped",
+    heroNews2Src: "NDTV, 2025",
+    heroNews3: "Deepfake video of actress used to sell crypto",
+    heroNews3Src: "India Today, 2024",
+    heroNews4: "WhatsApp forwards caused mob violence in 6 states",
+    heroNews4Src: "The Hindu, 2023",
+    // Story headlines
+    s1News: "Kerala: Man loses ₹40,000 after scammer clones son's voice using AI",
+    s1NewsSrc: "Manorama Online, Jan 2025",
+    s2News: "22-year-old arrested for creating 150+ fake Google, Microsoft offer letters",
+    s2NewsSrc: "Economic Times, Mar 2025",
+    s3News: "PIB fact-checks 1,800+ fake govt scheme images circulated on WhatsApp in 2024",
+    s3NewsSrc: "Press Information Bureau, 2024",
+    s4News: "Rashmika Mandanna deepfake video goes viral — Amitabh Bachchan, govt react",
+    s4NewsSrc: "NDTV, Nov 2023",
   },
   hi: {
     heroH1: "कुछ झूठ, झूठ जैसे नहीं दिखते।",
@@ -134,6 +152,22 @@ const T = {
     ctaH1: "शक होने पर परखें ऐसा नहीं है।",
     ctaH2: "परखें क्योंकि इंटरनेट बदल गया है।",
     ctaBtn: "परखना शुरू करें",
+    heroNews1: "लखनऊ में AI वॉइस क्लोन स्कैम से ₹1.4 करोड़ का नुकसान",
+    heroNews1Src: "टाइम्स ऑफ़ इंडिया, 2024",
+    heroNews2: "नकली नौकरी ऑफर रैकेट का भंडाफोड़ — 3,200 छात्र ठगे गए",
+    heroNews2Src: "NDTV, 2025",
+    heroNews3: "अभिनेत्री का डीपफेक वीडियो क्रिप्टो बेचने के लिए इस्तेमाल",
+    heroNews3Src: "इंडिया टुडे, 2024",
+    heroNews4: "व्हाट्सएप फॉरवर्ड से 6 राज्यों में भीड़ हिंसा",
+    heroNews4Src: "द हिंदू, 2023",
+    s1News: "केरल: ठग ने AI से बेटे की आवाज़ क्लोन कर ₹40,000 ठगे",
+    s1NewsSrc: "मनोरमा ऑनलाइन, जनवरी 2025",
+    s2News: "22 वर्षीय युवक 150+ नकली गूगल, माइक्रोसॉफ्ट ऑफर लेटर बनाने पर गिरफ्तार",
+    s2NewsSrc: "इकोनॉमिक टाइम्स, मार्च 2025",
+    s3News: "PIB ने 2024 में व्हाट्सएप पर प्रसारित 1,800+ नकली सरकारी योजना छवियों की जाँच की",
+    s3NewsSrc: "प्रेस सूचना ब्यूरो, 2024",
+    s4News: "रश्मिका मंदाना का डीपफेक वीडियो वायरल — अमिताभ बच्चन, सरकार की प्रतिक्रिया",
+    s4NewsSrc: "NDTV, नवंबर 2023",
   },
 };
 
@@ -440,66 +474,102 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Hero content */}
+          {/* Hero content — two-column grid */}
           <div className="flex-1 flex items-center">
-            <div className="max-w-[1080px] mx-auto px-6 py-20">
-              <motion.h1
-                initial={{ opacity: 0, y: 40 }}
-                animate={!loading ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.8, delay: 0.1 }}
-                className="font-extrabold tracking-tight leading-[1.05] text-[#181818]"
-                style={{ fontSize: 'clamp(40px, 6vw, 82px)' }}
-              >
-                {t.heroH1}
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 24 }}
-                animate={!loading ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="mt-4 text-[#666] font-normal"
-                style={{ fontSize: 'clamp(22px, 3vw, 36px)' }}
-              >
-                {t.heroH2}
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={!loading ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="mt-10 max-w-[520px] text-[#666] leading-[1.8]"
-                style={{ fontSize: '18px' }}
-              >
-                <p>{t.heroP1}</p>
-                <p>{t.heroP2}</p>
-                <p>{t.heroP3}</p>
-                <p>{t.heroP4}</p>
-                <p>{t.heroP5}</p>
-                <p className="mt-6 text-[#181818] font-medium">{t.heroP6}</p>
-                <p className="text-[#181818] font-medium">{t.heroP7}</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={!loading ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="mt-10 flex items-center gap-6"
-              >
-                <button
-                  onClick={() => setActiveTab('auth_signup')}
-                  className="text-[15px] font-semibold text-white px-7 py-3.5 rounded-xl transition-colors"
-                  style={{ backgroundColor: '#181818' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3E5C4B')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#181818')}
+            <div className="max-w-[1080px] mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              {/* Left: Text */}
+              <div>
+                <motion.h1
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.8, delay: 0.1 }}
+                  className="font-extrabold tracking-tight leading-[1.05] text-[#181818]"
+                  style={{ fontSize: 'clamp(40px, 6vw, 76px)' }}
                 >
-                  {t.btnVerify}
-                </button>
-                <button
-                  onClick={scrollToStories}
-                  className="text-[15px] text-[#666] hover:text-[#181818] transition-colors"
+                  {t.heroH1}
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  className="mt-4 text-[#666] font-normal"
+                  style={{ fontSize: 'clamp(20px, 2.5vw, 32px)' }}
                 >
-                  ↓ {t.btnStories}
-                </button>
+                  {t.heroH2}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="mt-10 max-w-[520px] text-[#666] leading-[1.8]"
+                  style={{ fontSize: '18px' }}
+                >
+                  <p>{t.heroP1}</p>
+                  <p>{t.heroP2}</p>
+                  <p>{t.heroP3}</p>
+                  <p>{t.heroP4}</p>
+                  <p>{t.heroP5}</p>
+                  <p className="mt-6 text-[#181818] font-medium">{t.heroP6}</p>
+                  <p className="text-[#181818] font-medium">{t.heroP7}</p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.7 }}
+                  className="mt-10 flex items-center gap-6"
+                >
+                  <button
+                    onClick={() => setActiveTab('auth_signup')}
+                    className="text-[15px] font-semibold text-white px-7 py-3.5 rounded-xl transition-colors"
+                    style={{ backgroundColor: '#181818' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3E5C4B')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#181818')}
+                  >
+                    {t.btnVerify}
+                  </button>
+                  <button
+                    onClick={scrollToStories}
+                    className="text-[15px] text-[#666] hover:text-[#181818] transition-colors"
+                  >
+                    ↓ {t.btnStories}
+                  </button>
+                </motion.div>
+              </div>
+
+              {/* Right: Stacked real news clippings */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={!loading ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.9, delay: 0.4 }}
+                className="space-y-4 hidden lg:block"
+              >
+                {[
+                  { text: t.heroNews1, src: t.heroNews1Src, rotate: '-1.5deg' },
+                  { text: t.heroNews2, src: t.heroNews2Src, rotate: '0.8deg' },
+                  { text: t.heroNews3, src: t.heroNews3Src, rotate: '-0.5deg' },
+                  { text: t.heroNews4, src: t.heroNews4Src, rotate: '1.2deg' },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={!loading ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, delay: 0.6 + i * 0.15 }}
+                    className="bg-[#FBFAF8] border border-[#E4E1DA] rounded-xl px-5 py-4 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] transition-shadow"
+                    style={{ transform: `rotate(${item.rotate})` }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-[6px] h-[6px] rounded-full bg-[#A1493F] mt-2 shrink-0" />
+                      <div>
+                        <p className="text-[14px] font-semibold text-[#181818] leading-snug">{item.text}</p>
+                        <p className="text-[11px] text-[#666] mt-1.5">{item.src}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+                <p className="text-[11px] text-[#666]/50 text-center mt-2 italic">These are real incidents.</p>
               </motion.div>
             </div>
           </div>
@@ -571,6 +641,17 @@ export default function Landing() {
                         <span className="text-[13px] text-[#666]">0:18</span>
                       </div>
                       <ResultBadge text={t.s1Result} visible />
+                      {/* Real news reference */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                        className="mt-4 bg-[#FBFAF8] border border-[#E4E1DA] rounded-xl px-4 py-3.5"
+                      >
+                        <p className="text-[10px] font-semibold text-[#A1493F] uppercase tracking-wider mb-1.5">Real Incident</p>
+                        <p className="text-[13px] font-medium text-[#181818] leading-snug">{t.s1News}</p>
+                        <p className="text-[11px] text-[#666] mt-1">{t.s1NewsSrc}</p>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -651,6 +732,21 @@ export default function Landing() {
             <div className="max-w-[400px]">
               <Reveal>
                 <ResultBadge text={t.s2Result} visible={story2.revealed} />
+                {/* Real news reference */}
+                <AnimatePresence>
+                  {story2.revealed && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.8 }}
+                      className="mt-6 bg-[#FBFAF8] border border-[#E4E1DA] rounded-xl px-4 py-3.5"
+                    >
+                      <p className="text-[10px] font-semibold text-[#A1493F] uppercase tracking-wider mb-1.5">Real Incident</p>
+                      <p className="text-[13px] font-medium text-[#181818] leading-snug">{t.s2News}</p>
+                      <p className="text-[11px] text-[#666] mt-1">{t.s2NewsSrc}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </Reveal>
             </div>
           </div>
@@ -737,6 +833,21 @@ export default function Landing() {
             <div className="max-w-[400px]">
               <Reveal>
                 <ResultBadge text={t.s3Result} visible={story3.revealed} />
+                {/* Real news reference */}
+                <AnimatePresence>
+                  {story3.revealed && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.7 }}
+                      className="mt-6 bg-[#FBFAF8] border border-[#E4E1DA] rounded-xl px-4 py-3.5"
+                    >
+                      <p className="text-[10px] font-semibold text-[#A1493F] uppercase tracking-wider mb-1.5">Real Incident</p>
+                      <p className="text-[13px] font-medium text-[#181818] leading-snug">{t.s3News}</p>
+                      <p className="text-[11px] text-[#666] mt-1">{t.s3NewsSrc}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </Reveal>
             </div>
           </div>
@@ -807,6 +918,17 @@ export default function Landing() {
                         <FlagLabel text={t.s4Flag2} visible delay={0.3} />
                       </div>
                       <ResultBadge text={t.s4Result} visible />
+                      {/* Real news reference */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.5 }}
+                        className="mt-4 bg-[#FBFAF8] border border-[#E4E1DA] rounded-xl px-4 py-3.5"
+                      >
+                        <p className="text-[10px] font-semibold text-[#A1493F] uppercase tracking-wider mb-1.5">Real Incident</p>
+                        <p className="text-[13px] font-medium text-[#181818] leading-snug">{t.s4News}</p>
+                        <p className="text-[11px] text-[#666] mt-1">{t.s4NewsSrc}</p>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
