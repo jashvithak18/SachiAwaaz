@@ -4,36 +4,40 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const TRANSLATIONS = {
   en: {
-    heroTitle1: "It looked real.",
-    heroTitle2: "That's why you believed it.",
-    scrollExplore: "Scroll to explore",
+    tagline: "परख सच की, भरोसा अपने निर्णयों का।",
+    heroTitle1: "We know what",
+    heroTitle2: "you're going through.",
+    heroSub: "In a world where anything can be created, your trust is the easiest thing to manipulate.",
     
     menuHowItWorks: "How It Works",
     menuUseCases: "Use Cases",
     menuAbout: "About",
     menuVerifyNow: "Verify Now",
     
-    q1: "What if that internship offer wasn't real?",
-    q2: "What if the payment screenshot was edited?",
-    q3: "What if the voice wasn't actually theirs?",
-    q4: "What if the document was forged?",
-    q5: "What if the QR code led you somewhere else?",
+    underTitle: "YOU'VE BEEN THERE. WE UNDERSTAND.",
     
-    warningSignature: "Forged Signature",
-    warningSignatureDesc: "The signature is not authentic.",
-    warningTimestamp: "Edited Timestamp",
-    warningTimestampDesc: "The timestamp doesn't match device data.",
-    warningFont: "Font Mismatch",
-    warningFontDesc: "Inconsistent font detected.",
-    warningVoice: "AI-Generated Voice",
-    warningVoiceDesc: "This voice is likely generated or cloned.",
-    warningMetadata: "Metadata Mismatch",
-    warningMetadataDesc: "The document metadata doesn't match its contents.",
-    warningQr: "Malicious QR Code",
-    warningQrDesc: "This QR code contains a suspicious link.",
+    card1Title: "You received an internship offer.",
+    card1Lines: ["It looked perfect.", "The company. The role.", "The signature."],
+    card1Highlight: "But it was fake.",
     
-    pivotTitle1: "Trust is disappearing.",
-    pivotTitle2: "We're bringing it back.",
+    card2Title: "You got a payment screenshot.",
+    card2Lines: ["Everything matched.", "Amount, time,", "reference ID."],
+    card2Highlight: "But it was edited.",
+    
+    card3Title: "You received your daughter's voice.",
+    card3Lines: ["It sounded exactly", "like her."],
+    card3Highlight: "But it was AI.",
+    
+    card4Title: "You downloaded a medical report.",
+    card4Lines: ["It had the seal.", "The format.", "Everything."],
+    card4Highlight: "But it was forged.",
+    
+    card5Title: "You scanned a QR code.",
+    card5Lines: ["It looked official.", "It redirected you", "somewhere."],
+    card5Highlight: "But it was a trap.",
+    
+    bannerText1: "It's not your fault. It looks real. That's how they fool you.",
+    bannerText2: "But now, you don't have to fall for it.",
     
     solutionTitle: "That's why we built PARAKH.",
     solutionDesc: "PARAKH helps you verify digital content before you make decisions. Simple. Private. Powerful.",
@@ -43,11 +47,13 @@ const TRANSLATIONS = {
     stepAnalyzing: "Analyzing",
     stepVerifying: "Verifying",
     stepGenerating: "Generating Result",
-    resultAuthentic: "Authenticity Confirmed",
-    resultAuthenticDesc: "This content is verified authentic.",
+    resultAuthentic: "Authentic",
+    resultAuthenticDesc: "This content is authentic.",
     viewFullReport: "View Full Report →",
     
-    verifyTitle: "What you can verify with PARAKH",
+    verifyTitle: "WE VERIFY WHAT MATTERS",
+    verifySub: "One platform. Every format.",
+    
     verifyVoice: "Voice",
     verifyDoc: "Document",
     verifyImg: "Image",
@@ -55,55 +61,60 @@ const TRANSLATIONS = {
     verifyQr: "QR Code",
     verifyEmail: "Email",
     
-    whyTitle1: "You don't need to understand digital forensics.",
-    whyTitle2: "You just need to know whether you can trust what you're looking at.",
-    why1: "Simple to use",
-    why1Desc: "Anyone can verify in seconds.",
-    why2: "Private & Secure" ,
-    why2Desc: "Your data stays yours.",
-    why3: "Accurate & Reliable",
-    why3Desc: "Advanced verification you can trust.",
+    howTitle: "HOW IT WORKS",
+    howSub: "Four simple steps. One trusted answer.",
+    step1Title: "Upload",
+    step1Desc: "Add any file or content.",
+    step2Title: "Analyze",
+    step2Desc: "Our system checks thousands of signals.",
+    step3Title: "Verify",
+    step3Desc: "Advanced forensics + AI verification.",
+    step4Title: "Get Result",
+    step4Desc: "Clear. Simple. Actionable.",
     
     finalTitle: "If something feels off...",
     finalSub: "Check before you believe.",
-    finalButton: "Start Verifying",
+    finalButton: "Start Verifying Now →",
     
-    footerText: "PARAKH. Verify before you trust.",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Use",
     footerContact: "Contact Support"
   },
   hi: {
-    heroTitle1: "यह असली लग रहा था।",
-    heroTitle2: "इसीलिए आपने विश्वास किया।",
-    scrollExplore: "तलाशने के लिए स्क्रॉल करें",
+    tagline: "परख सच की, भरोसा अपने निर्णयों का।",
+    heroTitle1: "हम जानते हैं कि आप",
+    heroTitle2: "किस दौर से गुजर रहे हैं।",
+    heroSub: "एक ऐसी दुनिया में जहां कुछ भी बनाया जा सकता है, आपका विश्वास हेरफेर करने के लिए सबसे आसान चीज है।",
     
     menuHowItWorks: "काम कैसे करता है",
     menuUseCases: "उपयोग के मामले",
     menuAbout: "हमारे बारे में",
     menuVerifyNow: "अभी जांचें",
     
-    q1: "क्या हो अगर वह इंटर्नशिप ऑफर असली नहीं था?",
-    q2: "क्या हो अगर भुगतान स्क्रीनशॉट एडिट किया गया था?",
-    q3: "क्या हो अगर वह आवाज़ वास्तव में उनकी नहीं थी?",
-    q4: "क्या हो अगर वह दस्तावेज़ जाली था?",
-    q5: "क्या हो अगर क्यूआर कोड आपको कहीं और ले गया?",
+    underTitle: "आप वहां रहे हैं। हम समझते हैं।",
     
-    warningSignature: "जाली हस्ताक्षर",
-    warningSignatureDesc: "हस्ताक्षर प्रामाणिक नहीं है।",
-    warningTimestamp: "संपादित टाइमस्टैम्प",
-    warningTimestampDesc: "टाइमस्टैम्प डिवाइस डेटा से मेल नहीं खाता।",
-    warningFont: "फ़ॉन्ट बेमेल",
-    warningFontDesc: "असंगत फ़ॉन्ट पाया गया।",
-    warningVoice: "एआई-जनित आवाज़",
-    warningVoiceDesc: "यह आवाज़ संभावित रूप से क्लोन की गई है।",
-    warningMetadata: "मेटाडेटा बेमेल",
-    warningMetadataDesc: "दस्तावेज़ मेटाडेटा उसकी सामग्री से मेल नहीं खाता।",
-    warningQr: "दुर्भावनापूर्ण क्यूआर कोड",
-    warningQrDesc: "इस क्यूआर कोड में एक संदिग्ध लिंक है।",
+    card1Title: "आपको इंटर्नशिप का प्रस्ताव मिला।",
+    card1Lines: ["यह बिल्कुल सही लग रहा था।", "कंपनी। भूमिका।", "हस्ताक्षर।"],
+    card1Highlight: "लेकिन वह नकली था।",
     
-    pivotTitle1: "विश्वास गायब हो रहा है।",
-    pivotTitle2: "हम इसे वापस ला रहे हैं।",
+    card2Title: "आपको भुगतान का स्क्रीनशॉट मिला।",
+    card2Lines: ["सब कुछ मेल खा रहा था।", "राशि, समय,", "संदर्भ आईडी।"],
+    card2Highlight: "लेकिन यह संपादित था।",
+    
+    card3Title: "आपको अपनी बेटी की आवाज़ मिली।",
+    card3Lines: ["यह बिल्कुल उसकी तरह", "लग रही थी।"],
+    card3Highlight: "लेकिन वह एआई था।",
+    
+    card4Title: "आपने एक मेडिकल रिपोर्ट डाउनलोड की।",
+    card4Lines: ["इस पर सील थी।", "प्रारूप।", "सब कुछ।"],
+    card4Highlight: "लेकिन वह जाली था।",
+    
+    card5Title: "आपने एक क्यूआर कोड स्कैन किया।",
+    card5Lines: ["यह आधिकारिक लग रहा था।", "इसने आपको कहीं और", "रीडायरेक्ट किया।"],
+    card5Highlight: "लेकिन वह एक जाल था।",
+    
+    bannerText1: "यह आपकी गलती नहीं है। यह असली लगता है। वे आपको इसी तरह बेवकूफ बनाते हैं।",
+    bannerText2: "लेकिन अब, आपको इसके झांसे में आने की जरूरत नहीं है।",
     
     solutionTitle: "इसीलिए हमने परख बनाया।",
     solutionDesc: "परख निर्णय लेने से पहले डिजिटल सामग्री को सत्यापित करने में आपकी सहायता करता है। सरल। निजी। शक्तिशाली।",
@@ -113,11 +124,13 @@ const TRANSLATIONS = {
     stepAnalyzing: "विश्लेषण हो रहा है",
     stepVerifying: "सत्यापित हो रहा है",
     stepGenerating: "परिणाम उत्पन्न हो रहा है",
-    resultAuthentic: "प्रामाणिकता की पुष्टि",
-    resultAuthenticDesc: "यह सामग्री सत्यापित और सुरक्षित है।",
+    resultAuthentic: "प्रामाणिक",
+    resultAuthenticDesc: "यह सामग्री प्रामाणिक है।",
     viewFullReport: "पूरी रिपोर्ट देखें →",
     
-    verifyTitle: "परख के साथ आप क्या सत्यापित कर सकते हैं",
+    verifyTitle: "हम सत्यापित करते हैं जो मायने रखता है",
+    verifySub: "एक मंच। हर प्रारूप।",
+    
     verifyVoice: "आवाज़",
     verifyDoc: "दस्तावेज़",
     verifyImg: "छवि",
@@ -125,20 +138,21 @@ const TRANSLATIONS = {
     verifyQr: "क्यूआर कोड",
     verifyEmail: "ईमेल",
     
-    whyTitle1: "आपको डिजिटल फॉरेंसिक को समझने की आवश्यकता नहीं है।",
-    whyTitle2: "आपको बस यह जानने की जरूरत है कि आप जो देख रहे हैं उस पर भरोसा कर सकते हैं या नहीं।",
-    why1: "उपयोग में सरल",
-    why1Desc: "कोई भी सेकंड में सत्यापित कर सकता है।",
-    why2: "निजी और सुरक्षित",
-    why2Desc: "आपका डेटा आपका ही रहता है।",
-    why3: "सटीक और विश्वसनीय",
-    why3Desc: "उन्नत सत्यापन जिस पर आप भरोसा कर सकते हैं।",
+    howTitle: "यह कैसे काम करता है",
+    howSub: "चार सरल कदम। एक विश्वसनीय उत्तर।",
+    step1Title: "अपलोड",
+    step1Desc: "कोई भी फ़ाइल या सामग्री जोड़ें।",
+    step2Title: "विश्लेषण",
+    step2Desc: "हमारा सिस्टम हजारों सिग्नलों की जांच करता है।",
+    step3Title: "सत्यापन",
+    step3Desc: "उन्नत फोरेंसिक + एआई सत्यापन।",
+    step4Title: "परिणाम प्राप्त करें",
+    step4Desc: "स्पष्ट। सरल। कार्रवाई योग्य।",
     
     finalTitle: "अगर कुछ अजीब लगता है...",
     finalSub: "विश्वास करने से पहले जांचें।",
-    finalButton: "सत्यापन शुरू करें",
+    finalButton: "अभी सत्यापन शुरू करें →",
     
-    footerText: "परख। भरोसा करने से पहले परखें।",
     footerPrivacy: "गोपनीयता नीति",
     footerTerms: "उपयोग की शर्तें",
     footerContact: "सहायता केंद्र"
@@ -180,13 +194,12 @@ export default function Landing() {
       
       {/* Sticky Top Navigation */}
       <header className="border-b border-[#E5DED5]/40 sticky top-0 z-50 backdrop-blur-md bg-[#F6F3EE]/80 transition">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="max-w-5xl mx-auto px-6 py-4.5 flex justify-between items-center">
           <div className="flex items-center space-x-8">
             <span className="font-semibold text-lg tracking-tight">PARAKH</span>
             <nav className="hidden md:flex items-center space-x-6 text-xs font-semibold text-[#5F5F5F] font-devanagari">
               <a href="#how-it-works" className="hover:text-[#171717] transition">{t.menuHowItWorks}</a>
               <a href="#scenarios" className="hover:text-[#171717] transition">{t.menuUseCases}</a>
-              <a href="#about" className="hover:text-[#171717] transition">{t.menuAbout}</a>
             </nav>
           </div>
 
@@ -200,7 +213,7 @@ export default function Landing() {
             
             <button 
               onClick={() => setActiveTab('auth_signup')}
-              className="bg-[#171717] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-xl transition duration-150"
+              className="bg-[#171717] hover:bg-[#2A2A2A] text-white px-4.5 py-2 rounded-xl transition duration-150"
             >
               {t.menuVerifyNow}
             </button>
@@ -209,176 +222,132 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative max-w-4xl mx-auto px-6 pt-24 pb-20 text-center min-h-[85vh] flex flex-col justify-center items-center space-y-12">
-        <div className="space-y-6">
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-light leading-[1.05] tracking-tight text-[#171717] font-devanagari">
+      <section className="relative max-w-5xl mx-auto px-6 pt-24 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
+        {/* Left Side */}
+        <div className="space-y-6 text-left">
+          <div className="space-y-2">
+            <span className="text-xl font-bold tracking-tight text-[#171717]">PARAKH</span>
+            <p className="text-sm font-bold text-[#B45309] font-devanagari">{t.tagline}</p>
+          </div>
+          <h2 className="text-5xl sm:text-6xl font-light leading-[1.05] tracking-tight text-[#171717] font-devanagari">
             {t.heroTitle1} <br />
-            <span className="text-[#B45309] font-normal">{t.heroTitle2}</span>
+            <span className="text-[#171717] font-normal">{t.heroTitle2}</span>
           </h2>
-        </div>
-
-        {/* Scroll exploration indicator */}
-        <div className="space-y-2 pt-12 text-[#5F5F5F] text-xs font-devanagari flex flex-col items-center">
-          <span>{t.scrollExplore}</span>
-          <span className="animate-bounce mt-1">↓</span>
-        </div>
-      </section>
-
-      {/* Section 2: The Problem - Scroll Storytelling */}
-      <section id="scenarios" className="max-w-4xl mx-auto px-6 py-20 space-y-20">
-        
-        {/* Scenario 1: Internship offer */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center border-t border-[#E5DED5] pt-12">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-[#B45309]">SCENARIO 01</span>
-            <h4 className="font-semibold text-lg text-[#171717] leading-snug font-devanagari">{t.q1}</h4>
-          </div>
-          {/* Mockup letter */}
-          <div className="bg-white border border-[#E5DED5] p-5 rounded-2xl shadow-sm space-y-3">
-            <div className="flex justify-between items-center text-[8px] text-brand-400">
-              <span className="font-bold">BrandCorp</span>
-              <span>12 May 2026</span>
-            </div>
-            <h5 className="font-bold text-[10px] text-brand-800 text-center">OFFER OF INTERNSHIP</h5>
-            <div className="space-y-1.5">
-              <div className="h-1 bg-brand-100 rounded w-full"></div>
-              <div className="h-1 bg-brand-100 rounded w-5/6"></div>
-              <div className="h-1 bg-brand-100 rounded w-4/6"></div>
-            </div>
-            <div className="flex justify-between items-center pt-2 border-t border-brand-100 text-[8px]">
-              <span className="italic">Robert Shaw</span>
-              <span className="text-brand-400">HR Director</span>
-            </div>
-          </div>
-          {/* Warning badge */}
-          <div className="bg-red-50 border border-red-200 p-4 rounded-xl space-y-1">
-            <span className="text-[10px] font-bold text-accent-red flex items-center space-x-1">
-              <span>⚠️</span> <span>{t.warningSignature}</span>
-            </span>
-            <p className="text-[10px] text-[#5F5F5F] leading-normal font-devanagari">{t.warningSignatureDesc}</p>
-          </div>
-        </div>
-
-        {/* Scenario 2: Payment Receipt */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center border-t border-[#E5DED5] pt-12">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-[#B45309]">SCENARIO 02</span>
-            <h4 className="font-semibold text-lg text-[#171717] leading-snug font-devanagari">{t.q2}</h4>
-          </div>
-          {/* Mockup receipt */}
-          <div className="bg-white border border-[#E5DED5] p-4.5 rounded-2xl shadow-sm space-y-2.5">
-            <div className="flex justify-between items-center text-[9px]">
-              <span className="text-[#5F5F5F]">Payment Successful</span>
-              <span className="text-green-600">✓</span>
-            </div>
-            <p className="text-lg font-black text-[#171717]">₹24,500</p>
-            <div className="text-[9px] text-[#5F5F5F] space-y-0.5">
-              <p>Sent to: Rohan Sharma</p>
-              <p>13 May 2026, 11:42 AM</p>
-            </div>
-          </div>
-          {/* Warning badge */}
-          <div className="space-y-2">
-            <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl space-y-0.5">
-              <span className="text-[10px] font-bold text-accent-red block">⚠️ {t.warningTimestamp}</span>
-              <p className="text-[9px] text-[#5F5F5F] font-devanagari">{t.warningTimestampDesc}</p>
-            </div>
-            <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl space-y-0.5">
-              <span className="text-[10px] font-bold text-accent-red block">⚠️ {t.warningFont}</span>
-              <p className="text-[9px] text-[#5F5F5F] font-devanagari">{t.warningFontDesc}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Scenario 3: Audio waveform */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center border-t border-[#E5DED5] pt-12">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-[#B45309]">SCENARIO 03</span>
-            <h4 className="font-semibold text-lg text-[#171717] leading-snug font-devanagari">{t.q3}</h4>
-          </div>
-          {/* Mockup waveform player */}
-          <div className="bg-white border border-[#E5DED5] p-4.5 rounded-2xl shadow-sm flex items-center space-x-3">
-            <span className="text-lg cursor-pointer">▶</span>
-            <div className="flex-grow flex items-center space-x-0.5">
-              <div className="w-1 h-4 bg-brand-300 rounded"></div>
-              <div className="w-1 h-6 bg-[#B45309] rounded"></div>
-              <div className="w-1 h-3 bg-brand-300 rounded"></div>
-              <div className="w-1 h-5 bg-brand-300 rounded"></div>
-              <div className="w-1 h-2 bg-brand-200 rounded"></div>
-            </div>
-            <span className="text-[9px] text-brand-400">0:02 / 0:11</span>
-          </div>
-          {/* Warning badge */}
-          <div className="bg-red-50 border border-red-200 p-4 rounded-xl space-y-1">
-            <span className="text-[10px] font-bold text-accent-red block">⚠️ {t.warningVoice}</span>
-            <p className="text-[10px] text-[#5F5F5F] leading-normal font-devanagari">{t.warningVoiceDesc}</p>
-          </div>
-        </div>
-
-        {/* Scenario 4: Forged document */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center border-t border-[#E5DED5] pt-12">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-[#B45309]">SCENARIO 04</span>
-            <h4 className="font-semibold text-lg text-[#171717] leading-snug font-devanagari">{t.q4}</h4>
-          </div>
-          {/* Mockup Medical Report */}
-          <div className="bg-white border border-[#E5DED5] p-5 rounded-2xl shadow-sm space-y-2.5">
-            <h5 className="font-bold text-[9px] text-brand-500 uppercase tracking-widest text-center">MEDICAL REPORT</h5>
-            <div className="text-[8px] text-brand-800 space-y-1">
-              <p>Patient Name: Amit Verma</p>
-              <p>Age / Gender: 34 / Male</p>
-              <p>Report Date: 10 May 2026</p>
-            </div>
-            <div className="border-t border-brand-100 pt-1.5 flex justify-end">
-              <span className="text-[8px] border border-brand-200 px-1.5 py-0.5 rounded text-brand-500 font-mono">Digital Signature</span>
-            </div>
-          </div>
-          {/* Warning badge */}
-          <div className="bg-red-50 border border-red-200 p-4 rounded-xl space-y-1">
-            <span className="text-[10px] font-bold text-accent-red block">⚠️ {t.warningMetadata}</span>
-            <p className="text-[10px] text-[#5F5F5F] leading-normal font-devanagari">{t.warningMetadataDesc}</p>
-          </div>
-        </div>
-
-        {/* Scenario 5: Fake QR code */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center border-t border-[#E5DED5] pt-12">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-[#B45309]">SCENARIO 05</span>
-            <h4 className="font-semibold text-lg text-[#171717] leading-snug font-devanagari">{t.q5}</h4>
-          </div>
-          {/* Mockup QR */}
-          <div className="bg-white border border-[#E5DED5] p-4.5 rounded-2xl shadow-sm flex justify-center">
-            <div className="w-16 h-16 bg-[#171717] rounded flex items-center justify-center text-white text-xs font-mono font-bold tracking-widest select-none">
-              QR
-            </div>
-          </div>
-          {/* Warning badge */}
-          <div className="bg-red-50 border border-red-200 p-4 rounded-xl space-y-1">
-            <span className="text-[10px] font-bold text-accent-red block">⚠️ {t.warningQr}</span>
-            <p className="text-[10px] text-[#5F5F5F] leading-normal font-devanagari">{t.warningQrDesc}</p>
-          </div>
-        </div>
-
-      </section>
-
-      {/* Section 3: The Reality - Emotional Pivot */}
-      <section className="bg-[#171717] py-24 text-white text-center border-t border-[#E5DED5]/20">
-        <div className="max-w-3xl mx-auto px-6 space-y-4 font-devanagari">
-          <h3 className="text-3xl sm:text-4xl font-light tracking-tight text-[#EFE9DF]">
-            {t.pivotTitle1}
-          </h3>
-          <p className="text-xl sm:text-2xl font-normal text-white">
-            {t.pivotTitle2}
+          <p className="text-[#5F5F5F] text-sm leading-relaxed max-w-md font-devanagari">
+            {t.heroSub}
           </p>
         </div>
+
+        {/* Right Side: Visual layered stack mockup cards */}
+        <div className="relative h-[320px] w-full flex items-center justify-center select-none pointer-events-none">
+          {/* Card 1 */}
+          <div className="absolute top-[5%] bg-white border border-[#E5DED5] p-4 rounded-xl shadow-lg w-52 rotate-[-3deg] z-20">
+            <p className="text-[7px] text-[#5F5F5F] font-bold uppercase">OFFER LETTER</p>
+            <p className="text-[10px] font-bold text-brand-800 mt-1">Internship offer letter</p>
+            <div className="h-0.5 bg-brand-100 rounded w-full mt-2"></div>
+            <div className="h-0.5 bg-brand-100 rounded w-4/5 mt-1"></div>
+          </div>
+          {/* Card 2 */}
+          <div className="absolute top-[35%] bg-white border border-[#E5DED5] p-4 rounded-xl shadow-md w-48 rotate-[2deg] z-10">
+            <p className="text-[7px] text-[#5F5F5F] font-bold uppercase">Payment Received</p>
+            <p className="text-sm font-black text-[#171717] mt-0.5">₹24,500</p>
+            <p className="text-[8px] text-brand-400">From Rohan Sharma</p>
+          </div>
+          {/* Card 3 */}
+          <div className="absolute bottom-[5%] bg-white border border-[#E5DED5] p-3.5 rounded-xl shadow-md w-52 rotate-[-1deg] z-30 flex items-center space-x-2">
+            <span className="text-xs">▶</span>
+            <div className="flex-grow flex items-center space-x-0.5">
+              <div className="w-0.5 h-3 bg-brand-300"></div>
+              <div className="w-0.5 h-4 bg-brand-850"></div>
+              <div className="w-0.5 h-2 bg-brand-300"></div>
+            </div>
+            <span className="text-[8px] text-brand-400">0:18</span>
+          </div>
+        </div>
       </section>
 
-      {/* Section 4 & 5: Solution & Interactive Verification Experience */}
-      <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-        {/* Left side text */}
+      {/* Section 2: Scenario Cards (YOU'VE BEEN THERE. WE UNDERSTAND) */}
+      <section id="scenarios" className="bg-[#EFE9DF] py-24 border-t border-b border-[#E5DED5]">
+        <div className="max-w-5xl mx-auto px-6 space-y-16">
+          <div className="text-center space-y-2">
+            <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block">
+              {t.underTitle}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 font-devanagari">
+            {/* Card 1 */}
+            <div className="bg-white p-5 rounded-2xl border border-[#E5DED5] flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <span className="text-xl">💼</span>
+                <h4 className="font-bold text-xs text-[#171717]">{t.card1Title}</h4>
+                <div className="text-[10px] text-[#5F5F5F] space-y-1 leading-normal">
+                  {t.card1Lines.map((line, i) => <p key={i}>{line}</p>)}
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-[#B45309]">{t.card1Highlight}</p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-white p-5 rounded-2xl border border-[#E5DED5] flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <span className="text-xl">🕒</span>
+                <h4 className="font-bold text-xs text-[#171717]">{t.card2Title}</h4>
+                <div className="text-[10px] text-[#5F5F5F] space-y-1 leading-normal">
+                  {t.card2Lines.map((line, i) => <p key={i}>{line}</p>)}
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-[#B45309]">{t.card2Highlight}</p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-white p-5 rounded-2xl border border-[#E5DED5] flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <span className="text-xl">🎙️</span>
+                <h4 className="font-bold text-xs text-[#171717]">{t.card3Title}</h4>
+                <div className="text-[10px] text-[#5F5F5F] space-y-1 leading-normal">
+                  {t.card3Lines.map((line, i) => <p key={i}>{line}</p>)}
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-[#B45309]">{t.card3Highlight}</p>
+            </div>
+
+            {/* Card 4 */}
+            <div className="bg-white p-5 rounded-2xl border border-[#E5DED5] flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <span className="text-xl">📄</span>
+                <h4 className="font-bold text-xs text-[#171717]">{t.card4Title}</h4>
+                <div className="text-[10px] text-[#5F5F5F] space-y-1 leading-normal">
+                  {t.card4Lines.map((line, i) => <p key={i}>{line}</p>)}
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-[#B45309]">{t.card4Highlight}</p>
+            </div>
+
+            {/* Card 5 */}
+            <div className="bg-white p-5 rounded-2xl border border-[#E5DED5] flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <span className="text-xl">🔗</span>
+                <h4 className="font-bold text-xs text-[#171717]">{t.card5Title}</h4>
+                <div className="text-[10px] text-[#5F5F5F] space-y-1 leading-normal">
+                  {t.card5Lines.map((line, i) => <p key={i}>{line}</p>)}
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-[#B45309]">{t.card5Highlight}</p>
+            </div>
+          </div>
+
+          <div className="text-center space-y-1 text-sm font-devanagari pt-4">
+            <p className="text-[#5F5F5F]">{t.bannerText1}</p>
+            <p className="font-bold text-[#171717]">{t.bannerText2}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3 & 4: Introduce PARAKH & Demo Section */}
+      <section className="max-w-5xl mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
-          <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block">Introducing PARAKH</span>
-          <h3 className="text-3xl font-normal leading-tight text-[#171717] font-devanagari">
+          <h3 className="text-4xl font-normal leading-tight text-[#171717] font-devanagari">
             {t.solutionTitle}
           </h3>
           <p className="text-[#5F5F5F] text-sm leading-relaxed font-devanagari">
@@ -386,7 +355,7 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Right side verification box */}
+        {/* Demo verification box */}
         <div className="bg-white border border-[#E5DED5] rounded-3xl p-6 shadow-sm space-y-6">
           {demoState === 'idle' ? (
             <div 
@@ -398,8 +367,7 @@ export default function Landing() {
             </div>
           ) : demoState !== 'done' ? (
             <div className="p-6 text-center space-y-4">
-              {/* Stepper details */}
-              <div className="flex justify-between items-center text-[10px] font-bold text-[#5F5F5F] pb-2 border-b border-[#E5DED5]">
+              <div className="flex justify-between items-center text-[9px] font-bold text-[#5F5F5F] pb-2 border-b border-[#E5DED5]">
                 <span className={demoState === 'uploading' ? 'text-[#B45309]' : ''}>1. {t.stepUploading}</span>
                 <span className={demoState === 'analyzing' ? 'text-[#B45309]' : ''}>2. {t.stepAnalyzing}</span>
                 <span className={demoState === 'verifying' ? 'text-[#B45309]' : ''}>3. {t.stepVerifying}</span>
@@ -410,12 +378,12 @@ export default function Landing() {
               </div>
             </div>
           ) : (
-            <div className="bg-green-50 border border-green-200 p-5 rounded-2xl space-y-3 text-center">
+            <div className="bg-green-50 border border-green-200 p-5 rounded-2xl text-center space-y-2">
               <span className="text-green-700 font-bold block text-sm">✓ {t.resultAuthentic}</span>
               <p className="text-[10px] text-[#5F5F5F] font-devanagari">{t.resultAuthenticDesc}</p>
               <button 
                 onClick={() => setActiveTab('auth_signup')}
-                className="text-xs text-accent-blue font-bold hover:underline"
+                className="text-xs text-[#B45309] font-bold hover:underline"
               >
                 {t.viewFullReport}
               </button>
@@ -424,11 +392,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Section 6: What You Can Verify */}
+      {/* Section 5: We Verify What Matters */}
       <section className="bg-[#EFE9DF] py-20 border-t border-b border-[#E5DED5]">
         <div className="max-w-5xl mx-auto px-6 space-y-12">
-          <div className="text-center">
-            <h3 className="text-2xl font-normal text-[#171717] font-devanagari">{t.verifyTitle}</h3>
+          <div className="text-center space-y-2">
+            <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block">{t.verifyTitle}</span>
+            <h3 className="text-2xl font-normal text-[#171717] font-devanagari">{t.verifySub}</h3>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 font-devanagari">
@@ -440,43 +409,43 @@ export default function Landing() {
             <CategoryTab label={t.verifyEmail} active={activeEngine === 'email'} onClick={() => setActiveEngine('email')} />
           </div>
 
-          {/* Tab Description display panel */}
+          {/* Description details card */}
           <div className="bg-white p-6 rounded-2xl border border-[#E5DED5] min-h-[100px] flex flex-col justify-center">
             <AnimatePresence mode="wait">
               {activeEngine === 'voice' && (
                 <motion.div key="voice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-1">
                   <h4 className="font-bold text-xs text-[#171717]">{t.verifyVoice}</h4>
-                  <p className="text-[11px] text-[#5F5F5F] leading-normal">{t.verifyVoiceDesc}</p>
+                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Inspects vocoder anomalies, pitch fluctuations, and synthesis indicators.</p>
                 </motion.div>
               )}
               {activeEngine === 'doc' && (
                 <motion.div key="doc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-1">
                   <h4 className="font-bold text-xs text-[#171717]">{t.verifyDoc}</h4>
-                  <p className="text-[11px] text-[#5F5F5F] leading-normal">{t.verifyDocDesc}</p>
+                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Scans PDF creator tags, signature blocks, and font compilation changes.</p>
                 </motion.div>
               )}
               {activeEngine === 'img' && (
                 <motion.div key="img" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-1">
                   <h4 className="font-bold text-xs text-[#171717]">{t.verifyImg}</h4>
-                  <p className="text-[11px] text-[#5F5F5F] leading-normal">{t.verifyImgDesc}</p>
+                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Performs JPEG quantization checks, compression artifact scans, and metadata checks.</p>
                 </motion.div>
               )}
               {activeEngine === 'vid' && (
                 <motion.div key="vid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-1">
                   <h4 className="font-bold text-xs text-[#171717]">{t.verifyVid}</h4>
-                  <p className="text-[11px] text-[#5F5F5F] leading-normal">{t.verifyVidDesc}</p>
+                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Reviews synchronization layouts, frame continuity, and video compiler tags.</p>
                 </motion.div>
               )}
               {activeEngine === 'qr' && (
                 <motion.div key="qr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-1">
                   <h4 className="font-bold text-xs text-[#171717]">{t.verifyQr}</h4>
-                  <p className="text-[11px] text-[#5F5F5F] leading-normal">{t.verifyQrDesc}</p>
+                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Resolves redirection URLs and audits destination safety registers.</p>
                 </motion.div>
               )}
               {activeEngine === 'email' && (
                 <motion.div key="email" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-1">
                   <h4 className="font-bold text-xs text-[#171717]">{t.verifyEmail}</h4>
-                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Checks SMTP header authentication parameters and sender domains.</p>
+                  <p className="text-[11px] text-[#5F5F5F] leading-normal">Verifies sender SMTP headers and domains against cryptographic keys.</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -484,52 +453,42 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Section 7: Why PARAKH */}
-      <section id="about" className="max-w-5xl mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* Left Side */}
-        <div className="space-y-6 font-devanagari">
-          <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block">Forensics Index</span>
-          <h3 className="text-2xl font-light text-[#5F5F5F] leading-normal">
-            "{t.whyTitle1}"
-          </h3>
-          <p className="text-lg font-semibold text-[#171717]">
-            {t.whyTitle2}
-          </p>
+      {/* Section 6: How It Works */}
+      <section className="max-w-5xl mx-auto px-6 py-24 space-y-16">
+        <div className="text-center space-y-2">
+          <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase block">{t.howTitle}</span>
+          <h3 className="text-2xl font-normal text-[#171717] font-devanagari">{t.howSub}</h3>
         </div>
 
-        {/* Right Side list items */}
-        <div className="space-y-6 font-devanagari">
-          <WhyListItem title={t.why1} desc={t.why1Desc} />
-          <WhyListItem title={t.why2} desc={t.why2Desc} />
-          <WhyListItem title={t.why3} desc={t.why3Desc} />
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-8 font-devanagari">
+          <StepItem number="01" title={t.step1Title} desc={t.step1Desc} />
+          <StepItem number="02" title={t.step2Title} desc={t.step2Desc} />
+          <StepItem number="03" title={t.step3Title} desc={t.step3Desc} />
+          <StepItem number="04" title={t.step4Title} desc={t.step4Desc} />
         </div>
       </section>
 
-      {/* Section 8: Final CTA */}
-      <section className="bg-gradient-to-r from-[#B45309] to-[#92400E] py-24 text-white text-center">
-        <div className="max-w-2xl mx-auto px-6 space-y-8 font-devanagari">
-          <h3 className="text-3xl sm:text-4xl font-normal text-[#F6F3EE]">{t.finalTitle}</h3>
-          <p className="text-[#EFE9DF] text-sm font-light">{t.finalSub}</p>
-          <button 
-            onClick={() => setActiveTab('auth_signup')}
-            className="bg-[#171717] hover:bg-[#2A2A2A] text-white font-bold py-3.5 px-8 rounded-xl transition duration-150 text-xs shadow-md min-h-[44px]"
-          >
-            {t.finalButton}
-          </button>
-        </div>
+      {/* Section 7: Final CTA */}
+      <section className="border-t border-[#E5DED5] py-24 text-center space-y-8 font-devanagari" style={{ backgroundColor: '#FFFDF9' }}>
+        <h3 className="text-3xl sm:text-4xl font-normal text-[#171717]">{t.finalTitle}</h3>
+        <p className="text-[#5F5F5F] text-base font-light">{t.finalSub}</p>
+        <button 
+          onClick={() => setActiveTab('auth_signup')}
+          className="bg-[#171717] hover:bg-[#2A2A2A] text-white font-bold py-3.5 px-8 rounded-xl transition duration-150 text-xs shadow-md min-h-[44px]"
+        >
+          {t.finalButton}
+        </button>
       </section>
 
-      {/* Minimal Footer */}
+      {/* Footer */}
       <footer className="border-t border-[#E5DED5] py-12 text-center text-xs text-[#5F5F5F] space-y-4 max-w-5xl mx-auto font-devanagari">
-        <p>{t.footerText}</p>
+        <p>PARAKH – {t.tagline}</p>
         <div className="flex justify-center space-x-6">
-          <a href="#how-it-works" className="hover:text-[#171717] transition">{t.menuHowItWorks}</a>
-          <span>|</span>
-          <a href="#scenarios" className="hover:text-[#171717] transition">{t.menuUseCases}</a>
-          <span>|</span>
           <a href="#" className="hover:text-[#171717] transition">{t.footerPrivacy}</a>
           <span>|</span>
           <a href="#" className="hover:text-[#171717] transition">{t.footerTerms}</a>
+          <span>|</span>
+          <a href="#" className="hover:text-[#171717] transition">{t.footerContact}</a>
         </div>
       </footer>
     </div>
@@ -546,9 +505,9 @@ function CategoryTab({ label, active, onClick }: CategoryTabProps) {
   return (
     <button
       onClick={onClick}
-      className={`text-center py-2.5 rounded-xl font-bold text-xs transition focus:outline-none ${
+      className={`text-center py-2 rounded-xl font-bold text-xs transition focus:outline-none ${
         active 
-          ? 'bg-[#171717] text-white shadow-sm' 
+          ? 'bg-[#171717] text-white shadow-sm font-extrabold' 
           : 'text-[#5F5F5F] hover:bg-white hover:text-[#171717]'
       }`}
     >
@@ -557,16 +516,18 @@ function CategoryTab({ label, active, onClick }: CategoryTabProps) {
   );
 }
 
-interface WhyListItemProps {
+interface StepItemProps {
+  number: string;
   title: string;
   desc: string;
 }
 
-function WhyListItem({ title, desc }: WhyListItemProps) {
+function StepItem({ number, title, desc }: StepItemProps) {
   return (
-    <div className="p-4.5 bg-white border border-[#E5DED5] rounded-2xl shadow-sm space-y-1">
+    <div className="bg-white border border-[#E5DED5] p-5 rounded-2xl shadow-sm space-y-2 hover:border-[#B45309]/30 transition duration-200">
+      <span className="font-mono text-xs font-bold text-[#B45309] block">{number}</span>
       <h4 className="font-bold text-xs text-[#171717]">{title}</h4>
-      <p className="text-[11px] text-[#5F5F5F] leading-normal">{desc}</p>
+      <p className="text-[10px] text-[#5F5F5F] leading-relaxed">{desc}</p>
     </div>
   );
 }
