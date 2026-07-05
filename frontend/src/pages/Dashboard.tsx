@@ -85,7 +85,11 @@ export default function Dashboard() {
         <div>
           <h2 className="text-3xl font-black tracking-tight text-brand-800">Forensics Center</h2>
           <p className="text-brand-500 text-xs mt-1">
-            Investigator: <span className="text-accent-blue font-bold">{user?.profile?.name || user?.email}</span> ({user?.role})
+            Investigator: <span className="text-accent-blue font-bold">
+              {user?.profile?.name && user.profile.name.trim().length > 0
+                ? user.profile.name 
+                : (user?.email ? user.email.split('@')[0].split(/[\._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Investigator')}
+            </span> ({user?.role})
           </p>
         </div>
         <div className="flex gap-2">

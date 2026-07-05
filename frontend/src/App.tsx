@@ -116,10 +116,14 @@ export default function App() {
         <div className="p-4 border-t border-brand-200 bg-brand-50 flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
             <div className="w-9 h-9 rounded-full bg-accent-blue/10 text-accent-blue font-bold flex items-center justify-center border border-accent-blue/20 shrink-0">
-              {user?.email[0].toUpperCase()}
+              {(user?.profile?.name || user?.email || 'I')[0].toUpperCase()}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold text-brand-800 truncate">{user?.profile?.name || user?.email}</p>
+              <p className="text-xs font-bold text-brand-800 truncate">
+                {user?.profile?.name && user.profile.name.trim().length > 0
+                  ? user.profile.name 
+                  : (user?.email ? user.email.split('@')[0].split(/[\._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Investigator')}
+              </p>
               <p className="text-[10px] text-brand-500 capitalize">{user?.role} Account</p>
             </div>
           </div>
