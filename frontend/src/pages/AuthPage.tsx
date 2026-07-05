@@ -84,8 +84,11 @@ export default function AuthPage() {
         {/* Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center space-x-2.5 cursor-pointer mb-2" onClick={() => setActiveTab('landing')}>
-            <span className="text-3xl animate-bounce">🛡️</span>
-            <span className="text-2xl font-black text-brand-800 tracking-widest uppercase">परख</span>
+            <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="text-2xl font-black text-[#181818] tracking-widest uppercase">परख</span>
           </div>
           <p className="text-brand-500 text-xs font-devanagari font-semibold">
             {mode === 'login' && 'सत्य की खोज में आपका स्वागत है।'}

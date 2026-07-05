@@ -39,10 +39,13 @@ export default function App() {
         <div>
           {/* Brand logo */}
           <div className="p-6 border-b border-brand-200 flex items-center space-x-3 cursor-pointer" onClick={() => useStore.setState({ activeTab: 'dashboard' })}>
-            <span className="text-2xl animate-pulse">🛡️</span>
+            <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             <div>
-              <h1 className="text-2xl font-black text-accent-blue tracking-wider leading-none">परख</h1>
-              <span className="text-[10px] font-bold text-accent-amber tracking-widest uppercase mt-1 block">PARAKH Platform</span>
+              <h1 className="text-2xl font-black text-[#181818] tracking-wider leading-none">परख</h1>
+              <span className="text-[10px] font-bold text-[#666] tracking-widest uppercase mt-1 block">PARAKH</span>
             </div>
           </div>
 

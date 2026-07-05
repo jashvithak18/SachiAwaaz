@@ -106,7 +106,16 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatsCard icon="🛡️" label="Total Audits" value={totalCount} />
+        <StatsCard 
+          icon={
+            <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          } 
+          label="Total Audits" 
+          value={totalCount} 
+        />
         <StatsCard icon="🎙️" label="Voice Files" value={voiceCount} />
         <StatsCard icon="🖼️" label="Image Files" value={imageCount} />
         <StatsCard icon="📂" label="Active Cases" value={activeCasesCount} />
@@ -290,7 +299,7 @@ export default function Dashboard() {
 }
 
 interface StatsCardProps {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   value: number;
 }
@@ -300,7 +309,7 @@ function StatsCard({ icon, label, value }: StatsCardProps) {
     <div className="bg-white border border-brand-200 p-5 rounded-2xl flex flex-col justify-between shadow-sm">
       <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
         <span>{label}</span>
-        <span>{icon}</span>
+        <span className="shrink-0 flex items-center">{icon}</span>
       </div>
       <div className="my-3">
         <span className="text-4xl font-black text-brand-800">{value}</span>

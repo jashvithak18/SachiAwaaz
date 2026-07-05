@@ -30,7 +30,10 @@ export default function HindiLoader({ title = "Forensic Audit In Progress" }: Hi
       <div className="relative w-20 h-20">
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-accent-blue via-accent-amber to-accent-teal animate-spin blur-sm opacity-80"></div>
         <div className="absolute inset-2 bg-brand-50 rounded-full flex items-center justify-center border border-brand-200 shadow-inner">
-          <span className="text-2xl animate-pulse">🛡️</span>
+          <svg className="w-8 h-8 animate-pulse" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
       </div>
 
