@@ -367,7 +367,7 @@ export default function VoiceVerify() {
           {verifyUrl && (
             <div className="p-4 bg-brand-50 border border-brand-200 rounded-xl space-y-2">
               <span className="text-xs font-bold text-brand-500 block">Preview Sample:</span>
-              <audio src={verifyUrl} controls className="w-full" />
+              <audio key={verifyUrl} src={verifyUrl} controls className="w-full" />
             </div>
           )}
 
@@ -452,7 +452,7 @@ export default function VoiceVerify() {
                 {enrollUrl && (
                   <div className="pt-2">
                     <span className="text-xs font-bold text-brand-500 block mb-1">Preview:</span>
-                    <audio src={enrollUrl} controls className="w-full" />
+                    <audio key={enrollUrl} src={enrollUrl} controls className="w-full" />
                   </div>
                 )}
               </div>
@@ -498,7 +498,7 @@ export default function VoiceVerify() {
                         Delete
                       </button>
                     </div>
-                    <audio src={`${SERVER_URL}/${member.audioPath}`} controls className="w-full h-8" />
+                    <audio key={member.audioPath} src={`${SERVER_URL}/${member.audioPath}`} controls className="w-full h-8" />
                   </div>
                 ))}
               </div>
