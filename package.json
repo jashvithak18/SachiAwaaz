@@ -1,0 +1,9 @@
+{
+  "name": "verivoice-root",
+  "version": "1.0.0",
+  "description": "Root wrapper for SachiAwaaz/PARAKH deployment on Render",
+  "scripts": {
+    "preinstall": "npm install --prefix backend",
+    "start": "node backend/server.js"
+  }
+}
