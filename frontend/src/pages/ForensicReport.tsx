@@ -164,7 +164,7 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-brand-200 pb-6">
             <div className="flex items-center space-x-3">
-              <Logo className="w-32 h-auto" showTagline={false} />
+              <Logo className="w-36 h-auto" showTagline={true} />
               <div>
                 <span className="text-[9px] font-bold text-[#666] tracking-widest uppercase mt-1 block">Forensics Unit</span>
               </div>

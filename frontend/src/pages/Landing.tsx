@@ -426,7 +426,7 @@ export default function Landing() {
             >
               <div className="max-w-[1080px] mx-auto px-6 h-[56px] flex items-center justify-between">
                 <div className="cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                  <Logo className="w-24 h-auto" showTagline={false} />
+                  <Logo className="w-28 h-auto" showTagline={true} />
                 </div>
                 <div className="flex items-center gap-4">
                   <button
@@ -455,7 +455,7 @@ export default function Landing() {
           {/* Top bar (inline, not fixed) */}
           <div className="max-w-[1080px] w-full mx-auto px-6 pt-8 flex items-center justify-between">
             <div>
-              <Logo className="w-28 h-auto" showTagline={false} />
+              <Logo className="w-32 h-auto" showTagline={true} />
             </div>
             <div className="flex items-center gap-4">
               <button
