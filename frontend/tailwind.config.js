@@ -7,29 +7,42 @@ export default {
   theme: {
     extend: {
       colors: {
+        parakhBg: '#FFF8F2',
+        parakhSurface: '#FFFDF9',
+        parakhPrimary: '#7C3AED',
+        parakhSecondary: '#F97316',
+        parakhAccent: '#14B8A6',
+        parakhHighlight: '#FBBF24',
+        parakhText: '#1E1B18',
+        parakhMuted: '#6B7280',
+        parakhBorder: 'rgba(124,58,237,0.12)',
+        
         brand: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
+          50: '#FFFDF9',
+          100: '#FFF8F2',
+          200: 'rgba(124,58,237,0.12)',
           300: '#CBD5E1',
           400: '#94A3B8',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          800: '#1E293B', // Confident deep slate blue for headings/branding
-          900: '#0F172A',
+          500: '#6B7280',
+          600: '#4b4845',
+          700: '#332f2c',
+          800: '#1E1B18',
+          900: '#1E1B18',
+          950: '#FFFDF9',
         },
         accent: {
-          blue: '#1D4ED8',   // Royal trustworthy blue for primary buttons
-          teal: '#0D9488',   // Confident alternative
-          green: '#16A34A',  // Clear green for verified/safe
-          red: '#DC2626',    // Clear red for mismatch
-          amber: '#D97706',  // Clear amber for AI flagged
+          blue: '#7C3AED',   // Royal Purple
+          teal: '#14B8A6',   // Teal
+          green: '#14B8A6',  // Teal (Success)
+          red: '#DC2626',    // Red (Danger)
+          amber: '#F97316',  // Soft Orange (Secondary)
+          yellow: '#FBBF24', // Amber
         },
-        lightBg: '#FAFAF9',  // Clean warm stone/off-white background
+        lightBg: '#FFF8F2',  // Warm Ivory
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        devanagari: ['Noto Sans Devanagari', 'sans-serif'],
       }
     },
   },

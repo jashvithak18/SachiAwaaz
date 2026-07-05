@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { useQuery } from '@tanstack/react-query';
 
@@ -15,6 +15,15 @@ interface Report {
   createdAt: string;
 }
 
+interface Case {
+  _id: string;
+  title: string;
+  description: string;
+  reports: Report[];
+  status: 'active' | 'closed';
+  createdAt: string;
+}
+
 export default function Dashboard() {
   const { token, user, setActiveTab, notifications, markAsRead } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,25 +31,41 @@ export default function Dashboard() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-  // React Query to fetch user reports list dynamically
-  const { data: reports = [], isLoading, refetch } = useQuery<Report[]>({
+  // 1. Fetch user reports list dynamically
+  const { data: reports = [], isLoading: reportsLoading, refetch: refetchReports } = useQuery<Report[]>({
     queryKey: ['userReports'],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/reports`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) throw new Error('Failed to fetch reports');
       return response.json();
     }
   });
 
+  // 2. Fetch user cases list dynamically
+  const { data: casesList = [], isLoading: casesLoading, refetch: refetchCases } = useQuery<Case[]>({
+    queryKey: ['userCases'],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/cases`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch cases');
+      return response.json();
+    }
+  });
+
+  const handleRefresh = () => {
+    refetchReports();
+    refetchCases();
+  };
+
   // Calculate statistics from query data
   const totalCount = reports.length;
   const voiceCount = reports.filter(r => r.mediaType === 'voice').length;
   const imageCount = reports.filter(r => r.mediaType === 'image').length;
   const docCount = reports.filter(r => r.mediaType === 'document').length;
+  const activeCasesCount = casesList.filter(c => c.status === 'active').length;
   
   const totalScore = reports.reduce((acc, r) => acc + r.authenticityScore, 0);
   const avgTrustScore = totalCount > 0 ? Math.round(totalScore / totalCount) : 100;
@@ -58,37 +83,37 @@ export default function Dashboard() {
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-white">Forensic Control Center</h2>
-          <p className="text-brand-400 text-sm mt-1">
-            Logged in as <span className="text-brand-200 font-bold">{user?.profile?.name || user?.email}</span> ({user?.role})
+          <h2 className="text-3xl font-black tracking-tight text-brand-800">Forensics Center</h2>
+          <p className="text-brand-500 text-xs mt-1">
+            Investigator: <span className="text-accent-blue font-bold">{user?.profile?.name || user?.email}</span> ({user?.role})
           </p>
         </div>
         <div className="flex gap-2">
           <button 
-            onClick={() => refetch()}
-            className="bg-brand-850 hover:bg-brand-800 text-brand-200 px-4 py-2.5 rounded-xl font-semibold transition text-sm min-h-[44px]"
+            onClick={handleRefresh}
+            className="bg-white hover:bg-brand-50 border border-brand-200 text-brand-600 px-4 py-2.5 rounded-xl font-semibold transition text-xs min-h-[44px]"
           >
             🔄 Refresh Data
           </button>
           <button 
             onClick={() => setActiveTab('voice')}
-            className="bg-accent-blue hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition text-sm shadow-sm min-h-[44px]"
+            className="bg-accent-blue hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition text-xs shadow-md shadow-accent-blue/10 min-h-[44px]"
           >
-            + Run Verification
+            + New Verification
           </button>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatsCard icon="🛡️" label="Total Audits" value={totalCount} borderClass="border-brand-850" />
-        <StatsCard icon="🎙️" label="Voice Analyses" value={voiceCount} borderClass="border-brand-850" />
-        <StatsCard icon="🖼️" label="Image Forensics" value={imageCount} borderClass="border-brand-850" />
-        <StatsCard icon="📄" label="Doc Integrity" value={docCount} borderClass="border-brand-850" />
+        <StatsCard icon="🛡️" label="Total Audits" value={totalCount} />
+        <StatsCard icon="🎙️" label="Voice Files" value={voiceCount} />
+        <StatsCard icon="🖼️" label="Image Files" value={imageCount} />
+        <StatsCard icon="📂" label="Active Cases" value={activeCasesCount} />
         
         {/* Trust Score Card */}
-        <div className="col-span-2 lg:col-span-1 bg-brand-950 border border-brand-800 p-5 rounded-2xl flex flex-col justify-between shadow-xl">
-          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-brand-400">
+        <div className="col-span-2 lg:col-span-1 bg-white border border-brand-200 p-5 rounded-2xl flex flex-col justify-between shadow-sm">
+          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
             <span>Avg Trust Score</span>
             <span>🧠</span>
           </div>
@@ -97,14 +122,14 @@ export default function Dashboard() {
               avgTrustScore >= 75 ? 'text-accent-green' : (avgTrustScore >= 45 ? 'text-accent-amber' : 'text-accent-red')
             }`}>{avgTrustScore}%</span>
           </div>
-          <p className="text-[10px] text-brand-500 leading-snug">Average authenticity score across all formats.</p>
+          <p className="text-[10px] text-brand-500 leading-snug">Average integrity score across evidence logs.</p>
         </div>
       </div>
 
-      {/* Notifications Alert Banner (Real-time Socket.io warnings) */}
+      {/* Live Socket Notifications */}
       {notifications.length > 0 && (
-        <div className="bg-brand-950 border border-brand-850 rounded-2xl p-5 shadow-xl space-y-3">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+        <div className="bg-white border border-brand-200 rounded-2xl p-5 shadow-sm space-y-3">
+          <h3 className="text-xs font-bold text-brand-800 uppercase tracking-wider flex items-center space-x-2">
             <span>🔔</span> <span>Real-time Alert Ledger ({notifications.filter(n => !n.read).length} new)</span>
           </h3>
           <div className="max-h-[160px] overflow-y-auto space-y-2 pr-1">
@@ -113,13 +138,13 @@ export default function Dashboard() {
                 key={n._id}
                 className={`p-3 rounded-xl border flex justify-between items-center text-xs ${
                   n.read 
-                    ? 'bg-brand-900/50 border-brand-850 text-brand-400' 
-                    : 'bg-accent-blue/5 border-accent-blue/20 text-brand-100'
+                    ? 'bg-brand-50/50 border-brand-200 text-brand-500' 
+                    : 'bg-accent-blue/5 border-accent-blue/15 text-brand-800'
                 }`}
               >
                 <div className="space-y-0.5">
                   <p className="font-bold">{n.title}</p>
-                  <p className="text-brand-400">{n.message}</p>
+                  <p className="text-brand-500">{n.message}</p>
                 </div>
                 {!n.read && (
                   <button 
@@ -135,95 +160,130 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Main Table / Recent Activity Section */}
-      <div className="bg-brand-950 border border-brand-800 rounded-3xl p-6 shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h3 className="text-xl font-bold text-white">Recent Forensics Logs</h3>
-          
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            {/* Search */}
-            <input
-              type="text"
-              className="bg-brand-900 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-2 text-xs focus:outline-none placeholder-brand-500 transition w-full sm:w-48"
-              placeholder="Search filename..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {/* Filter */}
-            <select
-              className="bg-brand-900 border border-brand-850 focus:border-accent-blue rounded-xl px-4 py-2 text-xs focus:outline-none transition text-brand-300"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option value="all">All Formats</option>
-              <option value="voice">🎙️ Voice</option>
-              <option value="image">🖼️ Image</option>
-              <option value="document">📄 Document</option>
-            </select>
+      {/* Cases list summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left 2 cols: Reports list */}
+        <div className="lg:col-span-2 bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h3 className="text-lg font-black text-brand-800">Forensics Log History</h3>
+            
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                className="bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-2 text-xs focus:outline-none placeholder-brand-400 transition w-full sm:w-44"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <select
+                className="bg-brand-50 border border-brand-200 focus:border-accent-blue rounded-xl px-3 py-2 text-xs focus:outline-none transition text-brand-600"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="all">All Formats</option>
+                <option value="voice">🎙️ Voice</option>
+                <option value="image">🖼️ Image</option>
+                <option value="document">📄 Document</option>
+              </select>
+            </div>
           </div>
+
+          {reportsLoading ? (
+            <div className="text-center py-16 text-brand-400">Loading forensic reports...</div>
+          ) : filteredReports.length === 0 ? (
+            <div className="text-center py-12 text-brand-500">
+              <span className="text-4xl block mb-2">📋</span>
+              <p className="text-xs font-semibold">No records matched.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-brand-200 text-[10px] uppercase tracking-wider text-brand-500 font-bold">
+                    <th className="py-2.5 px-3">Date</th>
+                    <th className="py-2.5 px-3">Filename</th>
+                    <th className="py-2.5 px-3">Format</th>
+                    <th className="py-2.5 px-3">Verdict</th>
+                    <th className="py-2.5 px-3 text-right">Authenticity</th>
+                    <th className="py-2.5 px-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-100">
+                  {filteredReports.map((report) => (
+                    <tr key={report._id} className="hover:bg-brand-50/50 transition group">
+                      <td className="py-3 px-3 text-brand-500">
+                        {new Date(report.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 px-3 font-bold text-brand-800 max-w-[140px] truncate">
+                        {report.fileName}
+                      </td>
+                      <td className="py-3 px-3 capitalize text-brand-650">
+                        {report.mediaType}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border uppercase ${
+                          report.verdict === 'safe'
+                            ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
+                            : (report.verdict === 'suspicious' ? 'bg-accent-amber/10 text-accent-amber border-accent-amber/20' : 'bg-accent-red/10 text-accent-red border-accent-red/20')
+                        }`}>{report.verdict}</span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-brand-800">
+                        {report.authenticityScore}%
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <button 
+                          onClick={() => setActiveTab(`report_detail:${report._id}`)}
+                          className="text-[10px] bg-brand-100 hover:bg-accent-blue text-brand-700 hover:text-white px-2.5 py-1 rounded-lg transition"
+                        >
+                          Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-20 text-brand-400">Loading forensic reports...</div>
-        ) : filteredReports.length === 0 ? (
-          <div className="text-center py-16 text-brand-500">
-            <span className="text-5xl block mb-3">📋</span>
-            <p className="text-base font-bold">No forensic audits matched.</p>
-            <p className="text-xs mt-1">Run an analysis to generate a verification ledger.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-brand-800 text-[10px] uppercase tracking-wider text-brand-500 font-bold">
-                  <th className="py-3 px-4">Timestamp</th>
-                  <th className="py-3 px-4">Filename</th>
-                  <th className="py-3 px-4">Media</th>
-                  <th className="py-3 px-4">Verdict</th>
-                  <th className="py-3 px-4 text-right">Confidence</th>
-                  <th className="py-3 px-4 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-850">
-                {filteredReports.map((report) => (
-                  <tr key={report._id} className="hover:bg-brand-900/35 transition group">
-                    <td className="py-3.5 px-4 text-xs text-brand-400">
-                      {new Date(report.createdAt).toLocaleString()}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-white max-w-[200px] truncate">
-                      {report.fileName}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs capitalize text-brand-300">
-                      {report.mediaType === 'voice' && '🎙️ Voice'}
-                      {report.mediaType === 'image' && '🖼️ Image'}
-                      {report.mediaType === 'document' && '📄 Document'}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider border uppercase ${
-                        report.verdict === 'safe'
-                          ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
-                          : (report.verdict === 'suspicious' ? 'bg-accent-amber/10 text-accent-amber border-accent-amber/20' : 'bg-accent-red/10 text-accent-red border-accent-red/20')
-                      }`}>
-                        {report.verdict}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-black text-brand-100">
-                      {report.authenticityScore}%
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <button 
-                        onClick={() => setActiveTab(`report_detail:${report._id}`)}
-                        className="text-xs bg-brand-800 group-hover:bg-accent-blue text-brand-200 group-hover:text-white px-3.5 py-1.5 rounded-lg transition duration-150"
-                      >
-                        Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {/* Right 1 col: Recent Cases list */}
+        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-4">
+          <h3 className="text-lg font-black text-brand-800 border-b border-brand-100 pb-2">Recent Cases</h3>
+          
+          {casesLoading ? (
+            <p className="text-center py-10 text-xs text-brand-400">Loading cases...</p>
+          ) : casesList.length === 0 ? (
+            <div className="text-center py-8 text-brand-500">
+              <span className="text-2xl block mb-1">📂</span>
+              <p className="text-xs">No active cases.</p>
+              <button 
+                onClick={() => setActiveTab('cases')}
+                className="text-[10px] text-accent-blue font-bold hover:underline mt-2"
+              >
+                Create case
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              {casesList.slice(0, 4).map(c => (
+                <div 
+                  key={c._id}
+                  onClick={() => setActiveTab(`case_detail:${c._id}`)}
+                  className="p-3.5 bg-brand-50 hover:bg-accent-blue/5 border border-brand-200 rounded-2xl cursor-pointer transition flex flex-col justify-between"
+                >
+                  <div>
+                    <h4 className="font-bold text-xs text-brand-800 truncate">{c.title}</h4>
+                    <p className="text-[10px] text-brand-500 mt-1 truncate">{c.description || 'No description.'}</p>
+                  </div>
+                  <div className="flex justify-between items-center text-[9px] text-brand-400 mt-3 border-t border-brand-200/50 pt-2">
+                    <span>📂 {c.reports.length} Evidence files</span>
+                    <span className="capitalize font-bold text-accent-blue">{c.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -233,20 +293,19 @@ interface StatsCardProps {
   icon: string;
   label: string;
   value: number;
-  borderClass: string;
 }
 
-function StatsCard({ icon, label, value, borderClass }: StatsCardProps) {
+function StatsCard({ icon, label, value }: StatsCardProps) {
   return (
-    <div className={`bg-brand-950 border border-brand-800 p-5 rounded-2xl flex flex-col justify-between shadow-xl`}>
-      <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-brand-400">
+    <div className="bg-white border border-brand-200 p-5 rounded-2xl flex flex-col justify-between shadow-sm">
+      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
         <span>{label}</span>
         <span>{icon}</span>
       </div>
       <div className="my-3">
-        <span className="text-4xl font-black text-white">{value}</span>
+        <span className="text-4xl font-black text-brand-800">{value}</span>
       </div>
-      <p className="text-[10px] text-brand-500 leading-snug">Forensic files audited dynamically in this category.</p>
+      <p className="text-[9px] text-brand-500 leading-snug">Forensic files audited dynamically.</p>
     </div>
   );
 }

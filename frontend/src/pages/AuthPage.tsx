@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore';
 export default function AuthPage() {
   const { login, setActiveTab } = useStore();
   
-  // Tab within AuthPage: 'login' | 'signup' | 'forgot' | 'verify'
+  // Tab: 'login' | 'signup' | 'forgot' | 'verify'
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'verify'>('login');
   
   const [email, setEmail] = useState('');
@@ -72,37 +72,37 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="bg-brand-950 text-brand-100 min-h-screen flex items-center justify-center relative px-6 py-12">
+    <div className="bg-brand-100 text-brand-850 min-h-screen flex items-center justify-center relative px-6 py-12" style={{ backgroundColor: '#FFF8F2' }}>
       
       {/* Background decoration */}
       <div className="absolute top-[20%] left-[10%] w-[350px] h-[350px] rounded-full bg-accent-blue/5 blur-[80px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md bg-brand-900 border border-brand-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-md bg-white border border-brand-200 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
         {/* Glow corner */}
         <div className="absolute top-0 right-0 w-16 h-16 bg-accent-blue/10 rounded-bl-3xl blur-md"></div>
         
         {/* Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center space-x-2.5 cursor-pointer mb-2" onClick={() => setActiveTab('landing')}>
-            <span className="text-3xl">🛡️</span>
-            <span className="text-2xl font-black text-white tracking-widest uppercase">AEGIS</span>
+            <span className="text-3xl animate-bounce">🛡️</span>
+            <span className="text-2xl font-black text-brand-800 tracking-widest uppercase">परख</span>
           </div>
-          <p className="text-brand-400 text-sm">
-            {mode === 'login' && 'Sign in to access your forensic dashboard'}
-            {mode === 'signup' && 'Create your forensic security account'}
-            {mode === 'forgot' && 'Reset your platform credentials'}
-            {mode === 'verify' && 'Complete authentication checks'}
+          <p className="text-brand-500 text-xs font-devanagari font-semibold">
+            {mode === 'login' && 'सत्य की खोज में आपका स्वागत है।'}
+            {mode === 'signup' && 'नया अन्वेषण खाता तैयार करें।'}
+            {mode === 'forgot' && 'खाता पहुँच पुनः प्राप्त करें।'}
+            {mode === 'verify' && 'प्रमाणीकरण कोड सत्यापित करें।'}
           </p>
         </div>
 
         {error && (
-          <div className="bg-accent-red/10 border border-accent-red/30 text-accent-red text-sm font-semibold p-4 rounded-xl mb-6">
+          <div className="bg-accent-red/10 border border-accent-red/20 text-accent-red text-xs font-semibold p-4 rounded-xl mb-6">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="bg-accent-green/10 border border-accent-green/30 text-accent-green text-sm font-semibold p-4 rounded-xl mb-6">
+          <div className="bg-accent-green/10 border border-accent-green/20 text-accent-green text-xs font-semibold p-4 rounded-xl mb-6">
             {success}
           </div>
         )}
@@ -111,22 +111,22 @@ export default function AuthPage() {
           {mode === 'signup' && (
             <>
               <div>
-                <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">Full Name</label>
+                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Full Name</label>
                 <input
                   type="text"
                   required
-                  className="w-full bg-brand-950 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition"
+                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
                   placeholder="e.g. Arthur Pendragon"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">Company / Organization</label>
+                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Company / Organization</label>
                 <input
                   type="text"
-                  className="w-full bg-brand-950 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition"
-                  placeholder="e.g. Camelot Cybersecurity"
+                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
+                  placeholder="e.g. PARAKH Forensics"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                 />
@@ -136,11 +136,11 @@ export default function AuthPage() {
 
           {mode !== 'verify' && (
             <div>
-              <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">Email Address</label>
+              <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Email Address</label>
               <input
                 type="email"
                 required
-                className="w-full bg-brand-950 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition"
+                className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
                 placeholder="e.g. secure@domain.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -151,7 +151,7 @@ export default function AuthPage() {
           {(mode === 'login' || mode === 'signup') && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider">Password</label>
+                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider">Password</label>
                 {mode === 'login' && (
                   <button 
                     type="button"
@@ -165,7 +165,7 @@ export default function AuthPage() {
               <input
                 type="password"
                 required
-                className="w-full bg-brand-950 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition"
+                className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -175,11 +175,11 @@ export default function AuthPage() {
 
           {mode === 'verify' && (
             <div>
-              <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">Verification Code / Token</label>
+              <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Verification Code / Token</label>
               <input
                 type="text"
                 required
-                className="w-full bg-brand-950 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition"
+                className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
                 placeholder="Enter reset or verification code"
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
@@ -202,16 +202,16 @@ export default function AuthPage() {
           </button>
         </form>
 
-        <div className="mt-8 border-t border-brand-800 pt-6 text-center text-sm">
+        <div className="mt-8 border-t border-brand-200 pt-6 text-center text-sm">
           {mode === 'login' ? (
-            <p className="text-brand-400">
+            <p className="text-brand-500">
               Don't have an account?{' '}
               <button onClick={() => setMode('signup')} className="text-accent-blue font-bold hover:underline">
                 Sign up free
               </button>
             </p>
           ) : (
-            <p className="text-brand-400">
+            <p className="text-brand-500">
               Already have an account?{' '}
               <button onClick={() => setMode('login')} className="text-accent-blue font-bold hover:underline">
                 Sign in

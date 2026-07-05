@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import VoiceVerify from './pages/VoiceVerify';
 import ImageVerify from './pages/ImageVerify';
 import DocumentVerify from './pages/DocumentVerify';
+import CaseWorkspace from './pages/CaseWorkspace';
 import ForensicReport from './pages/ForensicReport';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
@@ -30,18 +31,18 @@ export default function App() {
     return <Landing />;
   }
 
-  // Sidebar Layout for logged-in SaaS users
+  // Sidebar Layout for logged-in PARAKH users
   return (
-    <div className="min-h-screen bg-brand-900 text-brand-100 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/30">
+    <div className="min-h-screen bg-brand-100 text-brand-800 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/15">
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-brand-950 border-r border-brand-800 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-64 bg-white border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
         <div>
           {/* Brand logo */}
-          <div className="p-6 border-b border-brand-800 flex items-center space-x-3 cursor-pointer" onClick={() => useStore.setState({ activeTab: 'dashboard' })}>
-            <span className="text-2xl">🛡️</span>
+          <div className="p-6 border-b border-brand-200 flex items-center space-x-3 cursor-pointer" onClick={() => useStore.setState({ activeTab: 'dashboard' })}>
+            <span className="text-2xl animate-pulse">🛡️</span>
             <div>
-              <h1 className="text-xl font-black text-white tracking-wider uppercase leading-none">AEGIS</h1>
-              <span className="text-[10px] font-bold text-accent-blue tracking-widest uppercase mt-1 block">Trust Platform</span>
+              <h1 className="text-2xl font-black text-accent-blue tracking-wider leading-none">परख</h1>
+              <span className="text-[10px] font-bold text-accent-amber tracking-widest uppercase mt-1 block">PARAKH Platform</span>
             </div>
           </div>
 
@@ -53,6 +54,13 @@ export default function App() {
               active={activeTab === 'dashboard'} 
             />
             
+            <SidebarItem 
+              icon="📂" 
+              label="Case Workspace" 
+              tab="cases" 
+              active={activeTab === 'cases' || activeTab.startsWith('case_detail:')} 
+            />
+
             <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-brand-500 uppercase tracking-widest">
               Verification Engines
             </div>
@@ -82,7 +90,7 @@ export default function App() {
               icon="📋" 
               label="Forensic Ledger" 
               tab="reports" 
-              active={activeTab === 'reports' || activeTab === 'report_detail'} 
+              active={activeTab === 'reports' || activeTab.startsWith('report_detail:')} 
             />
             <SidebarItem 
               icon="⚙️" 
@@ -108,19 +116,19 @@ export default function App() {
         </div>
 
         {/* User Card */}
-        <div className="p-4 border-t border-brand-800 bg-brand-950/50 flex items-center justify-between">
+        <div className="p-4 border-t border-brand-200 bg-brand-50 flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-full bg-accent-blue/20 text-accent-blue font-bold flex items-center justify-center border border-accent-blue/30 shrink-0">
+            <div className="w-9 h-9 rounded-full bg-accent-blue/10 text-accent-blue font-bold flex items-center justify-center border border-accent-blue/20 shrink-0">
               {user?.email[0].toUpperCase()}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate">{user?.profile?.name || user?.email}</p>
-              <p className="text-[10px] text-brand-400 capitalize">{user?.role} Account</p>
+              <p className="text-xs font-bold text-brand-800 truncate">{user?.profile?.name || user?.email}</p>
+              <p className="text-[10px] text-brand-500 capitalize">{user?.role} Account</p>
             </div>
           </div>
           <button 
             onClick={logout}
-            className="text-brand-400 hover:text-accent-red p-2 rounded-lg transition"
+            className="text-brand-500 hover:text-accent-red p-2 rounded-lg transition"
             title="Log Out"
           >
             🚪
@@ -129,8 +137,9 @@ export default function App() {
       </aside>
 
       {/* Main View Panel */}
-      <main className="flex-grow min-h-screen bg-brand-900 overflow-y-auto">
+      <main className="flex-grow min-h-screen bg-brand-100 overflow-y-auto">
         {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'cases' && <CaseWorkspace />}
         {activeTab === 'voice' && <VoiceVerify />}
         {activeTab === 'image' && <ImageVerify />}
         {activeTab === 'document' && <DocumentVerify />}
@@ -141,6 +150,11 @@ export default function App() {
         {/* Render detailed report separately */}
         {activeTab.startsWith('report_detail:') && (
           <ForensicReport reportId={activeTab.split(':')[1]} />
+        )}
+
+        {/* Render detailed case separately */}
+        {activeTab.startsWith('case_detail:') && (
+          <CaseWorkspace caseId={activeTab.split(':')[1]} />
         )}
       </main>
     </div>
@@ -160,10 +174,10 @@ function SidebarItem({ icon, label, tab, active }: SidebarItemProps) {
   return (
     <button
       onClick={() => setActiveTab(tab)}
-      className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition ${
+      className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition duration-200 ${
         active
-          ? 'bg-accent-blue text-white shadow-lg shadow-accent-blue/15'
-          : 'text-brand-400 hover:bg-brand-800/40 hover:text-brand-200'
+          ? 'bg-accent-blue text-white shadow-md shadow-accent-blue/10 font-bold'
+          : 'text-brand-500 hover:bg-brand-100/70 hover:text-brand-800'
       }`}
     >
       <span className="text-base leading-none">{icon}</span>

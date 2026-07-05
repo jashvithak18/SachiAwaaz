@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { useQuery } from '@tanstack/react-query';
+import HindiLoader from '../components/HindiLoader';
 
 interface Member {
   _id: string;
@@ -21,7 +22,6 @@ export default function VoiceVerify() {
   const [verifyBlob, setVerifyBlob] = useState<Blob | null>(null);
   const [verifyUrl, setVerifyUrl] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verifyProgressText, setVerifyProgressText] = useState('Initiating check...');
 
   // Enroll form state
   const [name, setName] = useState('');
@@ -44,7 +44,7 @@ export default function VoiceVerify() {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
 
-  // React Query to fetch family list
+  // Fetch family list
   const { data: members = [], refetch: refetchMembers } = useQuery<Member[]>({
     queryKey: ['familyMembers'],
     queryFn: async () => {
@@ -62,12 +62,11 @@ export default function VoiceVerify() {
     };
   }, []);
 
-  // Audio Recording Methods
+  // Mic Recording methods
   const startRecording = async (target: 'verify' | 'enroll') => {
     setError('');
     setSuccess('');
     
-    // reset current targets
     if (target === 'verify') {
       setVerifyFile(null);
       setVerifyBlob(null);
@@ -120,7 +119,7 @@ export default function VoiceVerify() {
       }, 1000);
 
     } catch (err) {
-      setError('Could not access your microphone. Please check permissions.');
+      setError('Mic access denied.');
     }
   };
 
@@ -132,7 +131,6 @@ export default function VoiceVerify() {
     }
   };
 
-  // Upload Handlers
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'verify' | 'enroll') => {
     setError('');
     const file = e.target.files?.[0];
@@ -161,7 +159,7 @@ export default function VoiceVerify() {
       return;
     }
     if (!enrollFile && !enrollBlob) {
-      setError('Please record or upload a voice sample (10-20 seconds).');
+      setError('Record or upload a voice sample (10-20 seconds).');
       return;
     }
 
@@ -210,21 +208,6 @@ export default function VoiceVerify() {
     }
 
     setIsVerifying(true);
-    setVerifyProgressText('Uploading audio file...');
-
-    const progressTexts = [
-      'Extracting spectral voiceprints...',
-      'Matching pitch and similarity metrics...',
-      'Scanning for digital vocoder noise...',
-      'Computing synthetic deepfake markers...',
-      'Writing secure forensic reports...'
-    ];
-    let step = 0;
-    const progressInterval = setInterval(() => {
-      setVerifyProgressText(progressTexts[step]);
-      step = (step + 1) % progressTexts.length;
-    }, 1800);
-
     const formData = new FormData();
     if (selectedMemberId) {
       formData.append('familyMemberId', selectedMemberId);
@@ -243,24 +226,17 @@ export default function VoiceVerify() {
       });
 
       const data = await response.json();
-      clearInterval(progressInterval);
+      if (!response.ok) throw new Error(data.message || 'Verification failed.');
 
-      if (!response.ok) throw new Error(data.message || 'Failed to execute verification.');
-
-      // Redirect immediately to detailed Forensic Report details view
       setActiveTab(`report_detail:${data.report._id}`);
-
     } catch (err: any) {
-      clearInterval(progressInterval);
       setError(err.message);
       setIsVerifying(false);
     }
   };
 
   const handleMemberDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to remove this enrolled speaker? This action deletes their biometric voiceprint.')) {
-      return;
-    }
+    if (!window.confirm('Delete this speaker?')) return;
     try {
       const response = await fetch(`${API_URL}/voice/family/${id}`, {
         method: 'DELETE',
@@ -277,22 +253,23 @@ export default function VoiceVerify() {
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-5xl mx-auto">
+      
       {/* Title */}
       <div>
-        <h2 className="text-3xl font-black tracking-tight text-white flex items-center space-x-2">
-          <span>🎙️</span> <span>Voice Authenticity Module</span>
+        <h2 className="text-3xl font-black font-devanagari tracking-tight text-brand-850 flex items-center space-x-3">
+          <span>🎙️</span> <span>आवाज़ की परख (Voice Authentication)</span>
         </h2>
-        <p className="text-brand-400 text-sm mt-1">
-          Perform digital forensics comparing query clips against enrolled speaker voiceprints.
+        <p className="text-brand-500 text-sm mt-1">
+          Verify voice authentication clips and verify synthetic digital artifacts.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-brand-950 p-1.5 rounded-xl border border-brand-850 w-full sm:w-80">
+      <div className="flex bg-white p-1 rounded-xl border border-brand-200 w-full sm:w-80 shadow-sm">
         <button
           onClick={() => setActiveSection('check')}
           className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition ${
-            activeSection === 'check' ? 'bg-accent-blue text-white' : 'text-brand-400 hover:text-white'
+            activeSection === 'check' ? 'bg-accent-blue text-white' : 'text-brand-500 hover:text-brand-800'
           }`}
         >
           Check Audio Clip
@@ -300,7 +277,7 @@ export default function VoiceVerify() {
         <button
           onClick={() => setActiveSection('enroll')}
           className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition ${
-            activeSection === 'enroll' ? 'bg-accent-blue text-white' : 'text-brand-400 hover:text-white'
+            activeSection === 'enroll' ? 'bg-accent-blue text-white' : 'text-brand-500 hover:text-brand-800'
           }`}
         >
           Enroll Biometric
@@ -308,40 +285,34 @@ export default function VoiceVerify() {
       </div>
 
       {error && (
-        <div className="bg-accent-red/10 border border-accent-red/30 text-accent-red text-sm font-semibold p-4 rounded-xl">
+        <div className="bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm font-semibold p-4 rounded-xl shadow-sm">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="bg-accent-green/10 border border-accent-green/30 text-accent-green text-sm font-semibold p-4 rounded-xl">
+        <div className="bg-accent-green/10 border border-accent-green/20 text-accent-green text-sm font-semibold p-4 rounded-xl shadow-sm">
           {success}
         </div>
       )}
 
       {isVerifying ? (
-        <div className="bg-brand-950 border border-brand-850 rounded-3xl p-12 text-center flex flex-col items-center justify-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-accent-blue/10 border border-accent-blue/30 flex items-center justify-center animate-pulse">
-            <span className="text-3xl">🎙️</span>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white mb-1">Analyzing Speech Markers</h3>
-            <p className="text-brand-400 text-lg animate-pulse font-semibold">{verifyProgressText}</p>
-          </div>
+        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-xl">
+          <HindiLoader title="Analyzing Speech Sample" />
         </div>
       ) : activeSection === 'check' ? (
         /* Checking section */
-        <form onSubmit={handleVerifySubmit} className="bg-brand-950 border border-brand-800 rounded-3xl p-6 shadow-xl space-y-6">
+        <form onSubmit={handleVerifySubmit} className="bg-white border border-brand-200 rounded-3xl p-6 shadow-xl space-y-6">
           <div>
-            <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">
+            <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">
               Who does this voice claim to be?
             </label>
             <select
-              className="w-full bg-brand-900 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none transition text-brand-200"
+              className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none transition text-brand-800"
               value={selectedMemberId}
               onChange={(e) => setSelectedMemberId(e.target.value)}
             >
-              <option value="">🔎 Detect automatically (best matching voiceprint)</option>
+              <option value="">🔎 Auto detect closest speaker voiceprint</option>
               {members.map(member => (
                 <option key={member._id} value={member._id}>
                   {member.name} ({member.relationship})
@@ -350,21 +321,21 @@ export default function VoiceVerify() {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-brand-900/40 p-5 rounded-2xl border border-brand-850">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-brand-50 p-5 rounded-2xl border border-brand-200">
             {/* Record column */}
-            <div className="bg-brand-950 p-5 rounded-xl border border-brand-850 flex flex-col justify-between space-y-4">
+            <div className="bg-white p-5 rounded-xl border border-brand-200 flex flex-col justify-between space-y-4 shadow-sm">
               <div>
-                <h4 className="font-bold text-white text-sm mb-1">Record from MIC</h4>
-                <p className="text-brand-500 text-xs">Capture speaker played on speaker/microphone.</p>
+                <h4 className="font-bold text-brand-800 text-sm mb-1">Record Audio Stream</h4>
+                <p className="text-brand-500 text-xs">Speak into your system mic.</p>
               </div>
               
               {!recording ? (
                 <button
                   type="button"
                   onClick={() => startRecording('verify')}
-                  className="w-full bg-accent-blue hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition min-h-[44px]"
+                  className="w-full bg-accent-blue hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-sm min-h-[44px]"
                 >
-                  🎙️ Record audio
+                  🎙️ Start Recording
                 </button>
               ) : (
                 <button
@@ -372,37 +343,37 @@ export default function VoiceVerify() {
                   onClick={stopRecording}
                   className="w-full bg-accent-red hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition animate-pulse min-h-[44px]"
                 >
-                  ⏹ Stop ({recordingSeconds}s / 20s)
+                  ⏹ Stop ({recordingSeconds}s)
                 </button>
               )}
             </div>
 
             {/* Upload column */}
-            <div className="bg-brand-950 p-5 rounded-xl border border-brand-850 flex flex-col justify-between space-y-4">
+            <div className="bg-white p-5 rounded-xl border border-brand-200 flex flex-col justify-between space-y-4 shadow-sm">
               <div>
-                <h4 className="font-bold text-white text-sm mb-1">Upload Audio File</h4>
-                <p className="text-brand-500 text-xs">Supported formats: .wav, .mp3, .m4a, .flac.</p>
+                <h4 className="font-bold text-brand-800 text-sm mb-1">Upload File</h4>
+                <p className="text-brand-500 text-xs">Supported: .wav, .mp3, .m4a, .flac.</p>
               </div>
               <input
                 type="file"
                 ref={fileInputRef}
                 accept="audio/*"
                 onChange={(e) => handleFileUpload(e, 'verify')}
-                className="w-full text-xs text-brand-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-800 file:text-brand-200 hover:file:bg-brand-700"
+                className="w-full text-xs text-brand-550 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-100 file:text-brand-700 hover:file:bg-brand-200"
               />
             </div>
           </div>
 
           {verifyUrl && (
-            <div className="p-4 bg-brand-900 border border-brand-850 rounded-xl space-y-2">
-              <span className="text-xs font-bold text-brand-400 block">Check Audio Preview:</span>
+            <div className="p-4 bg-brand-50 border border-brand-200 rounded-xl space-y-2">
+              <span className="text-xs font-bold text-brand-500 block">Preview Sample:</span>
               <audio src={verifyUrl} controls className="w-full" />
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-accent-teal hover:bg-teal-700 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 text-sm shadow-md min-h-[44px]"
+            className="w-full bg-accent-amber hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 text-sm shadow-md shadow-accent-amber/10 min-h-[44px]"
           >
             🔍 Run Forensic Verification
           </button>
@@ -411,41 +382,41 @@ export default function VoiceVerify() {
         /* Enrollment section */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {/* Enroll Form */}
-          <div className="bg-brand-950 border border-brand-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <h3 className="text-lg font-bold text-white border-b border-brand-850 pb-3">
-              Add New Speaker Profile
+          <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-xl space-y-6">
+            <h3 className="text-lg font-black text-brand-800 border-b border-brand-200 pb-2">
+              Add New Speaker Signature
             </h3>
             
-            <form onSubmit={handleEnrollSubmit} className="space-y-5">
+            <form onSubmit={handleEnrollSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">Name</label>
+                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Speaker Name</label>
                 <input
                   type="text"
                   required
-                  className="w-full bg-brand-900 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition text-brand-200"
-                  placeholder="e.g. Grandma, Dad, Arthur"
+                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition text-brand-850"
+                  placeholder="e.g. Grandma, Arthur"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider mb-2">Relationship</label>
+                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Relationship</label>
                 <input
                   type="text"
                   required
-                  className="w-full bg-brand-900 border border-brand-850 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-600 transition text-brand-200"
-                  placeholder="e.g. Grandmother, Husband"
+                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition text-brand-850"
+                  placeholder="e.g. Grandmother, Associate"
                   value={relationship}
                   onChange={(e) => setRelationship(e.target.value)}
                 />
               </div>
 
-              <div className="bg-brand-900/40 p-4 rounded-xl border border-brand-850 space-y-4">
-                <label className="block text-xs font-bold uppercase text-brand-400 tracking-wider">
-                  Provide Voice Sample (10-20 seconds)
+              <div className="bg-brand-50 p-4 rounded-xl border border-brand-200 space-y-3">
+                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider">
+                  Voice Signature (10-20 seconds)
                 </label>
-                <p className="text-[11px] text-brand-500 leading-relaxed italic">
+                <p className="text-[10px] text-brand-500 leading-relaxed italic">
                   This is the step other tools skip. Without it, we can only guess if a voice is fake — with it, we can tell you if it's actually your family.
                 </p>
 
@@ -454,7 +425,7 @@ export default function VoiceVerify() {
                     <button
                       type="button"
                       onClick={() => startRecording('enroll')}
-                      className="flex-1 bg-accent-blue hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition min-h-[44px]"
+                      className="flex-1 bg-accent-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow-sm min-h-[44px]"
                     >
                       🎙️ Record sample
                     </button>
@@ -462,25 +433,25 @@ export default function VoiceVerify() {
                     <button
                       type="button"
                       onClick={stopRecording}
-                      className="flex-1 bg-accent-red hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition animate-pulse min-h-[44px]"
+                      className="flex-1 bg-accent-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition animate-pulse min-h-[44px]"
                     >
                       ⏹ Stop ({recordingSeconds}s)
                     </button>
                   )}
                 </div>
 
-                <div className="text-center text-xs text-brand-600">OR</div>
+                <div className="text-center text-xs text-brand-400">OR</div>
 
                 <input
                   type="file"
                   accept="audio/*"
                   onChange={(e) => handleFileUpload(e, 'enroll')}
-                  className="w-full text-xs text-brand-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-850 file:text-brand-200 hover:file:bg-brand-800"
+                  className="w-full text-xs text-brand-550 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-100 file:text-brand-700 hover:file:bg-brand-200"
                 />
 
                 {enrollUrl && (
                   <div className="pt-2">
-                    <span className="text-xs font-bold text-brand-400 block mb-1">Preview:</span>
+                    <span className="text-xs font-bold text-brand-500 block mb-1">Preview:</span>
                     <audio src={enrollUrl} controls className="w-full" />
                   </div>
                 )}
@@ -489,7 +460,7 @@ export default function VoiceVerify() {
               <button
                 type="submit"
                 disabled={isEnrolling}
-                className="w-full bg-accent-teal hover:bg-teal-700 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 text-sm shadow-md min-h-[44px]"
+                className="w-full bg-accent-teal hover:bg-teal-700 text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 text-sm shadow-md shadow-accent-teal/10 min-h-[44px]"
               >
                 {isEnrolling ? 'Generating Biometric Voiceprint...' : 'Enroll Speaker'}
               </button>
@@ -497,10 +468,10 @@ export default function VoiceVerify() {
           </div>
 
           {/* List Column */}
-          <div className="bg-brand-950 border border-brand-800 rounded-3xl p-6 shadow-xl space-y-6">
-            <h3 className="text-lg font-bold text-white border-b border-brand-850 pb-3 flex justify-between items-center">
+          <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-xl space-y-6">
+            <h3 className="text-lg font-black text-brand-800 border-b border-brand-200 pb-2 flex justify-between items-center">
               Enrolled Speakers
-              <span className="bg-brand-800 text-brand-200 text-xs px-2.5 py-1 rounded-full font-bold">
+              <span className="bg-brand-100 text-brand-700 text-xs px-2.5 py-1 rounded-full font-bold">
                 {members.length} Enrolled
               </span>
             </h3>
@@ -509,16 +480,16 @@ export default function VoiceVerify() {
               <div className="text-center py-12 text-brand-500">
                 <span className="text-3xl block mb-2">👥</span>
                 <p className="text-sm font-semibold">No speakers enrolled yet.</p>
-                <p className="text-xs mt-1">Enroll your team or family members to initiate verified checks.</p>
+                <p className="text-xs mt-1">Enroll voice signatures to check incoming clips against verified identity profiles.</p>
               </div>
             ) : (
-              <div className="divide-y divide-brand-850 max-h-[400px] overflow-y-auto pr-1">
+              <div className="divide-y divide-brand-100 max-h-[400px] overflow-y-auto pr-1">
                 {members.map(member => (
                   <div key={member._id} className="py-4 first:pt-0 last:pb-0 space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-bold text-white text-base leading-snug">{member.name}</h4>
-                        <p className="text-xs text-brand-500">Relationship: {member.relationship}</p>
+                        <h4 className="font-bold text-brand-850 text-base leading-snug">{member.name}</h4>
+                        <p className="text-xs text-brand-500">Relation: {member.relationship}</p>
                       </div>
                       <button
                         onClick={() => handleMemberDelete(member._id)}

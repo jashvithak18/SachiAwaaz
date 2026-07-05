@@ -89,25 +89,25 @@ export default function AdminPanel() {
       
       {/* Title */}
       <div>
-        <h2 className="text-3xl font-black tracking-tight text-white flex items-center space-x-2">
+        <h2 className="text-3xl font-black tracking-tight text-brand-800 flex items-center space-x-2">
           <span>🔑</span> <span>Administrative Control Panel</span>
         </h2>
-        <p className="text-brand-400 text-sm mt-1">
+        <p className="text-brand-500 text-sm mt-1">
           Monitor system metrics, review system-wide forensic audits, and manage accounts.
         </p>
       </div>
 
       {/* Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-brand-950 border border-brand-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-brand-400">System Users</span>
-          <p className="text-4xl font-black text-white mt-2">{stats?.totalUsers || 0}</p>
+        <div className="bg-white border border-brand-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-500">System Users</span>
+          <p className="text-4xl font-black text-brand-800 mt-2">{stats?.totalUsers || 0}</p>
           <span className="text-[10px] text-brand-500 mt-2 block">Total registered SaaS accounts.</span>
         </div>
 
-        <div className="bg-brand-950 border border-brand-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-brand-400">Total Verification Files</span>
-          <p className="text-4xl font-black text-white mt-2">{stats?.totalReports || 0}</p>
+        <div className="bg-white border border-brand-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-500">Total Verification Files</span>
+          <p className="text-4xl font-black text-brand-800 mt-2">{stats?.totalReports || 0}</p>
           <div className="text-[10px] text-brand-500 mt-2 flex justify-between">
             <span>🎙️ {stats?.mediaDistribution.voice || 0}</span>
             <span>🖼️ {stats?.mediaDistribution.image || 0}</span>
@@ -115,9 +115,9 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        <div className="bg-brand-950 border border-brand-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-brand-400">System-wide Trust Avg</span>
-          <p className="text-4xl font-black text-white mt-2">{stats?.avgTrustScore || 100}%</p>
+        <div className="bg-white border border-brand-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-500">System-wide Trust Avg</span>
+          <p className="text-4xl font-black text-brand-850 mt-2">{stats?.avgTrustScore || 100}%</p>
           <span className="text-[10px] text-brand-500 mt-2 block">Average authenticity score globally.</span>
         </div>
       </div>
@@ -125,14 +125,14 @@ export default function AdminPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* User management */}
-        <div className="bg-brand-950 border border-brand-800 rounded-3xl p-6 shadow-xl space-y-6">
-          <h3 className="text-lg font-bold text-white border-b border-brand-850 pb-3">User Directory</h3>
+        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
+          <h3 className="text-lg font-bold text-brand-800 border-b border-brand-200 pb-2">User Directory</h3>
           <div className="max-h-[300px] overflow-y-auto space-y-3 pr-1">
             {users.map(u => (
-              <div key={u._id} className="p-4 bg-brand-900/30 border border-brand-850 rounded-xl flex justify-between items-center text-xs">
+              <div key={u._id} className="p-4 bg-brand-50 border border-brand-200 rounded-xl flex justify-between items-center text-xs">
                 <div className="space-y-1">
-                  <p className="font-bold text-white truncate max-w-[180px]">{u.profile?.name || 'No Name Set'}</p>
-                  <p className="text-brand-400 truncate max-w-[180px]">{u.email}</p>
+                  <p className="font-bold text-brand-800 truncate max-w-[180px]">{u.profile?.name || 'No Name Set'}</p>
+                  <p className="text-brand-500 truncate max-w-[180px]">{u.email}</p>
                   <p className="text-brand-500 uppercase tracking-widest text-[9px]">{u.role}</p>
                 </div>
                 {u.role !== 'admin' && (
@@ -149,17 +149,17 @@ export default function AdminPanel() {
         </div>
 
         {/* Global audit ledger */}
-        <div className="bg-brand-950 border border-brand-800 rounded-3xl p-6 shadow-xl space-y-6">
-          <h3 className="text-lg font-bold text-white border-b border-brand-850 pb-3">System Audit Ledger</h3>
+        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
+          <h3 className="text-lg font-bold text-brand-800 border-b border-brand-200 pb-2">System Audit Ledger</h3>
           <div className="max-h-[300px] overflow-y-auto space-y-3 pr-1">
             {reports.map(r => (
-              <div key={r._id} className="p-4 bg-brand-900/30 border border-brand-850 rounded-xl flex justify-between items-center text-xs">
+              <div key={r._id} className="p-4 bg-brand-50 border border-brand-200 rounded-xl flex justify-between items-center text-xs">
                 <div className="space-y-1 overflow-hidden">
-                  <p className="font-bold text-white truncate max-w-[160px]">{r.fileName}</p>
-                  <p className="text-brand-400 truncate">Account: {r.userId?.email || 'Unknown'}</p>
-                  <p className="text-brand-500 capitalize">{r.mediaType} • Verdict: <span className="font-bold text-brand-300">{r.verdict}</span></p>
+                  <p className="font-bold text-brand-850 truncate max-w-[160px]">{r.fileName}</p>
+                  <p className="text-brand-500 truncate">Account: {r.userId?.email || 'Unknown'}</p>
+                  <p className="text-brand-500 capitalize">{r.mediaType} • Verdict: <span className="font-bold text-brand-600">{r.verdict}</span></p>
                 </div>
-                <span className="font-black text-white shrink-0 text-sm">{r.authenticityScore}%</span>
+                <span className="font-black text-brand-850 shrink-0 text-sm">{r.authenticityScore}%</span>
               </div>
             ))}
           </div>
