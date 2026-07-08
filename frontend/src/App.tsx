@@ -23,6 +23,35 @@ export default function App() {
   const { token, user, activeTab, connectSocket, disconnectSocket, logout } = useStore();
 
   useEffect(() => {
+    if (token) {
+      const fetchProfile = async () => {
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+          const res = await fetch(`${API_URL}/auth/profile`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const formattedUser = {
+              id: data._id || data.id,
+              email: data.email,
+              role: data.role,
+              profile: data.profile
+            };
+            localStorage.setItem('aegis_user', JSON.stringify(formattedUser));
+            useStore.setState({ user: formattedUser });
+          }
+        } catch (err) {
+          console.error("Failed to fetch fresh user profile:", err);
+        }
+      };
+      fetchProfile();
+    }
+  }, [token]);
+
+  useEffect(() => {
     if (token && user) {
       connectSocket(user.id);
     }

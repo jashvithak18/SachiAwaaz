@@ -99,13 +99,18 @@ export default function Dashboard() {
     return matchesSearch && matchesFilter;
   });
 
+  const firstName = user?.profile?.name
+    ? user.profile.name.trim().split(' ')[0]
+    : (user?.email ? user.email.split('@')[0].split(/[\._-]/)[0] : 'Investigator');
+  const greetingName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
       
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-brand-800">PARAKH Trust Analytics</h2>
+          <h2 className="text-3xl font-black tracking-tight text-brand-800">Welcome back, {greetingName}!</h2>
           <p className="text-brand-500 text-xs mt-1">
             Investigator: <span className="text-accent-blue font-bold">
               {user?.profile?.name && user.profile.name.trim().length > 0
