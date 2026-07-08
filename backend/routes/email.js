@@ -141,37 +141,26 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
     // Content-based spam and phishing detection heuristics
     const emailBodyLower = emailContent.toLowerCase();
     
-    // Low-to-Medium Risk spam keywords
-    const spamKeywords = [
-      'program fees will be shared',
-      'seat availability',
-      'placement support',
-      'program fees',
-      'applicable program fees',
-      'fees will be',
-      'limited seats',
-      'placement opportunity',
-      'training & internship program',
-      'corizo',
-      'forms.office.com',
-      'docs.google.com/forms',
-      'forms.gle',
-      'dear student'
-    ];
+    // Check for paid-training scam signatures
+    const hasFeeKeywords = emailBodyLower.includes('program fees') || 
+                           emailBodyLower.includes('applicable fees') || 
+                           emailBodyLower.includes('enrollment fees') ||
+                           emailBodyLower.includes('course fee') ||
+                           emailBodyLower.includes('fees will be') ||
+                           emailBodyLower.includes('registration fee') ||
+                           emailBodyLower.includes('payment of');
 
-    let spamMatches = 0;
-    spamKeywords.forEach(kw => {
-      if (emailBodyLower.includes(kw)) {
-        spamMatches++;
-      }
-    });
+    const hasInternshipKeywords = emailBodyLower.includes('internship') || 
+                                  emailBodyLower.includes('training') || 
+                                  emailBodyLower.includes('placement') || 
+                                  emailBodyLower.includes('corizo');
 
-    const hasFormLink = emailBodyLower.includes('forms.office.com') || emailBodyLower.includes('forms.gle') || emailBodyLower.includes('docs.google.com/forms');
-    const isInternshipSpam = spamMatches >= 2 || (hasFormLink && spamMatches >= 1);
+    // Only penalize if it combines an internship/training offer with fee/payment requirements, or is a known paid-program scam
+    const isPaidInternshipScam = (hasInternshipKeywords && hasFeeKeywords) || emailBodyLower.includes('corizo');
 
-    if (isInternshipSpam) {
+    if (isPaidInternshipScam) {
       trustScore -= 30;
-      anomalies.push('Suspected Unsolicited Internship/Training Spam: Contains typical marketing and program fee solicitation markers.');
+      anomalies.push('Suspected Paid-Training/Internship Scam: Email solicits fees or payments for a training/internship program.');
     }
 
     // High-Risk Phishing/Fraud keywords
