@@ -16,7 +16,6 @@ import EmailVerify from './pages/EmailVerify';
 import QRVerify from './pages/QRVerify';
 
 import ScamCenter from './pages/ScamCenter';
-import ScamLibrary from './pages/ScamLibrary';
 
 export default function App() {
   const { token, user, activeTab, connectSocket, disconnectSocket, logout } = useStore();
@@ -144,12 +143,7 @@ export default function App() {
               tab="scam_center" 
               active={activeTab === 'scam_center'} 
             />
-            <SidebarItem 
-              icon="📚" 
-              label="Scam Library" 
-              tab="scam_library" 
-              active={activeTab === 'scam_library'} 
-            />
+
 
             <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-brand-500 uppercase tracking-widest">
               Management
@@ -223,7 +217,7 @@ export default function App() {
         {activeTab === 'qr' && <QRVerify />}
 
         {activeTab === 'scam_center' && <ScamCenter />}
-        {activeTab === 'scam_library' && <ScamLibrary />}
+
 
         
         {/* Render detailed report separately */}

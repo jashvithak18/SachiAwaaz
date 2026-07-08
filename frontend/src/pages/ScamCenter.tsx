@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useStore } from '../store/useStore';
 
 interface Article {
   id: string;
@@ -12,6 +13,7 @@ interface Article {
 }
 
 export default function ScamCenter() {
+  const { setActiveTab } = useStore();
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -185,14 +187,24 @@ export default function ScamCenter() {
   );
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-5xl mx-auto">
-      <div>
-        <h2 className="text-3xl font-black tracking-tight text-brand-850 flex items-center space-x-3">
-          <span>🎓</span> <span>Scam Knowledge Center</span>
-        </h2>
-        <p className="text-brand-500 text-sm mt-1">
-          Learn how online scams operate, recognize key warning signs, and understand how PARAKH forensic modules detect them.
-        </p>
+    <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black tracking-tight text-brand-850 flex items-center space-x-3">
+            <span>🎓</span> <span>Scam Knowledge Center</span>
+          </h2>
+          <p className="text-brand-500 text-sm mt-1">
+            Learn how online scams operate, recognize key warning signs, and understand how PARAKH forensic modules detect them.
+          </p>
+        </div>
+        {!selectedArticle && (
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className="self-start md:self-center px-4 py-2 bg-white border border-brand-200 hover:border-brand-350 text-brand-700 hover:text-brand-850 rounded-xl text-xs font-bold transition flex items-center gap-1.5 focus:outline-none shadow-sm"
+          >
+            <span>←</span> Back to Dashboard
+          </button>
+        )}
       </div>
 
       {!selectedArticle ? (
@@ -232,7 +244,7 @@ export default function ScamCenter() {
             onClick={() => setSelectedArticle(null)}
             className="text-brand-500 hover:text-brand-800 text-xs font-bold flex items-center gap-1.5 focus:outline-none mb-4"
           >
-            <span>←</span> Back to scams library
+            <span>←</span> Back to Scam Directory
           </button>
 
           <div className="space-y-4 border-b border-brand-200 pb-5">
