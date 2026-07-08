@@ -426,7 +426,7 @@ export default function VoiceVerify() {
             <div className="bg-white p-5 rounded-xl border border-brand-200 flex flex-col justify-between space-y-4 shadow-sm">
               <div>
                 <h4 className="font-bold text-brand-800 text-sm mb-1">Upload File</h4>
-                <p className="text-brand-500 text-xs">Supported: .wav, .mp3, .m4a, .flac.</p>
+                <p className="text-brand-500 text-xs">Supported: .wav, .mp3, .m4a, .flac, .ogg, .opus (including WhatsApp voice notes).</p>
               </div>
               <input
                 type="file"

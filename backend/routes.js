@@ -27,12 +27,12 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
-    const filetypes = /wav|mp3|m4a|flac/;
+    const filetypes = /wav|mp3|m4a|flac|ogg|opus/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     if (extname) {
       return cb(null, true);
     }
-    cb(new Error('Only audio files (.wav, .mp3, .m4a, .flac) are allowed!'));
+    cb(new Error('Only audio files (.wav, .mp3, .m4a, .flac, .ogg, .opus) are allowed!'));
   }
 });
 

@@ -41,17 +41,28 @@ except Exception as e:
     print(f"Error loading models: {e}")
 
 def preprocess_audio(file_path: str) -> torch.Tensor:
-    """Load audio file using soundfile, convert to mono, resample to 16kHz, and return as torch tensor."""
-    data, sr = sf.read(file_path)
-    signal = torch.tensor(data, dtype=torch.float32)
-    
-    # If mono (1D), convert to (1, time)
-    if len(signal.shape) == 1:
-        signal = signal.unsqueeze(0)
-    # If multi-channel (time, channels), transpose to (channels, time) and average to mono
-    elif len(signal.shape) == 2:
-        signal = signal.T
-        signal = torch.mean(signal, dim=0, keepdim=True)
+    """Load audio file using torchaudio or soundfile, convert to mono, resample to 16kHz, and return as torch tensor."""
+    try:
+        import torchaudio
+        # torchaudio.load handles WAV, MP3, OGG, OPUS, FLAC, M4A, etc.
+        signal, sr = torchaudio.load(file_path)
+        signal = signal.to(dtype=torch.float32)
+        
+        # If multi-channel, convert to mono
+        if signal.shape[0] > 1:
+            signal = torch.mean(signal, dim=0, keepdim=True)
+    except Exception as e:
+        print(f"torchaudio load failed, falling back to soundfile: {e}")
+        data, sr = sf.read(file_path)
+        signal = torch.tensor(data, dtype=torch.float32)
+        
+        # If mono (1D), convert to (1, time)
+        if len(signal.shape) == 1:
+            signal = signal.unsqueeze(0)
+        # If multi-channel (time, channels), transpose to (channels, time) and average to mono
+        elif len(signal.shape) == 2:
+            signal = signal.T
+            signal = torch.mean(signal, dim=0, keepdim=True)
     
     # Resample to 16000 if sample rate is different
     if sr != 16000:

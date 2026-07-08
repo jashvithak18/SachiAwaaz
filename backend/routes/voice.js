@@ -26,10 +26,10 @@ const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext === '.wav' || ext === '.mp3' || ext === '.m4a' || ext === '.flac') {
+    if (ext === '.wav' || ext === '.mp3' || ext === '.m4a' || ext === '.flac' || ext === '.ogg' || ext === '.opus') {
       return cb(null, true);
     }
-    cb(new Error('Only audio formats (.wav, .mp3, .m4a, .flac) are allowed.'));
+    cb(new Error('Only audio formats (.wav, .mp3, .m4a, .flac, .ogg, .opus) are allowed.'));
   }
 });
 
