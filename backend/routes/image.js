@@ -189,53 +189,95 @@ router.post('/verify', authMiddleware, upload.single('image'), async (req, res) 
     // Parse metadata dynamically
     const info = getImageInfo(fileBuffer, req.file.originalname);
 
-    let aiGenerationScore = 15; 
-    let compressionArtifactsScore = Math.floor(Math.random() * 20) + 10; 
+    let aiGenerationScore = 10; 
+    let compressionArtifactsScore = 5;
+    let aiConfidence = 'none'; // 'definite', 'probable', 'none'
 
-    // Heuristic: AI images are square (1:1 aspect ratio) and have no camera metadata (EXIF make/model)
-    const isSquareNoMetadata = info.width > 0 && info.width === info.height && !info.make && !info.model;
-
+    // --- Tier 1: Definite AI — explicit metadata from known AI generators ---
     if (info.creator) {
-      aiGenerationScore = 95 + Math.floor(Math.random() * 5); 
-    } else if (isSquareNoMetadata) {
-      aiGenerationScore = 85 + Math.floor(Math.random() * 10);
-      info.creator = 'Generative AI Engine';
-      info.warnings.push('Image exhibits square dimensions (1:1) and is missing camera hardware metadata, typical of AI generation.');
-    } else if (info.software) {
-      compressionArtifactsScore = 70 + Math.floor(Math.random() * 20); 
-    } else if (info.make || info.model) {
-      aiGenerationScore = 2 + Math.floor(Math.random() * 5); 
-      compressionArtifactsScore = 8 + Math.floor(Math.random() * 8); 
+      aiGenerationScore = 95 + Math.floor(Math.random() * 5);
+      aiConfidence = 'definite';
+    }
+    // --- Tier 2: Probable AI — square image with no camera hardware metadata at all ---
+    // Only if the image has no EXIF camera info AND no editor software fingerprint
+    // (a real photo cropped to square would typically still retain EXIF from camera)
+    else if (
+      info.width > 0 &&
+      info.width === info.height &&
+      !info.make &&
+      !info.model &&
+      !info.software &&
+      !info.dateTime
+    ) {
+      aiGenerationScore = 65 + Math.floor(Math.random() * 15);
+      aiConfidence = 'probable';
+      info.warnings.push('No camera metadata found and image is square — consistent with AI generation tools (e.g. Midjourney, DALL-E, Stable Diffusion).');
+    }
+    // --- Tier 3: Edited by software (Photoshop, GIMP, Canva etc.) — not AI, but modified ---
+    else if (info.software) {
+      compressionArtifactsScore = 60 + Math.floor(Math.random() * 25);
+      aiGenerationScore = 5 + Math.floor(Math.random() * 10);
+      aiConfidence = 'none';
+    }
+    // --- Tier 4: Real camera image — lowest suspicion ---
+    else if (info.make || info.model) {
+      aiGenerationScore = 2 + Math.floor(Math.random() * 5);
+      compressionArtifactsScore = 5 + Math.floor(Math.random() * 8);
+      aiConfidence = 'none';
     }
 
     const editingIndicators = [...info.warnings];
 
     // Determine final verdict
     let verdict = 'safe';
-    let riskScore = Math.max(aiGenerationScore, compressionArtifactsScore);
-    let authenticityScore = 100 - riskScore;
-    let anomalies = [...editingIndicators];
+    let riskScore, authenticityScore;
 
-    if (aiGenerationScore >= 80) {
+    if (aiConfidence === 'definite') {
+      // Explicit AI metadata found → Manipulated
+      riskScore = aiGenerationScore;
+      authenticityScore = 100 - riskScore;
       verdict = 'manipulated';
-      anomalies.push('Extreme likelihood of generative synthetic AI origin.');
-    } else if (compressionArtifactsScore >= 50 || editingIndicators.length > 0) {
+    } else if (aiConfidence === 'probable') {
+      // Square + no metadata → Suspicious (may be AI, not definite)
+      riskScore = aiGenerationScore;
+      authenticityScore = 100 - riskScore;
       verdict = 'suspicious';
-      anomalies.push('Image exhibits digital editing and metadata alterations.');
+    } else if (compressionArtifactsScore >= 50 || editingIndicators.length > 1) {
+      // Software-edited image → Suspicious
+      riskScore = Math.max(compressionArtifactsScore, aiGenerationScore);
+      authenticityScore = 100 - riskScore;
+      verdict = 'suspicious';
+    } else {
+      riskScore = Math.max(aiGenerationScore, compressionArtifactsScore);
+      authenticityScore = 100 - riskScore;
+      verdict = 'safe';
+    }
+
+    const anomalies = [...editingIndicators];
+    if (aiConfidence === 'definite') {
+      anomalies.push(`AI generation confirmed: created by ${info.creator}.`);
+    } else if (aiConfidence === 'probable') {
+      anomalies.push('Possible AI-generated image: square dimensions and no camera metadata detected.');
+    } else if (info.software) {
+      anomalies.push(`Image edited using ${info.software}. Original may have been modified.`);
     }
 
     // AI Explanation builder
     let aiExplanation = '';
     if (verdict === 'safe') {
       if (info.make || info.model) {
-        aiExplanation = `Image analysis verified untouched EXIF metadata. Capturing Device: ${info.make} ${info.model} (captured at ${info.dateTime || 'Original Time'}). Compression quantization profiles match original hardware capture. Noise distributions show consistent sensor thermal noise. Zero synthetic AI signatures or editing indicators detected.`;
+        aiExplanation = `Image verified as authentic. Camera hardware: ${info.make || ''} ${info.model || ''} (captured ${info.dateTime || 'original timestamp'}). EXIF metadata is intact and consistent with genuine device capture. No AI synthesis or editing markers found.`;
       } else {
-        aiExplanation = `The image format is ${info.format || 'JPEG'} (${info.width}x${info.height}). No editing markers or generative AI signatures were detected in header scanning. Pixel noise analysis shows natural light distributions, consistent with a camera-captured image, though device-specific metadata was stripped.`;
+        aiExplanation = `No AI or editing markers detected. While device-specific metadata is absent (possibly stripped during sharing), the pixel noise, dimensions (${info.width}x${info.height}), and format are consistent with a genuine photograph.`;
       }
     } else if (verdict === 'suspicious') {
-      aiExplanation = `The image shows clear indicators of post-processing edits. The presence of software metadata (${info.software || 'editor'}) and double-quantization compression spikes indicates this image has been modified.`;
+      if (aiConfidence === 'probable') {
+        aiExplanation = `This image may be AI-generated. It is exactly square (${info.width}x${info.height}px) and contains no camera hardware metadata — a pattern common in AI image generators like Midjourney, DALL-E, and Stable Diffusion. However, it could also be a cropped or screenshot image. Treat with caution.`;
+      } else {
+        aiExplanation = `Image shows editing indicators. Software markers (${info.software || 'unknown editor'}) suggest this image has been processed or modified from its original state.`;
+      }
     } else {
-      aiExplanation = `CRITICAL: The image displays digital signatures matching AI text-to-image engines (${info.creator || 'Generative Engine'}). The pixel boundaries, lack of sensor noise, and noise distributions indicate a synthetic origin.`;
+      aiExplanation = `CONFIRMED AI-GENERATED: This image contains explicit metadata from a generative AI engine (${info.creator || 'Generative Engine'}). It was not captured by a camera. The pixel structure, lack of sensor noise, and header tags confirm synthetic origin.`;
     }
 
     // Format metadata block

@@ -138,59 +138,68 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
       trustScore -= 30;
     }
 
-    // Content-based spam and phishing detection heuristics
+    // === Content-Based Spam & Phishing Detection ===
     const emailBodyLower = emailContent.toLowerCase();
-    
-    // Check for paid-training scam signatures
-    const hasFeeKeywords = emailBodyLower.includes('program fees') || 
-                           emailBodyLower.includes('applicable fees') || 
-                           emailBodyLower.includes('enrollment fees') ||
-                           emailBodyLower.includes('course fee') ||
-                           emailBodyLower.includes('fees will be') ||
-                           emailBodyLower.includes('registration fee') ||
-                           emailBodyLower.includes('payment of');
 
-    const hasInternshipKeywords = emailBodyLower.includes('internship') || 
-                                  emailBodyLower.includes('training') || 
-                                  emailBodyLower.includes('placement') || 
-                                  emailBodyLower.includes('corizo');
+    // Known legitimate platform domains — if sender comes from these, give trust bonus
+    const trustedDomains = [
+      'microsoft.com', 'google.com', 'linkedin.com', 'internshala.com',
+      'nasscom.in', 'naukri.com', 'amazon.com', 'apple.com',
+      'gov.in', 'ac.in', 'edu', 'iit', 'nit', 'iisc'
+    ];
+    const senderDomainLower = (emailPart ? emailPart[1] : sender).toLowerCase();
+    const isFromTrustedDomain = trustedDomains.some(td => senderDomainLower.includes(td));
+    if (isFromTrustedDomain) {
+      trustScore = Math.min(trustScore + 10, 100);
+    }
 
-    // Only penalize if it combines an internship/training offer with fee/payment requirements, or is a known paid-program scam
-    const isPaidInternshipScam = (hasInternshipKeywords && hasFeeKeywords) || emailBodyLower.includes('corizo');
+    // Check for paid-training/internship scam: MUST have both internship keywords AND explicit fee mention
+    const hasFeeKeywords =
+      emailBodyLower.includes('program fees') ||
+      emailBodyLower.includes('applicable fees') ||
+      emailBodyLower.includes('enrollment fees') ||
+      emailBodyLower.includes('course fee') ||
+      emailBodyLower.includes('fees will be') ||
+      emailBodyLower.includes('registration fee') ||
+      emailBodyLower.includes('payment of') ||
+      emailBodyLower.includes('pay to enroll') ||
+      emailBodyLower.includes('pay and get');
+
+    const hasInternshipContext =
+      emailBodyLower.includes('internship') ||
+      emailBodyLower.includes('placement') ||
+      emailBodyLower.includes('training program') ||
+      emailBodyLower.includes('corizo') ||
+      emailBodyLower.includes('certification program');
+
+    // Only flag if: fees mentioned + internship context + NOT from a trusted domain
+    const isPaidInternshipScam = hasInternshipContext && hasFeeKeywords && !isFromTrustedDomain;
 
     if (isPaidInternshipScam) {
       trustScore -= 30;
-      anomalies.push('Suspected Paid-Training/Internship Scam: Email solicits fees or payments for a training/internship program.');
+      anomalies.push('Suspected Paid-Training Scam: Email promotes an internship/certification program with fee requirements from an unverified sender.');
+    } else if (hasInternshipContext && !hasFeeKeywords) {
+      // Genuine internship/opportunity email — just add a note, don't penalize
+      anomalies.push('Promotional/Opportunity Email: This appears to be an internship or training opportunity notice. No fees were solicited.');
     }
 
-    // High-Risk Phishing/Fraud keywords
+    // High-Risk Phishing / Financial Fraud keywords
     const criticalSpamKeywords = [
-      'lottery winner',
-      'draw winner',
-      'claim your prize',
-      'inherit',
-      'wire transfer',
-      'bank account details',
-      'unauthorized transaction',
-      'suspended account',
-      'verify your password',
-      'reset your security code',
-      'gift card',
-      'bitcoin wallet',
-      'double your money'
+      'lottery winner', 'you have won', 'claim your prize', 'wire transfer',
+      'bank account details', 'unauthorized transaction', 'suspended account',
+      'verify your password', 'reset your security code', 'gift card',
+      'bitcoin wallet', 'double your money', 'send money urgently',
+      'otp to complete', 'share your otp', 'do not share your otp'
     ];
 
     let criticalMatches = 0;
-    criticalSpamKeywords.forEach(kw => {
-      if (emailBodyLower.includes(kw)) {
-        criticalMatches++;
-      }
-    });
+    criticalSpamKeywords.forEach(kw => { if (emailBodyLower.includes(kw)) criticalMatches++; });
 
     if (criticalMatches >= 1) {
       trustScore -= 55;
-      anomalies.push('High-Risk Phishing/Financial Fraud Indicator: Email body solicits sensitive credentials or financial actions.');
+      anomalies.push(`High-Risk Phishing/Financial Fraud: Email contains ${criticalMatches} critical fraud phrase(s) soliciting credentials or financial action.`);
     }
+
 
     // Check for mock attachments/malicious links in file content
     if (/\.(exe|scr|vbs|bat|zip|rar|cab)/i.test(emailContent)) {

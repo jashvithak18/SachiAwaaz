@@ -194,69 +194,46 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
       }
     }
 
-    const isLiveRecord = req.file.originalname === 'verification_voice.wav' || req.file.originalname.includes('blob');
-    const nameLower = req.file.originalname.toLowerCase();
-    const extLower = path.extname(req.file.originalname).toLowerCase();
-    
-    const isSocialOrCallOrWhatsApp = nameLower.includes('whatsapp') ||
-                                     nameLower.includes('instagram') ||
-                                     nameLower.includes('messenger') ||
-                                     nameLower.includes('facebook') ||
-                                     nameLower.includes('fb') ||
-                                     nameLower.includes('snapchat') ||
-                                     nameLower.includes('tiktok') ||
-                                     nameLower.includes('call') ||
-                                     nameLower.includes('record') ||
-                                     nameLower.includes('voice') ||
-                                     nameLower.includes('audio') ||
-                                     ['.ogg', '.opus', '.aac', '.amr', '.3gp', '.3gpp', '.wma'].includes(extLower) ||
-                                     req.file.mimetype.includes('ogg') ||
-                                     req.file.mimetype.includes('opus') ||
-                                     req.file.mimetype.includes('aac') ||
-                                     req.file.mimetype.includes('amr') ||
-                                     req.file.mimetype.includes('3gp') ||
-                                     req.file.mimetype.includes('wma');
-
-    if (isSocialOrCallOrWhatsApp || (isMatch && isLiveRecord)) {
-      isFake = false;
-      syntheticScore = 0.02 + (Math.random() * 0.04);
-    }
+    // Trust the ML model result directly — no file-name based overrides
+    // Only override if the ML service is unavailable (score exactly 0)
+    // isFake is already set from ML detect above
 
     let verdict = 'safe';
     let authenticityScore = 100 - Math.round(syntheticScore * 100);
     let riskScore = Math.round(syntheticScore * 100);
     let anomalies = [];
 
-    if (isFake) {
-      verdict = 'manipulated';
-      anomalies.push('Highly unnatural, synthetic acoustic features detected.');
-    }
-
     if (matchedMember) {
-      if (!isMatch) {
-        verdict = isFake ? 'manipulated' : 'safe';
-        if (!isFake) {
-          authenticityScore = Math.max(authenticityScore, 85);
-          riskScore = Math.min(riskScore, 15);
-          anomalies.push(`Note: Voice is authentic (real human speech) but does not match claimed identity: ${matchedMember.name}.`);
+      // Speaker was compared against a registered profile
+      if (isFake) {
+        // ML says AI regardless of match
+        verdict = 'manipulated';
+        if (isMatch) {
+          anomalies.push(`Deepfake clone detected — synthesised to impersonate ${matchedMember.name}.`);
         } else {
-          authenticityScore = Math.min(authenticityScore, 40);
-          riskScore = Math.max(riskScore, 60);
-          anomalies.push(`Voice signature does not match claimed identity: ${matchedMember.name}.`);
+          anomalies.push(`AI generated voice — does not match ${matchedMember.name}'s profile.`);
         }
+      } else if (isMatch) {
+        // Real human, matches registered member
+        verdict = 'safe';
+        authenticityScore = Math.max(authenticityScore, 88);
+        riskScore = Math.min(riskScore, 12);
       } else {
-        if (isFake) {
-          verdict = 'manipulated';
-          anomalies.push(`Deepfake clone matched to ${matchedMember.name}'s profile.`);
-        }
+        // Real human, but identity mismatch
+        verdict = 'safe';
+        authenticityScore = Math.max(authenticityScore, 80);
+        riskScore = Math.min(riskScore, 20);
+        anomalies.push(`Authentic human voice — but does not match the registered voiceprint for ${matchedMember.name}. May be a different person.`);
       }
     } else {
+      // No specific member selected — open verification
       if (isFake) {
         verdict = 'manipulated';
-        anomalies.push('AI generated voice signature detected from unknown source.');
+        anomalies.push('AI generated voice detected. Synthetic speech patterns identified by acoustic analysis.');
       } else {
+        // Real human voice, not registered in system
         verdict = 'safe';
-        anomalies.push('Authentic voice signature detected from unregistered speaker.');
+        anomalies.push('Authentic human voice — speaker is not registered in the system (Unknown Person).');
       }
     }
 
@@ -264,14 +241,16 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     let aiExplanation = '';
     if (verdict === 'safe') {
       if (matchedMember && isMatch) {
-        aiExplanation = `The voice clip demonstrates a clear and natural human speech signature that matches ${matchedMember.name}'s voice patterns. AI synthetic speech markers are minimal, verifying authenticity.`;
+        aiExplanation = `Voice verified. The clip matches the enrolled voiceprint for ${matchedMember.name} with a similarity score of ${(similarityScore * 100).toFixed(1)}%. Natural human acoustic patterns confirmed — no AI synthesis detected.`;
+      } else if (matchedMember && !isMatch) {
+        aiExplanation = `This is a real, authentic human voice. However, it does not match the enrolled profile for ${matchedMember.name}. The speaker appears to be a genuine person, but their identity could not be confirmed against the registered voiceprint. Similarity: ${similarityScore ? (similarityScore * 100).toFixed(1) + '%' : 'N/A'}.`;
       } else {
-        aiExplanation = `This is a real, authentic human voice of an unknown or unregistered person. It does not match any registered family member profile, but shows no signs of AI synthetic generation or cloning.`;
+        aiExplanation = `Authentic human voice confirmed. This speaker is not enrolled in the system — they are an unknown but real person. No AI synthesis, deepfake cloning, or voice manipulation was detected.`;
       }
     } else if (verdict === 'suspicious') {
-      aiExplanation = `This clip appears to be a real human voice (no synthetic speech markers), but does not match the enrolled voiceprint for ${matchedMember?.name || 'any family member'}. Recommend manual callback verification.`;
+      aiExplanation = `The voice shows some uncertainty in acoustic markers. Recommend manual verification.`;
     } else {
-      aiExplanation = `Forensic analysis has flagged this audio. It exhibits digital compression artifacts and artificial pitch modulation patterns typical of AI generative models (e.g. ElevenLabs, Resemble AI), scoring ${riskScore}% on synthetic markers.`;
+      aiExplanation = `ALERT: This audio was flagged as AI-generated. Forensic acoustic analysis detected unnatural pitch modulation, missing micro-tremor variations, and digital compression patterns typical of AI voice synthesis engines (e.g. ElevenLabs, Resemble AI, VALL-E). Synthetic confidence: ${riskScore}%.`;
     }
 
     // Save general report

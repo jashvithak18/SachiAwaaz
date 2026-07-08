@@ -14,7 +14,7 @@ import AdminPanel from './pages/AdminPanel';
 import WebsiteVerify from './pages/WebsiteVerify';
 import EmailVerify from './pages/EmailVerify';
 import QRVerify from './pages/QRVerify';
-import LinkInspector from './pages/LinkInspector';
+
 import ScamCenter from './pages/ScamCenter';
 import ScamLibrary from './pages/ScamLibrary';
 import CompareWorkspace from './pages/CompareWorkspace';
@@ -133,12 +133,7 @@ export default function App() {
               tab="qr" 
               active={activeTab === 'qr'} 
             />
-            <SidebarItem 
-              icon="🔗" 
-              label="Link Inspector" 
-              tab="link" 
-              active={activeTab === 'link'} 
-            />
+
 
             <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-brand-500 uppercase tracking-widest">
               Digital Trust
@@ -232,7 +227,7 @@ export default function App() {
         {activeTab === 'website' && <WebsiteVerify />}
         {activeTab === 'email' && <EmailVerify />}
         {activeTab === 'qr' && <QRVerify />}
-        {activeTab === 'link' && <LinkInspector />}
+
         {activeTab === 'scam_center' && <ScamCenter />}
         {activeTab === 'scam_library' && <ScamLibrary />}
         {activeTab === 'compare' && <CompareWorkspace />}
