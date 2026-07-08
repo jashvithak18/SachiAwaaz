@@ -138,6 +138,71 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
       trustScore -= 30;
     }
 
+    // Content-based spam and phishing detection heuristics
+    const emailBodyLower = emailContent.toLowerCase();
+    
+    // Low-to-Medium Risk spam keywords
+    const spamKeywords = [
+      'program fees will be shared',
+      'seat availability',
+      'placement support',
+      'program fees',
+      'applicable program fees',
+      'fees will be',
+      'limited seats',
+      'placement opportunity',
+      'training & internship program',
+      'corizo',
+      'forms.office.com',
+      'docs.google.com/forms',
+      'forms.gle',
+      'dear student'
+    ];
+
+    let spamMatches = 0;
+    spamKeywords.forEach(kw => {
+      if (emailBodyLower.includes(kw)) {
+        spamMatches++;
+      }
+    });
+
+    const hasFormLink = emailBodyLower.includes('forms.office.com') || emailBodyLower.includes('forms.gle') || emailBodyLower.includes('docs.google.com/forms');
+    const isInternshipSpam = spamMatches >= 2 || (hasFormLink && spamMatches >= 1);
+
+    if (isInternshipSpam) {
+      trustScore -= 30;
+      anomalies.push('Suspected Unsolicited Internship/Training Spam: Contains typical marketing and program fee solicitation markers.');
+    }
+
+    // High-Risk Phishing/Fraud keywords
+    const criticalSpamKeywords = [
+      'lottery winner',
+      'draw winner',
+      'claim your prize',
+      'inherit',
+      'wire transfer',
+      'bank account details',
+      'unauthorized transaction',
+      'suspended account',
+      'verify your password',
+      'reset your security code',
+      'gift card',
+      'bitcoin wallet',
+      'double your money'
+    ];
+
+    let criticalMatches = 0;
+    criticalSpamKeywords.forEach(kw => {
+      if (emailBodyLower.includes(kw)) {
+        criticalMatches++;
+      }
+    });
+
+    if (criticalMatches >= 1) {
+      trustScore -= 55;
+      anomalies.push('High-Risk Phishing/Financial Fraud Indicator: Email body solicits sensitive credentials or financial actions.');
+    }
+
     // Check for mock attachments/malicious links in file content
     if (/\.(exe|scr|vbs|bat|zip|rar|cab)/i.test(emailContent)) {
       const match = emailContent.match(/[\w-]+\.(exe|scr|vbs|bat|zip|rar|cab)/i);
