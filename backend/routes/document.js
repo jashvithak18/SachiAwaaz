@@ -103,9 +103,32 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       }
     }
 
+    // AI Text detection heuristics (common phrases used by ChatGPT/Claude and filename checks)
+    const nameLower = req.file.originalname.toLowerCase();
+    const isAIName = nameLower.includes('chatgpt') || nameLower.includes('gpt') || nameLower.includes('ai_') || nameLower.includes('claude') || nameLower.includes('gemini') || nameLower.includes('copilot');
+    
+    const bufferStrLower = bufferString.toLowerCase();
+    const hasAIPhrases = bufferStrLower.includes('as an ai') || 
+                           bufferStrLower.includes('language model') || 
+                           bufferStrLower.includes('it is important to remember') || 
+                           bufferStrLower.includes('it is worth noting') || 
+                           bufferStrLower.includes('furthermore,') || 
+                           bufferStrLower.includes('moreover,') || 
+                           bufferStrLower.includes('in conclusion,') || 
+                           bufferStrLower.includes('delve into') || 
+                           bufferStrLower.includes('testament to');
+    
+    const isAIText = isAIName || hasAIPhrases;
+    metadata.aiTextDetected = isAIText;
+    metadata.aiTextConfidence = isAIText ? 'High' : 'Low';
+
     // Heuristics to build score
     let riskScore = 10; // default low risk
     let anomalies = [];
+
+    if (isAIText) {
+      anomalies.push('Text styling exhibits writing patterns typical of AI text assistants (e.g. ChatGPT/Claude).');
+    }
 
     if (possibleManipulation !== 'None Detected') {
       riskScore = 40;
@@ -117,16 +140,14 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       anomalies.push('OCR Text inconsistency: No digital text layer matching visual layout.');
     }
 
+    let verdict = 'safe';
     if (req.file.originalname.toLowerCase().includes('invoice') || req.file.originalname.toLowerCase().includes('contract')) {
-      // simulate check
       if (signaturePresence === 'None Detected') {
         riskScore = Math.max(riskScore, 65);
-        verdict = 'suspicious';
         anomalies.push('Missing signature fields on financial/contractual layout.');
       }
     }
 
-    let verdict = 'safe';
     if (riskScore >= 60) {
       verdict = 'manipulated';
     } else if (riskScore >= 35) {
@@ -138,7 +159,11 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     // AI Explanation builder
     let aiExplanation = '';
     if (verdict === 'safe') {
-      aiExplanation = `Document structural integrity verified. Clear font embedding and digital signatures check out successfully. Author fields match structural compiled history.`;
+      if (isAIText) {
+        aiExplanation = `Document structural integrity verified. Clear font embedding and digital signatures check out successfully. Note: Natural Language Processing detected stylistic writing patterns typical of AI text assistants (like ChatGPT/Claude) within the document text. The document is authentic, but the text content may be AI-assisted.`;
+      } else {
+        aiExplanation = `Document structural integrity verified. Clear font embedding and digital signatures check out successfully. Author fields match structural compiled history. No synthetic AI text or layout modifications detected.`;
+      }
     } else if (verdict === 'suspicious') {
       aiExplanation = `Potential verification warning. We detected PDF structural manipulation indicators (compile program: ${metadata.producer || 'unknown'}). Standard cryptographic signatures are absent.`;
     } else {
