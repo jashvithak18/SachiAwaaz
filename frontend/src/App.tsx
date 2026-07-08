@@ -17,7 +17,6 @@ import QRVerify from './pages/QRVerify';
 
 import ScamCenter from './pages/ScamCenter';
 import ScamLibrary from './pages/ScamLibrary';
-import CompareWorkspace from './pages/CompareWorkspace';
 
 export default function App() {
   const { token, user, activeTab, connectSocket, disconnectSocket, logout } = useStore();
@@ -138,12 +137,7 @@ export default function App() {
             <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-brand-500 uppercase tracking-widest">
               Digital Trust
             </div>
-            <SidebarItem 
-              icon="⚖️" 
-              label="Multi-File Compare" 
-              tab="compare" 
-              active={activeTab === 'compare'} 
-            />
+
             <SidebarItem 
               icon="🎓" 
               label="Scam Knowledge" 
@@ -230,7 +224,7 @@ export default function App() {
 
         {activeTab === 'scam_center' && <ScamCenter />}
         {activeTab === 'scam_library' && <ScamLibrary />}
-        {activeTab === 'compare' && <CompareWorkspace />}
+
         
         {/* Render detailed report separately */}
         {activeTab.startsWith('report_detail:') && (

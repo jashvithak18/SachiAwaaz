@@ -106,7 +106,6 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
   const [verdictFilter, setVerdictFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'compare'>('dashboard');
   const [sliderPosition, setSliderPosition] = useState(50);
   const [showNonTech, setShowNonTech] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
