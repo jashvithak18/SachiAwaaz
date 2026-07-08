@@ -192,16 +192,23 @@ router.post('/verify', authMiddleware, upload.single('image'), async (req, res) 
     let aiGenerationScore = 15; 
     let compressionArtifactsScore = Math.floor(Math.random() * 20) + 10; 
 
-    const editingIndicators = [...info.warnings];
+    // Heuristic: AI images are square (1:1 aspect ratio) and have no camera metadata (EXIF make/model)
+    const isSquareNoMetadata = info.width > 0 && info.width === info.height && !info.make && !info.model;
 
     if (info.creator) {
       aiGenerationScore = 95 + Math.floor(Math.random() * 5); 
+    } else if (isSquareNoMetadata) {
+      aiGenerationScore = 85 + Math.floor(Math.random() * 10);
+      info.creator = 'Generative AI Engine';
+      info.warnings.push('Image exhibits square dimensions (1:1) and is missing camera hardware metadata, typical of AI generation.');
     } else if (info.software) {
       compressionArtifactsScore = 70 + Math.floor(Math.random() * 20); 
     } else if (info.make || info.model) {
       aiGenerationScore = 2 + Math.floor(Math.random() * 5); 
       compressionArtifactsScore = 8 + Math.floor(Math.random() * 8); 
     }
+
+    const editingIndicators = [...info.warnings];
 
     // Determine final verdict
     let verdict = 'safe';
