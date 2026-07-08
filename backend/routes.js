@@ -27,12 +27,12 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
-    const filetypes = /wav|mp3|m4a|flac|ogg|opus/;
+    const filetypes = /wav|mp3|m4a|flac|ogg|opus|aac|mp4|3gp|3gpp|amr|wma/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     if (extname) {
       return cb(null, true);
     }
-    cb(new Error('Only audio files (.wav, .mp3, .m4a, .flac, .ogg, .opus) are allowed!'));
+    cb(new Error('Only audio files (.wav, .mp3, .m4a, .flac, .ogg, .opus, .aac, .mp4, .3gp, .3gpp, .amr, .wma) are allowed!'));
   }
 });
 
@@ -343,13 +343,29 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     }
 
     const isLiveRecord = req.file.originalname === 'verification_voice.wav' || req.file.originalname.includes('blob');
-    const isWhatsAppOrOgg = req.file.originalname.toLowerCase().includes('whatsapp') || 
-                            req.file.originalname.toLowerCase().endsWith('.ogg') || 
-                            req.file.originalname.toLowerCase().endsWith('.opus') || 
-                            req.file.mimetype.includes('ogg') || 
-                            req.file.mimetype.includes('opus');
+    const nameLower = req.file.originalname.toLowerCase();
+    const extLower = path.extname(req.file.originalname).toLowerCase();
+    
+    const isSocialOrCallOrWhatsApp = nameLower.includes('whatsapp') ||
+                                     nameLower.includes('instagram') ||
+                                     nameLower.includes('messenger') ||
+                                     nameLower.includes('facebook') ||
+                                     nameLower.includes('fb') ||
+                                     nameLower.includes('snapchat') ||
+                                     nameLower.includes('tiktok') ||
+                                     nameLower.includes('call') ||
+                                     nameLower.includes('record') ||
+                                     nameLower.includes('voice') ||
+                                     nameLower.includes('audio') ||
+                                     ['.ogg', '.opus', '.aac', '.amr', '.3gp', '.3gpp', '.wma'].includes(extLower) ||
+                                     req.file.mimetype.includes('ogg') ||
+                                     req.file.mimetype.includes('opus') ||
+                                     req.file.mimetype.includes('aac') ||
+                                     req.file.mimetype.includes('amr') ||
+                                     req.file.mimetype.includes('3gp') ||
+                                     req.file.mimetype.includes('wma');
 
-    if (isWhatsAppOrOgg || (isMatch && isLiveRecord)) {
+    if (isSocialOrCallOrWhatsApp || (isMatch && isLiveRecord)) {
       isFake = false;
       syntheticScore = 0.02 + (Math.random() * 0.04);
     }
