@@ -8,6 +8,7 @@ interface Member {
   name: string;
   relationship: string;
   audioPath: string;
+  audioBase64?: string;
 }
 
 // WAV Encoder Helpers
@@ -571,7 +572,7 @@ export default function VoiceVerify() {
                         Delete
                       </button>
                     </div>
-                    <audio key={member.audioPath} src={`${SERVER_URL}/${member.audioPath}`} controls className="w-full h-8" />
+                    <audio key={member.audioPath} src={member.audioBase64 || `${SERVER_URL}/${member.audioPath}`} controls className="w-full h-8" />
                   </div>
                 ))}
               </div>

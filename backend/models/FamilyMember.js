@@ -20,6 +20,10 @@ const FamilyMemberSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  audioBase64: {
+    type: String,
+    required: false
+  },
   embedding: {
     type: [Number], // 192-dimensional vector
     required: true
