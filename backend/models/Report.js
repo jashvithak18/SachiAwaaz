@@ -16,7 +16,7 @@ const ReportSchema = new mongoose.Schema({
   },
   mediaType: {
     type: String,
-    enum: ['voice', 'image', 'document'],
+    enum: ['voice', 'image', 'document', 'website', 'email', 'qr', 'link'],
     required: true
   },
   authenticityScore: {
@@ -39,6 +39,14 @@ const ReportSchema = new mongoose.Schema({
   anomalies: {
     type: [String],
     default: []
+  },
+  isFavorite: {
+    type: Boolean,
+    default: false
+  },
+  analysisDetails: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   createdAt: {
     type: Date,

@@ -45,6 +45,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
       analysisDetails = await ImageAnalysis.findOne({ reportId: report._id });
     } else if (report.mediaType === 'document') {
       analysisDetails = await DocumentAnalysis.findOne({ reportId: report._id });
+    } else {
+      analysisDetails = report.analysisDetails || null;
     }
 
     res.json({
@@ -80,6 +82,21 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     await Report.deleteOne({ _id: report._id });
 
     res.json({ success: true, message: 'Report deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error: ' + err.message });
+  }
+});
+
+// Toggle favorite status
+router.put('/:id/favorite', authMiddleware, async (req, res) => {
+  try {
+    const report = await Report.findOne({ _id: req.params.id, userId: req.user.userId });
+    if (!report) return res.status(404).json({ message: 'Report not found.' });
+
+    report.isFavorite = !report.isFavorite;
+    await report.save();
+
+    res.json({ success: true, isFavorite: report.isFavorite, message: `Report ${report.isFavorite ? 'favorited' : 'unfavorited'} successfully.` });
   } catch (err) {
     res.status(500).json({ message: 'Server error: ' + err.message });
   }

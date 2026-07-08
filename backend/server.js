@@ -72,6 +72,10 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/cases', require('./routes/cases'));
+app.use('/api/website', require('./routes/website'));
+app.use('/api/email', require('./routes/email'));
+app.use('/api/qr', require('./routes/qr'));
+app.use('/api/link', require('./routes/link'));
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

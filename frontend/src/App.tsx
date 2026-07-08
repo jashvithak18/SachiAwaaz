@@ -11,6 +11,13 @@ import CaseWorkspace from './pages/CaseWorkspace';
 import ForensicReport from './pages/ForensicReport';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
+import WebsiteVerify from './pages/WebsiteVerify';
+import EmailVerify from './pages/EmailVerify';
+import QRVerify from './pages/QRVerify';
+import LinkInspector from './pages/LinkInspector';
+import ScamCenter from './pages/ScamCenter';
+import ScamLibrary from './pages/ScamLibrary';
+import CompareWorkspace from './pages/CompareWorkspace';
 
 export default function App() {
   const { token, user, activeTab, connectSocket, disconnectSocket, logout } = useStore();
@@ -78,6 +85,52 @@ export default function App() {
               label="Document Integrity" 
               tab="document" 
               active={activeTab === 'document'} 
+            />
+            <SidebarItem 
+              icon="🌐" 
+              label="Website Verification" 
+              tab="website" 
+              active={activeTab === 'website'} 
+            />
+            <SidebarItem 
+              icon="✉️" 
+              label="Email Verification" 
+              tab="email" 
+              active={activeTab === 'email'} 
+            />
+            <SidebarItem 
+              icon="🔍" 
+              label="QR Verification" 
+              tab="qr" 
+              active={activeTab === 'qr'} 
+            />
+            <SidebarItem 
+              icon="🔗" 
+              label="Link Inspector" 
+              tab="link" 
+              active={activeTab === 'link'} 
+            />
+
+            <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-brand-500 uppercase tracking-widest">
+              Digital Trust
+            </div>
+            <SidebarItem 
+              icon="⚖️" 
+              label="Multi-File Compare" 
+              tab="compare" 
+              active={activeTab === 'compare'} 
+            />
+            <SidebarItem 
+              icon="🎓" 
+              label="Scam Knowledge" 
+              tab="scam_center" 
+              active={activeTab === 'scam_center'} 
+            />
+            <SidebarItem 
+              icon="📚" 
+              label="Scam Library" 
+              tab="scam_library" 
+              active={activeTab === 'scam_library'} 
             />
 
             <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-brand-500 uppercase tracking-widest">
@@ -147,6 +200,13 @@ export default function App() {
         {activeTab === 'reports' && <ForensicReport />}
         {activeTab === 'settings' && <Settings />}
         {activeTab === 'admin' && <AdminPanel />}
+        {activeTab === 'website' && <WebsiteVerify />}
+        {activeTab === 'email' && <EmailVerify />}
+        {activeTab === 'qr' && <QRVerify />}
+        {activeTab === 'link' && <LinkInspector />}
+        {activeTab === 'scam_center' && <ScamCenter />}
+        {activeTab === 'scam_library' && <ScamLibrary />}
+        {activeTab === 'compare' && <CompareWorkspace />}
         
         {/* Render detailed report separately */}
         {activeTab.startsWith('report_detail:') && (

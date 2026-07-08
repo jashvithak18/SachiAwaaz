@@ -12,7 +12,7 @@ interface Report {
   _id: string;
   fileName: string;
   fileUrl: string;
-  mediaType: 'voice' | 'image' | 'document';
+  mediaType: 'voice' | 'image' | 'document' | 'website' | 'email' | 'qr' | 'link';
   authenticityScore: number;
   riskScore: number;
   verdict: 'safe' | 'suspicious' | 'manipulated';

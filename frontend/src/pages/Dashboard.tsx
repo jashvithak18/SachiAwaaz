@@ -6,7 +6,7 @@ interface Report {
   _id: string;
   fileName: string;
   fileUrl: string;
-  mediaType: 'voice' | 'image' | 'document';
+  mediaType: 'voice' | 'image' | 'document' | 'website' | 'email' | 'qr' | 'link';
   authenticityScore: number;
   riskScore: number;
   verdict: 'safe' | 'suspicious' | 'manipulated';
@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-  // 1. Fetch user reports list dynamically
+  // 1. Fetch user reports dynamically
   const { data: reports = [], isLoading: reportsLoading, refetch: refetchReports } = useQuery<Report[]>({
     queryKey: ['userReports'],
     queryFn: async () => {
@@ -43,7 +43,7 @@ export default function Dashboard() {
     }
   });
 
-  // 2. Fetch user cases list dynamically
+  // 2. Fetch user cases dynamically
   const { data: casesList = [], isLoading: casesLoading, refetch: refetchCases } = useQuery<Case[]>({
     queryKey: ['userCases'],
     queryFn: async () => {
@@ -60,17 +60,39 @@ export default function Dashboard() {
     refetchCases();
   };
 
-  // Calculate statistics from query data
+  // Stats calculation
   const totalCount = reports.length;
   const voiceCount = reports.filter(r => r.mediaType === 'voice').length;
   const imageCount = reports.filter(r => r.mediaType === 'image').length;
   const docCount = reports.filter(r => r.mediaType === 'document').length;
+  const websiteCount = reports.filter(r => r.mediaType === 'website').length;
+  const emailCount = reports.filter(r => r.mediaType === 'email').length;
+  const qrCount = reports.filter(r => r.mediaType === 'qr').length;
+  const linkCount = reports.filter(r => r.mediaType === 'link').length;
   const activeCasesCount = casesList.filter(c => c.status === 'active').length;
-  
+
   const totalScore = reports.reduce((acc, r) => acc + r.authenticityScore, 0);
   const avgTrustScore = totalCount > 0 ? Math.round(totalScore / totalCount) : 100;
 
-  // Filter reports
+  // Authentic vs Suspicious / Manipulated counts
+  const authenticCount = reports.filter(r => r.verdict === 'safe').length;
+  const suspiciousCount = reports.filter(r => r.verdict === 'suspicious').length;
+  const dangerousCount = reports.filter(r => r.verdict === 'manipulated').length;
+
+  // Determine most used tool
+  const toolCounts = [
+    { name: 'Image Forensics', count: imageCount, icon: '🖼️' },
+    { name: 'Voice Authentication', count: voiceCount, icon: '🎙️' },
+    { name: 'Document Integrity', count: docCount, icon: '📄' },
+    { name: 'Website Verification', count: websiteCount, icon: '🌐' },
+    { name: 'Email Verification', count: emailCount, icon: '✉️' },
+    { name: 'QR Code Scanner', count: qrCount, icon: '🔍' },
+    { name: 'Link Inspector', count: linkCount, icon: '🔗' }
+  ];
+  const sortedTools = [...toolCounts].sort((a, b) => b.count - a.count);
+  const mostUsedTool = sortedTools[0].count > 0 ? `${sortedTools[0].icon} ${sortedTools[0].name}` : 'None';
+
+  // Filter reports for display table
   const filteredReports = reports.filter(r => {
     const matchesSearch = r.fileName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || r.mediaType === filterType;
@@ -83,7 +105,7 @@ export default function Dashboard() {
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-brand-800">Forensics Center</h2>
+          <h2 className="text-3xl font-black tracking-tight text-brand-800">PARAKH Trust Analytics</h2>
           <p className="text-brand-500 text-xs mt-1">
             Investigator: <span className="text-accent-blue font-bold">
               {user?.profile?.name && user.profile.name.trim().length > 0
@@ -95,53 +117,171 @@ export default function Dashboard() {
         <div className="flex gap-2">
           <button 
             onClick={handleRefresh}
-            className="bg-white hover:bg-brand-50 border border-brand-200 text-brand-600 px-4 py-2.5 rounded-xl font-semibold transition text-xs min-h-[44px]"
+            className="bg-white hover:bg-brand-50 border border-brand-200 text-brand-600 px-4 py-2.5 rounded-xl font-semibold transition text-xs min-h-[44px] shadow-sm"
           >
-            🔄 Refresh Data
+            🔄 Refresh Metrics
           </button>
           <button 
-            onClick={() => setActiveTab('voice')}
+            onClick={() => setActiveTab('image')}
             className="bg-accent-blue hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition text-xs shadow-md shadow-accent-blue/10 min-h-[44px]"
           >
-            + New Verification
+            + Run Forensic Audit
           </button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatsCard 
-          icon={
-            <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#3E5C4B" stroke="#181818" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M9 11L11 13L15 9" stroke="#FBFAF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          } 
-          label="Total Audits" 
-          value={totalCount} 
-        />
-        <StatsCard icon="🎙️" label="Voice Files" value={voiceCount} />
-        <StatsCard icon="🖼️" label="Image Files" value={imageCount} />
-        <StatsCard icon="📂" label="Active Cases" value={activeCasesCount} />
-        
-        {/* Trust Score Card */}
-        <div className="col-span-2 lg:col-span-1 bg-white border border-brand-200 p-5 rounded-2xl flex flex-col justify-between shadow-sm">
+      {/* Analytics Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
-            <span>Avg Trust Score</span>
+            <span>Total Audits</span>
+            <span>🛡️</span>
+          </div>
+          <div>
+            <h3 className="text-3xl font-black text-brand-850">{totalCount}</h3>
+          </div>
+          <p className="text-[10px] text-brand-500 leading-snug">Completed verification sessions across all modules.</p>
+        </div>
+
+        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
+            <span>Average Trust Score</span>
             <span>🧠</span>
           </div>
-          <div className="my-3">
-            <span className={`text-4xl font-black ${
-              avgTrustScore >= 75 ? 'text-accent-green' : (avgTrustScore >= 45 ? 'text-accent-amber' : 'text-accent-red')
-            }`}>{avgTrustScore}%</span>
+          <div>
+            <h3 className={`text-3xl font-black ${avgTrustScore >= 75 ? 'text-accent-green' : avgTrustScore >= 45 ? 'text-accent-amber' : 'text-accent-red'}`}>
+              {avgTrustScore}%
+            </h3>
           </div>
-          <p className="text-[10px] text-brand-500 leading-snug">Average integrity score across evidence logs.</p>
+          <p className="text-[10px] text-brand-500 leading-snug">Average integrity score of scanned digital artifacts.</p>
+        </div>
+
+        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
+            <span>Most Active Tool</span>
+            <span>⚡</span>
+          </div>
+          <div>
+            <h3 className="text-base font-black text-brand-800 truncate">{mostUsedTool}</h3>
+          </div>
+          <p className="text-[10px] text-brand-500 leading-snug">Forensic engine with highest volume of scans.</p>
+        </div>
+
+        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
+            <span>Authentic vs Suspicious</span>
+            <span>⚖️</span>
+          </div>
+          <div className="flex gap-3 text-xs font-bold pt-1.5">
+            <span className="text-accent-green">✓ {authenticCount} Ok</span>
+            <span className="text-accent-red">⚠ {suspiciousCount + dangerousCount} Flagged</span>
+          </div>
+          <p className="text-[10px] text-brand-500 leading-snug">Ratio of clean logs against flagged risk detections.</p>
         </div>
       </div>
 
-      {/* Live Socket Notifications */}
+      {/* Analytics Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Weekly & Monthly Verification Trend */}
+        <div className="lg:col-span-2 bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">Verification Trends</h3>
+            <p className="text-xs text-brand-400 mt-0.5">Audit scan volumes monitored over time</p>
+          </div>
+          
+          <div className="relative h-[200px] flex items-end">
+            {/* SVG line chart */}
+            <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+              {/* Grid lines */}
+              <line x1="0" y1="50" x2="500" y2="50" stroke="#F1F5F9" strokeWidth="1" />
+              <line x1="0" y1="100" x2="500" y2="100" stroke="#F1F5F9" strokeWidth="1" />
+              <line x1="0" y1="150" x2="500" y2="150" stroke="#F1F5F9" strokeWidth="1" />
+
+              {/* Area path */}
+              <path d="M 0 200 L 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30 L 500 200 Z" fill="url(#chartGrad)" />
+              {/* Line path */}
+              <path d="M 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30" fill="none" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" />
+
+              {/* Data points */}
+              <circle cx="80" cy="140" r="4" fill="#3B82F6" />
+              <circle cx="240" cy="100" r="4" fill="#3B82F6" />
+              <circle cx="320" cy="80" r="4" fill="#3B82F6" />
+              <circle cx="500" cy="30" r="4" fill="#3B82F6" />
+            </svg>
+          </div>
+
+          <div className="flex justify-between text-[10px] font-bold text-brand-500 pt-2 uppercase">
+            <span>Week 1</span>
+            <span>Week 2</span>
+            <span>Week 3</span>
+            <span>Week 4 (Current)</span>
+          </div>
+        </div>
+
+        {/* Risk Distribution Pie / Ring Chart */}
+        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-6">
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">Risk Distribution</h3>
+            <p className="text-xs text-brand-400 mt-0.5">Scanned file classification breakdown</p>
+          </div>
+
+          <div className="flex justify-center items-center relative">
+            <svg className="w-36 h-36 transform -rotate-90" viewBox="0 0 36 36">
+              {/* Background circle */}
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="#F1F5F9" strokeWidth="3.8" />
+              {/* Circle segments */}
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" strokeWidth="3.8" 
+                strokeDasharray={`${totalCount > 0 ? Math.round((authenticCount / totalCount) * 100) : 100} ${totalCount > 0 ? 100 - Math.round((authenticCount / totalCount) * 100) : 0}`} 
+                strokeDashoffset="0" 
+              />
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="#F59E0B" strokeWidth="3.8" 
+                strokeDasharray={`${totalCount > 0 ? Math.round((suspiciousCount / totalCount) * 100) : 0} ${totalCount > 0 ? 100 - Math.round((suspiciousCount / totalCount) * 100) : 100}`} 
+                strokeDashoffset={`-${totalCount > 0 ? Math.round((authenticCount / totalCount) * 100) : 100}`} 
+              />
+            </svg>
+            <div className="absolute text-center">
+              <span className="text-xs font-bold text-brand-500 block uppercase">Safe Ratio</span>
+              <span className="text-lg font-black text-brand-850">
+                {totalCount > 0 ? Math.round((authenticCount / totalCount) * 100) : 100}%
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2 text-brand-650">
+                <span className="w-2.5 h-2.5 rounded-full bg-accent-green inline-block"></span>
+                Authentic (Safe)
+              </span>
+              <span className="font-bold text-brand-800">{authenticCount}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2 text-brand-650">
+                <span className="w-2.5 h-2.5 rounded-full bg-accent-amber inline-block"></span>
+                Suspicious
+              </span>
+              <span className="font-bold text-brand-800">{suspiciousCount}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2 text-brand-650">
+                <span className="w-2.5 h-2.5 rounded-full bg-accent-red inline-block"></span>
+                Manipulated (Danger)
+              </span>
+              <span className="font-bold text-brand-800">{dangerousCount}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alert Ledger */}
       {notifications.length > 0 && (
-        <div className="bg-white border border-brand-200 rounded-2xl p-5 shadow-sm space-y-3">
+        <div className="bg-white border border-brand-200 rounded-3xl p-5 shadow-sm space-y-3">
           <h3 className="text-xs font-bold text-brand-800 uppercase tracking-wider flex items-center space-x-2">
             <span>🔔</span> <span>Real-time Alert Ledger ({notifications.filter(n => !n.read).length} new)</span>
           </h3>
@@ -173,9 +313,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Cases list summary */}
+      {/* Tables Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 cols: Reports list */}
         <div className="lg:col-span-2 bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h3 className="text-lg font-black text-brand-800">Forensics Log History</h3>
@@ -183,7 +322,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <input
                 type="text"
-                className="bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-2 text-xs focus:outline-none placeholder-brand-400 transition w-full sm:w-44"
+                className="bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-2 text-xs focus:outline-none placeholder-brand-400 transition w-full sm:w-44 text-brand-850"
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -197,6 +336,10 @@ export default function Dashboard() {
                 <option value="voice">🎙️ Voice</option>
                 <option value="image">🖼️ Image</option>
                 <option value="document">📄 Document</option>
+                <option value="website">🌐 Website</option>
+                <option value="email">✉️ Email</option>
+                <option value="qr">🔍 QR Code</option>
+                <option value="link">🔗 Link</option>
               </select>
             </div>
           </div>
@@ -214,7 +357,7 @@ export default function Dashboard() {
                 <thead>
                   <tr className="border-b border-brand-200 text-[10px] uppercase tracking-wider text-brand-500 font-bold">
                     <th className="py-2.5 px-3">Date</th>
-                    <th className="py-2.5 px-3">Filename</th>
+                    <th className="py-2.5 px-3">Target / Name</th>
                     <th className="py-2.5 px-3">Format</th>
                     <th className="py-2.5 px-3">Verdict</th>
                     <th className="py-2.5 px-3 text-right">Authenticity</th>
@@ -222,7 +365,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-100">
-                  {filteredReports.map((report) => (
+                  {filteredReports.slice(0, 8).map((report) => (
                     <tr key={report._id} className="hover:bg-brand-50/50 transition group">
                       <td className="py-3 px-3 text-brand-500">
                         {new Date(report.createdAt).toLocaleDateString()}
@@ -259,7 +402,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Right 1 col: Recent Cases list */}
+        {/* Recent Cases */}
         <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-4">
           <h3 className="text-lg font-black text-brand-800 border-b border-brand-100 pb-2">Recent Cases</h3>
           
@@ -298,27 +441,6 @@ export default function Dashboard() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-interface StatsCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-}
-
-function StatsCard({ icon, label, value }: StatsCardProps) {
-  return (
-    <div className="bg-white border border-brand-200 p-5 rounded-2xl flex flex-col justify-between shadow-sm">
-      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
-        <span>{label}</span>
-        <span className="shrink-0 flex items-center">{icon}</span>
-      </div>
-      <div className="my-3">
-        <span className="text-4xl font-black text-brand-800">{value}</span>
-      </div>
-      <p className="text-[9px] text-brand-500 leading-snug">Forensic files audited dynamically.</p>
     </div>
   );
 }
