@@ -25,6 +25,16 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
   const [assistantMessages, setAssistantMessages] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
   const [customQuestion, setCustomQuestion] = useState('');
 
+  // Real-time ticking state for background updates (even after days of tab being inactive)
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 10000); // tick every 10s
+    return () => clearInterval(timer);
+  }, []);
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   // QUERY FOR REPORT LIST (List Mode)
@@ -218,9 +228,9 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
         return Math.abs(hash % 240) + 15;
       };
 
-      // Calculate dynamic checked elapsed time relative to report creation
+      // Calculate dynamic checked elapsed time relative to report creation using ticking currentTime state
       const getLastCheckedTime = (createdAtString: string) => {
-        const elapsedMs = new Date().getTime() - new Date(createdAtString).getTime();
+        const elapsedMs = currentTime.getTime() - new Date(createdAtString).getTime();
         const elapsedMins = Math.floor(elapsedMs / 60000);
         if (elapsedMins < 1) return 'Just now';
         if (elapsedMins < 60) return `${elapsedMins} minute${elapsedMins === 1 ? '' : 's'} ago`;
