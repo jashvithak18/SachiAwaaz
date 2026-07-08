@@ -211,10 +211,16 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
 
     if (matchedMember) {
       if (!isMatch) {
-        verdict = isFake ? 'manipulated' : 'suspicious';
-        authenticityScore = Math.min(authenticityScore, 40);
-        riskScore = Math.max(riskScore, 60);
-        anomalies.push(`Voice signature does not match claimed identity: ${matchedMember.name}.`);
+        verdict = isFake ? 'manipulated' : 'safe';
+        if (!isFake) {
+          authenticityScore = Math.max(authenticityScore, 85);
+          riskScore = Math.min(riskScore, 15);
+          anomalies.push(`Note: Voice is authentic (real human speech) but does not match claimed identity: ${matchedMember.name}.`);
+        } else {
+          authenticityScore = Math.min(authenticityScore, 40);
+          riskScore = Math.max(riskScore, 60);
+          anomalies.push(`Voice signature does not match claimed identity: ${matchedMember.name}.`);
+        }
       } else {
         if (isFake) {
           verdict = 'manipulated';
@@ -223,17 +229,22 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
       }
     } else {
       if (isFake) {
+        verdict = 'manipulated';
         anomalies.push('AI generated voice signature detected from unknown source.');
       } else {
-        verdict = 'suspicious';
-        anomalies.push('Authentic voice signature detected, but profile does not match any enrolled family member.');
+        verdict = 'safe';
+        anomalies.push('Authentic voice signature detected from unregistered speaker.');
       }
     }
 
     // Build plain language explanation
     let aiExplanation = '';
     if (verdict === 'safe') {
-      aiExplanation = `The voice clip demonstrates a clear and natural human speech signature that matches ${matchedMember?.name || 'enrolled'} voice patterns. AI synthetic speech markers are minimal (below 5%), verifying authenticity.`;
+      if (matchedMember && isMatch) {
+        aiExplanation = `The voice clip demonstrates a clear and natural human speech signature that matches ${matchedMember.name}'s voice patterns. AI synthetic speech markers are minimal, verifying authenticity.`;
+      } else {
+        aiExplanation = `This is a real, authentic human voice of an unknown or unregistered person. It does not match any registered family member profile, but shows no signs of AI synthetic generation or cloning.`;
+      }
     } else if (verdict === 'suspicious') {
       aiExplanation = `This clip appears to be a real human voice (no synthetic speech markers), but does not match the enrolled voiceprint for ${matchedMember?.name || 'any family member'}. Recommend manual callback verification.`;
     } else {
