@@ -341,10 +341,10 @@ export default function EmailVerify() {
             {showExplanation ? (
               <p className="text-xs text-brand-700 leading-relaxed bg-white border border-brand-200 rounded-xl p-3.5 transition">
                 {result.report.verdict === 'safe'
-                  ? 'This email is legitimate. The authentication keys align perfectly, and the message contains no dangerous attachments.'
+                  ? 'Everything looks good! This email is safe. It comes from a verified sender, and there are no dangerous links or files attached.'
                   : result.report.verdict === 'suspicious'
-                  ? 'Caution: The sender addresses are slightly misaligned, or mail servers were unable to verify transit routes.'
-                  : 'Danger: The sender display name is forged, or SPF/DMARC filters caught spoofed headers. Do not download files.'}
+                  ? 'Be careful! This email looks a bit unusual. The sender\'s address doesn\'t match up perfectly, or it took a strange route to reach you. Double-check before replying or clicking links.'
+                  : 'Alert! This is a dangerous email. Someone is pretending to be a company or person you trust (spoofing) to steal your information. Do not reply, click any links, or download any attachments!'}
               </p>
             ) : (
               <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>

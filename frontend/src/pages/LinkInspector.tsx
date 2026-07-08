@@ -252,10 +252,10 @@ export default function LinkInspector() {
               {showExplanation ? (
                 <p className="text-xs text-brand-700 leading-relaxed bg-white border border-brand-200 rounded-xl p-3.5 transition">
                   {result.report.verdict === 'safe'
-                    ? 'The link is safe. It is an active SSL domain and has no high risk malware scripts.'
+                    ? 'This link is safe to visit! The website is properly encrypted, and we didn\'t find any hidden tracking scripts or malware.'
                     : result.report.verdict === 'suspicious'
-                    ? 'Use caution. The connection lacks standard encryption profiles, or uses hidden redirect routines.'
-                    : 'Do not visit! The site holds script loops targeting your local system, or executes payment scam templates.'}
+                    ? 'Use caution. This link redirects you through hidden pages or lacks standard security encryption. It is best to avoid unless you are sure.'
+                    : 'Do not click! This link is a trap. It leads to a fake website designed to steal your passwords or install harmful software on your device.'}
                 </p>
               ) : (
                 <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>

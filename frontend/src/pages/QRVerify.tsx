@@ -244,10 +244,10 @@ export default function QRVerify() {
               {showExplanation ? (
                 <p className="text-xs text-brand-700 leading-relaxed bg-white border border-brand-200 rounded-xl p-3.5 transition">
                   {result.report.verdict === 'safe'
-                    ? 'This QR code contains a direct link to an established, safe website. No redirects or masks detected.'
+                    ? 'This QR code is safe! It takes you directly to a well-known, verified website with no hidden tricks.'
                     : result.report.verdict === 'suspicious'
-                    ? 'This QR code points to a shortened link (like bit.ly) or redirects multiple times. Take care.'
-                    : 'Phishing trap! This QR code points to a fake page that mimics payment networks or bank logins to steal your money.'}
+                    ? 'Be careful! This QR code uses a shortened link (like bit.ly) or redirects you multiple times, making it hard to see where it really goes.'
+                    : 'Alert! This QR code is a scam. It points to a fake page designed to steal your money, credit card details, or bank login info.'}
                 </p>
               ) : (
                 <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>

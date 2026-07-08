@@ -410,10 +410,10 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
             {showNonTech && (
               <p className="px-6 pb-5 pt-1 border-t border-brand-200 text-xs text-brand-650 leading-relaxed transition bg-white">
                 {isSafe 
-                  ? 'All verification keys and digital headers align perfectly. No traces of graphic alterations or AI synthesizers were discovered.'
+                  ? 'Everything looks good! We checked this very carefully and didn\'t find any signs of fake images, cloned voices, altered files, or trick links. It is safe to trust.'
                   : isSusp 
-                  ? 'Warning: We found inconsistencies in domain details, re-saving artifacts, or address routing channels.'
-                  : 'Critical Alert: This asset contains synthetic AI generation grids, lookalike homograph characters, or fake identity credentials.'}
+                  ? 'Be careful! Some details look a bit unusual or out of place. It might be a minor mistake, or it could be someone trying to trick you. We recommend double-checking directly with the sender before sharing any info.'
+                  : 'Alert! This is highly likely to be a scam or fake. We detected signs of computer-generated images, AI voice cloning, forged documents, or trick websites designed to steal your information. Do not trust or share this!'}
               </p>
             )}
           </div>

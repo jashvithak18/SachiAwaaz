@@ -255,10 +255,10 @@ export default function WebsiteVerify() {
             {showExplanation ? (
               <p className="text-xs text-brand-700 leading-relaxed bg-white border border-brand-200 rounded-xl p-3.5 transition">
                 {result.report.verdict === 'safe'
-                  ? 'This website is safe. It is an established website with encrypted connections and registered with verified companies.'
+                  ? 'This website is safe to use! It has strong security encryption and is officially registered to a verified company.'
                   : result.report.verdict === 'suspicious'
-                  ? 'Be careful here. The website is relatively new and lacks standard encryption configurations that authentic domains use.'
-                  : 'Warning: This website is a fake/scam page. It is using name-mimicking tricks to look like a brand to steal your logins.'}
+                  ? 'Use caution. This website is very new or has incomplete security setups, which is common for copycat pages. Do not enter private details.'
+                  : 'Danger! This is a fake website. It is designed to look exactly like a real bank, payment portal, or service to trick you into entering your password.'}
               </p>
             ) : (
               <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>
