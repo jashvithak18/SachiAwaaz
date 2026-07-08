@@ -10,6 +10,40 @@ interface Member {
   audioPath: string;
 }
 
+// WAV Encoder Helpers
+const writeString = (view: DataView, offset: number, string: string) => {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+};
+
+const encodeWAV = (samples: Float32Array, sampleRate: number) => {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM = 1
+  view.setUint16(22, 1, true); // Mono = 1
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); // Byte rate (sampleRate * channelCount * bytesPerSample)
+  view.setUint16(32, 2, true); // Block align (channelCount * bytesPerSample)
+  view.setUint16(34, 16, true); // Bits per sample
+  writeString(view, 36, 'data');
+  view.setUint32(40, samples.length * 2, true);
+
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    let s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+
+  return new Blob([view], { type: 'audio/wav' });
+};
+
 export default function VoiceVerify() {
   const { token, setActiveTab } = useStore();
   
@@ -34,7 +68,13 @@ export default function VoiceVerify() {
   // Mic recording states
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+
+  // Audio Context and ScriptProcessor references
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const recordedSamplesRef = useRef<number[]>([]);
+  const recordingTargetRef = useRef<'verify' | 'enroll' | null>(null);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -59,6 +99,10 @@ export default function VoiceVerify() {
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      // Clean up stream if recording is unmounted
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
     };
   }, []);
 
@@ -66,6 +110,7 @@ export default function VoiceVerify() {
   const startRecording = async (target: 'verify' | 'enroll') => {
     setError('');
     setSuccess('');
+    recordingTargetRef.current = target;
     
     if (target === 'verify') {
       setVerifyFile(null);
@@ -79,39 +124,35 @@ export default function VoiceVerify() {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
+      streamRef.current = stream;
+      
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      audioContextRef.current = audioContext;
 
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
-      };
+      const source = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      scriptProcessorRef.current = processor;
 
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/wav' });
-        const url = URL.createObjectURL(blob);
-        
-        if (target === 'verify') {
-          setVerifyBlob(blob);
-          setVerifyUrl(url);
-        } else {
-          setEnrollBlob(blob);
-          setEnrollUrl(url);
+      recordedSamplesRef.current = [];
+
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
+        for (let i = 0; i < inputData.length; i++) {
+          recordedSamplesRef.current.push(inputData[i]);
         }
-
-        stream.getTracks().forEach(track => track.stop());
       };
 
-      setMediaRecorder(recorder);
-      recorder.start();
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+
       setRecording(true);
       setRecordingSeconds(0);
 
       timerRef.current = setInterval(() => {
         setRecordingSeconds((prev) => {
           if (prev >= 20) {
-            recorder.stop();
-            setRecording(false);
-            clearInterval(timerRef.current);
+            stopRecordingInternal();
             return 20;
           }
           return prev + 1;
@@ -124,10 +165,42 @@ export default function VoiceVerify() {
   };
 
   const stopRecording = () => {
-    if (mediaRecorder && recording) {
-      mediaRecorder.stop();
-      setRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
+    stopRecordingInternal();
+  };
+
+  const stopRecordingInternal = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRecording(false);
+
+    if (scriptProcessorRef.current) {
+      scriptProcessorRef.current.disconnect();
+      scriptProcessorRef.current.onaudioprocess = null;
+      scriptProcessorRef.current = null;
+    }
+
+    if (audioContextRef.current) {
+      const sampleRate = audioContextRef.current.sampleRate;
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+
+      // Encode WAV
+      const samples = new Float32Array(recordedSamplesRef.current);
+      const blob = encodeWAV(samples, sampleRate);
+      const url = URL.createObjectURL(blob);
+
+      const target = recordingTargetRef.current;
+      if (target === 'verify') {
+        setVerifyBlob(blob);
+        setVerifyUrl(url);
+      } else {
+        setEnrollBlob(blob);
+        setEnrollUrl(url);
+      }
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
   };
 
