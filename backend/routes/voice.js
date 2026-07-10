@@ -7,8 +7,37 @@ const FamilyMember = require('../models/FamilyMember');
 const Report = require('../models/Report');
 const VoiceAnalysis = require('../models/VoiceAnalysis');
 const { authMiddleware } = require('../auth');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'https://jashvithaa-verivoice.hf.space';
+
+// Helper to convert non-WAV or compressed files using FFmpeg (optional/graceful fallback)
+async function tryConvertToWav(inputPath, originalName) {
+  const ext = path.extname(inputPath).toLowerCase();
+  const wavPath = inputPath.replace(ext, '') + '-converted.wav';
+
+  try {
+    // Check if ffmpeg is available
+    await execPromise('ffmpeg -version');
+    
+    // Run conversion: Mono channel, 16kHz sample rate, 16-bit PCM WAV
+    console.log(`Converting ${originalName} to standard WAV using FFmpeg...`);
+    await execPromise(`ffmpeg -y -i "${inputPath}" -ac 1 -ar 16000 -acodec pcm_s16le "${wavPath}"`);
+    
+    if (fs.existsSync(wavPath)) {
+      console.log(`Conversion successful: ${wavPath}`);
+      return { path: wavPath, converted: true, mimetype: 'audio/wav', originalname: originalName.replace(ext, '.wav') };
+    }
+  } catch (err) {
+    console.warn(`FFmpeg conversion failed or FFmpeg not available: ${err.message}. Sending original file.`);
+    if (fs.existsSync(wavPath)) {
+      try { fs.unlinkSync(wavPath); } catch (e) {}
+    }
+  }
+  return { path: inputPath, converted: false, mimetype: null, originalname: originalName };
+}
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -74,13 +103,19 @@ router.post('/family', authMiddleware, upload.single('audio'), async (req, res) 
   const finalFilename = `${Date.now()}-${name.replace(/\s+/g, '_')}-${req.file.originalname}`;
   const finalPath = path.join(enrollDir, finalFilename);
 
+  let conversionResult = null;
   try {
+    conversionResult = await tryConvertToWav(tempPath, req.file.originalname);
+    const processPath = conversionResult.path;
+    const processMimetype = conversionResult.mimetype || req.file.mimetype;
+    const processName = conversionResult.originalname;
+
     // Generate embedding from ML service
-    const fileBuffer = fs.readFileSync(tempPath);
-    const audioBlob = new Blob([fileBuffer], { type: req.file.mimetype });
-    const audioBase64 = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+    const fileBuffer = fs.readFileSync(processPath);
+    const audioBlob = new Blob([fileBuffer], { type: processMimetype });
+    const audioBase64 = `data:${req.file.mimetype};base64,${fs.readFileSync(tempPath).toString('base64')}`;
     const formData = new FormData();
-    formData.append('file', audioBlob, req.file.originalname);
+    formData.append('file', audioBlob, processName);
 
     const mlResponse = await fetch(`${ML_SERVICE_URL}/embed`, {
       method: 'POST',
@@ -93,6 +128,10 @@ router.post('/family', authMiddleware, upload.single('audio'), async (req, res) 
 
     const { embedding } = await mlResponse.json();
     fs.renameSync(tempPath, finalPath);
+
+    if (conversionResult.converted && fs.existsSync(processPath)) {
+      try { fs.unlinkSync(processPath); } catch (e) {}
+    }
 
     const member = new FamilyMember({
       userId: req.user.userId,
@@ -109,7 +148,12 @@ router.post('/family', authMiddleware, upload.single('audio'), async (req, res) 
 
     res.status(201).json(responseMember);
   } catch (err) {
-    if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    if (fs.existsSync(tempPath)) {
+      try { fs.unlinkSync(tempPath); } catch (e) {}
+    }
+    if (conversionResult && conversionResult.converted && fs.existsSync(conversionResult.path)) {
+      try { fs.unlinkSync(conversionResult.path); } catch (e) {}
+    }
     res.status(500).json({ message: 'Enrollment failed: ' + err.message });
   }
 });
@@ -141,17 +185,23 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
   const finalFilename = `${Date.now()}-check-${req.file.originalname}`;
   const finalPath = path.join(checkDir, finalFilename);
 
+  let conversionResult = null;
   try {
-    const fileBuffer = fs.readFileSync(tempPath);
-    const audioBlob = new Blob([fileBuffer], { type: req.file.mimetype });
+    conversionResult = await tryConvertToWav(tempPath, req.file.originalname);
+    const processPath = conversionResult.path;
+    const processMimetype = conversionResult.mimetype || req.file.mimetype;
+    const processName = conversionResult.originalname;
+
+    const fileBuffer = fs.readFileSync(processPath);
+    const audioBlob = new Blob([fileBuffer], { type: processMimetype });
 
     // Execute embed and detect in parallel
     const embedFormData = new FormData();
-    embedFormData.append('file', audioBlob, req.file.originalname);
+    embedFormData.append('file', audioBlob, processName);
     const embedPromise = fetch(`${ML_SERVICE_URL}/embed`, { method: 'POST', body: embedFormData }).then(r => r.json());
 
     const detectFormData = new FormData();
-    detectFormData.append('file', audioBlob, req.file.originalname);
+    detectFormData.append('file', audioBlob, processName);
     const detectPromise = fetch(`${ML_SERVICE_URL}/detect`, { method: 'POST', body: detectFormData }).then(r => r.json());
 
     const [embedData, detectData] = await Promise.all([embedPromise, detectPromise]);
@@ -159,6 +209,10 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     const detectResults = detectData.results;
 
     fs.renameSync(tempPath, finalPath);
+
+    if (conversionResult.converted && fs.existsSync(processPath)) {
+      try { fs.unlinkSync(processPath); } catch (e) {}
+    }
 
     const fakeObj = detectResults.find(r => r.label.toLowerCase() === 'fake' || r.label.toLowerCase() === 'label_1') || { score: 0 };
     let syntheticScore = fakeObj.score;
@@ -295,7 +349,12 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     });
 
   } catch (err) {
-    if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    if (fs.existsSync(tempPath)) {
+      try { fs.unlinkSync(tempPath); } catch (e) {}
+    }
+    if (conversionResult && conversionResult.converted && fs.existsSync(conversionResult.path)) {
+      try { fs.unlinkSync(conversionResult.path); } catch (e) {}
+    }
     res.status(500).json({ message: 'Verification failed: ' + err.message });
   }
 });
