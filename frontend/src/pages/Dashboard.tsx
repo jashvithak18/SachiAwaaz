@@ -99,7 +99,16 @@ export default function Dashboard() {
   };
 
   const presetAvatars = [
-    '🕵️‍♂️', '👩‍💻', '👮‍♀️', '🤖', '🦸‍♂️', '🧑‍🚀', '🦁', '🦉', '🦊', '🧠'
+    { type: 'image', value: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&h=120&q=80' },
+    { type: 'image', value: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80' },
+    { type: 'image', value: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80' },
+    { type: 'image', value: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80' },
+    { type: 'image', value: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80' },
+    { type: 'emoji', value: '🕵️‍♂️' },
+    { type: 'emoji', value: '👩‍💻' },
+    { type: 'emoji', value: '👮‍♀️' },
+    { type: 'emoji', value: '🤖' },
+    { type: 'emoji', value: '🧠' }
   ];
 
   // 1. Fetch user reports dynamically
@@ -198,7 +207,7 @@ export default function Dashboard() {
             className="flex items-center space-x-3 bg-white border border-brand-200 hover:border-brand-350 p-2.5 pr-4 rounded-2xl shadow-sm cursor-pointer transition select-none hover:scale-[1.01]"
           >
             {user?.profile?.avatar ? (
-              user.profile.avatar.startsWith('data:image') ? (
+              (user.profile.avatar.startsWith('data:image') || user.profile.avatar.startsWith('http') || user.profile.avatar.startsWith('/')) ? (
                 <img 
                   src={user.profile.avatar} 
                   alt="Avatar" 
@@ -264,15 +273,19 @@ export default function Dashboard() {
 
                 <div>
                   <label className="block text-[9px] font-bold uppercase text-brand-500 tracking-wider mb-1.5 font-bold">Choose Preset Avatar</label>
-                  <div className="grid grid-cols-5 gap-2 pb-1.5">
+                  <div className="grid grid-cols-5 gap-2 pb-1.5 font-bold">
                     {presetAvatars.map((av) => (
                       <button
-                        key={av}
+                        key={av.value}
                         type="button"
-                        onClick={() => setEditAvatar(av)}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition ${editAvatar === av ? 'bg-accent-blue/15 border-2 border-accent-blue' : 'bg-brand-50 border border-brand-200 hover:bg-brand-100'}`}
+                        onClick={() => setEditAvatar(av.value)}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden transition ${editAvatar === av.value ? 'bg-accent-blue/15 border-2 border-accent-blue' : 'bg-brand-50 border border-brand-200 hover:bg-brand-100'}`}
                       >
-                        {av}
+                        {av.type === 'image' ? (
+                          <img src={av.value} alt="Avatar Preset" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-lg">{av.value}</span>
+                        )}
                       </button>
                     ))}
                   </div>
