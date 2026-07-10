@@ -183,6 +183,71 @@ export default function QRVerify() {
             </div>
           </div>
 
+          {/* Ownership & Trust Assessment */}
+          <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-md space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500 pb-2 border-b border-brand-100">
+              Ownership & Trust Assessment
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+              <div className="space-y-3">
+                <div>
+                  <span className="font-semibold text-brand-500 uppercase text-[10px] tracking-wider block mb-1">QR Target Entity:</span>
+                  {result.details.isUpi ? (
+                    <div className="p-3 bg-brand-50 rounded-2xl border border-brand-200 space-y-1">
+                      <div className="text-sm font-black text-brand-850">👤 {result.details.payeeName || 'Unknown Payee'}</div>
+                      <div className="font-mono text-brand-600 text-[11px]">VPA: {result.details.payeeAddress || 'N/A'}</div>
+                      {result.details.amount && <div className="text-accent-teal font-extrabold text-xs">Requested Amount: ₹{result.details.amount}</div>}
+                      <div className="text-[10px] text-brand-500 font-bold uppercase tracking-wider mt-1.5 flex items-center gap-1">
+                        <span className="text-accent-teal">💳</span> UPI Payment Recipient
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-brand-50 rounded-2xl border border-brand-200 space-y-1">
+                      <div className="text-sm font-black text-brand-850">🌐 {result.details.domain || 'Unknown Domain'}</div>
+                      <div className="text-[10px] text-brand-500 font-bold uppercase tracking-wider mt-1.5 flex items-center gap-1">
+                        <span>🔗</span> Web Destination Target
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <span className="font-semibold text-brand-500 uppercase text-[10px] tracking-wider block mb-1">Authenticity & Safety:</span>
+                  {result.report.verdict === 'safe' ? (
+                    <div className="p-3 bg-accent-green/5 rounded-2xl border border-accent-green/20 space-y-1">
+                      <div className="text-sm font-black text-accent-green flex items-center gap-1.5">
+                        <span>✅</span> Genuine Target
+                      </div>
+                      <p className="text-brand-650 leading-relaxed text-[11px]">
+                        This QR code points to a verified, safe payee or website. No threat indicators, spam patterns, or malicious redirects were detected.
+                      </p>
+                    </div>
+                  ) : result.report.verdict === 'suspicious' ? (
+                    <div className="p-3 bg-accent-amber/5 rounded-2xl border border-accent-amber/20 space-y-1">
+                      <div className="text-sm font-black text-accent-amber flex items-center gap-1.5">
+                        <span>⚠️</span> Unverified / Suspicious
+                      </div>
+                      <p className="text-brand-650 leading-relaxed text-[11px]">
+                        Caution is advised. This destination uses unverified redirect paths or lacks verified domain credentials. Confirm ownership before paying or entering logins.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-accent-red/5 rounded-2xl border border-accent-red/20 space-y-1">
+                      <div className="text-sm font-black text-accent-red flex items-center gap-1.5">
+                        <span>🚨</span> Spam / Phishing Threat
+                      </div>
+                      <p className="text-brand-650 leading-relaxed text-[11px]">
+                        Danger detected! This QR contains signatures matching malicious websites or unverified handles containing spam/scam indicators. Do NOT interact.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Sandbox Safety Card - Never automatically open the website */}
           <div className="bg-accent-red/5 border border-accent-red/20 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center space-x-3 text-accent-red">
@@ -243,11 +308,19 @@ export default function QRVerify() {
               </div>
               {showExplanation ? (
                 <p className="text-xs text-brand-700 leading-relaxed bg-white border border-brand-200 rounded-xl p-3.5 transition">
-                  {result.report.verdict === 'safe'
-                    ? 'This QR code is safe! It takes you directly to a well-known, verified website with no hidden tricks.'
-                    : result.report.verdict === 'suspicious'
-                    ? 'Be careful! This QR code uses a shortened link (like bit.ly) or redirects you multiple times, making it hard to see where it really goes.'
-                    : 'Alert! This QR code is a scam. It points to a fake page designed to steal your money, credit card details, or bank login info.'}
+                  {result.details.isUpi ? (
+                    result.report.verdict === 'safe'
+                      ? `This is a genuine UPI Payment QR code. The payee VPA (${result.details.payeeAddress}) and name ("${result.details.payeeName}") are valid and free of suspicious keywords.`
+                      : result.report.verdict === 'suspicious'
+                      ? 'Be careful! This UPI code contains unverified payment handles or redirect anomalies. Verify the recipient before paying.'
+                      : 'Alert! This UPI payment request is flagged as a scam handle or contains keywords associated with fraud lottery/refund messages.'
+                  ) : (
+                    result.report.verdict === 'safe'
+                      ? 'This QR code is safe! It takes you directly to a well-known, verified website with no hidden tricks.'
+                      : result.report.verdict === 'suspicious'
+                      ? 'Be careful! This QR code uses a shortened link (like bit.ly) or redirects you multiple times, making it hard to see where it really goes.'
+                      : 'Alert! This QR code is a scam. It points to a fake page designed to steal your money, credit card details, or bank login info.'
+                  )}
                 </p>
               ) : (
                 <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>
