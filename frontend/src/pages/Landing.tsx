@@ -12,7 +12,6 @@ const T = {
   en: {
     heroH1: "Some lies don't look like lies.",
     heroH2: "That's what makes them dangerous.",
-    // Homepage Flow: Situation -> Fear -> Verification -> Relief
     heroP1: "You receive something online.",
     heroP2: "You aren't sure if it's real.",
     heroP3: "PARAKH checks it in seconds.",
@@ -23,13 +22,12 @@ const T = {
     btnVerify: "Verify Something",
     btnStories: "See Real Stories",
     navVerify: "Verify Now",
-    
+
     // Story 1 (Voice)
     s1Bubble: '"Papa, I\'m in trouble. Send money."',
     s1Reveal: "It sounded exactly like her. The panic felt real.",
     s1Result: "🟢 Good catch. This voice appears AI-generated.",
-    s1Relief: "Good thing you checked first. You're safer because you verified first.",
-    
+
     // Story 2 (Doc)
     s2From: "hiring@goggle-careers.co",
     s2Subject: "Congratulations! You've been selected",
@@ -43,8 +41,7 @@ const T = {
     s2Meta: "PDF created: 2 hours ago · Creator: Canva",
     s2Reveal: "You wanted to believe it. But something felt slightly off.",
     s2Result: "🟢 Good catch. This document contains forged details.",
-    s2Relief: "Good thing you checked first. You're safer because you verified first.",
-    
+
     // Story 3 (Image)
     s3Name: "Uncle Sharma",
     s3Msg1: "Did you see this? Government just announced free laptop scheme for students!",
@@ -56,8 +53,7 @@ const T = {
     s3Flag3: "No official source",
     s3Reveal: "It had government logos. Everyone was sharing it.",
     s3Result: "🟢 Good catch. This image has been manipulated.",
-    s3Relief: "Good thing you checked first. You're safer because you verified first.",
-    
+
     // Story 4 (Reel)
     s4Caption: "I invested just ₹500 and earned ₹5,00,000 in 3 months! Use this app now!",
     s4User: "@wealth_guru_official",
@@ -65,20 +61,19 @@ const T = {
     s4Flag2: "Voice pattern mismatch",
     s4Reveal: "It was a famous face you trusted. The advice felt authentic.",
     s4Result: "🟢 Good catch. This face/voice appears to be a deepfake.",
-    s4Relief: "Good thing you checked first. You're safer because you verified first.",
-    
+
     // Interactive
     interTitle: "What would you verify today?",
     interDrop: "Drop a file or click to upload",
-    interAnalyze: "Looking for signs that something isn’t right…",
-    interDone: "Done. Here’s what we found.",
+    interAnalyze: "Looking for signs that something isn't right…",
+    interDone: "Done. Here's what we found.",
     tabVoice: "Voice",
     tabDoc: "Document",
     tabImage: "Image",
     tabVideo: "Video",
-    
+
     // Trust
-    trustH: "Trust shouldn’t be a gamble anymore.",
+    trustH: "Trust shouldn't be a gamble anymore.",
     trustP1: "We built PARAKH because everyone deserves to feel safe online.",
     trustP2: "Every forwarded message,",
     trustP3: "every unknown call,",
@@ -86,13 +81,13 @@ const T = {
     trustP5: "every AI generated voice—",
     trustP6: "deserves verification before belief.",
     trustP7: "PARAKH exists to give people confidence before they trust.",
-    
+
     // CTA
     ctaH1: "Don't verify because you're suspicious.",
     ctaH2: "Verify because the internet has changed.",
     ctaBtn: "Start Verifying",
-    
-    // Hero headlines
+
+    // Hero news
     heroNews1: "₹1.4 crore lost to AI voice clone scam in Lucknow",
     heroNews1Src: "Times of India, 2024",
     heroNews2: "Fake job offer racket busted — 3,200 students duped",
@@ -101,8 +96,8 @@ const T = {
     heroNews3Src: "India Today, 2024",
     heroNews4: "WhatsApp forwards caused mob violence in 6 states",
     heroNews4Src: "The Hindu, 2023",
-    
-    // Story headlines
+
+    // Story news
     s1News: "Kerala: Man loses ₹40,000 after scammer clones son's voice using AI",
     s1NewsSrc: "Manorama Online, Jan 2025",
     s2News: "22-year-old arrested for creating 150+ fake Google, Microsoft offer letters",
@@ -125,13 +120,12 @@ const T = {
     btnVerify: "कुछ परखें",
     btnStories: "असली कहानियाँ देखें",
     navVerify: "अभी परखें",
-    
+
     // Story 1 (Voice)
     s1Bubble: '"पापा, मैं मुसीबत में हूँ। पैसे भेजो।"',
     s1Reveal: "आवाज़ बिल्कुल उसी जैसी थी। घबराहट बिल्कुल असली लगी।",
     s1Result: "🟢 अच्छा हुआ पकड़ा गया। यह आवाज़ AI द्वारा बनाई गई लगती है।",
-    s1Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
-    
+
     // Story 2 (Doc)
     s2From: "hiring@goggle-careers.co",
     s2Subject: "बधाई! आपका चयन हो गया है",
@@ -145,8 +139,7 @@ const T = {
     s2Meta: "PDF बनाया: 2 घंटे पहले · निर्माता: Canva",
     s2Reveal: "आप इस पर विश्वास करना चाहते थे। लेकिन कुछ थोड़ा अजीब लग रहा था।",
     s2Result: "🟢 अच्छा हुआ पकड़ा गया। इस दस्तावेज़ में जाली विवरण हैं।",
-    s2Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
-    
+
     // Story 3 (Image)
     s3Name: "शर्मा अंकल",
     s3Msg1: "ये देखा? सरकार ने छात्रों के लिए मुफ्त लैपटॉप योजना घोषित की!",
@@ -158,8 +151,7 @@ const T = {
     s3Flag3: "कोई आधिकारिक स्रोत नहीं",
     s3Reveal: "इस पर सरकारी लोगो थे। हर कोई इसे साझा कर रहा था।",
     s3Result: "🟢 अच्छा हुआ पकड़ा गया। इस छवि के साथ छेड़छाड़ की गई है।",
-    s3Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
-    
+
     // Story 4 (Reel)
     s4Caption: "मैंने बस ₹500 लगाए और 3 महीने में ₹5,00,000 कमाए! अभी ये ऐप इस्तेमाल करो!",
     s4User: "@wealth_guru_official",
@@ -167,8 +159,7 @@ const T = {
     s4Flag2: "आवाज़ पैटर्न मेल नहीं खाता",
     s4Reveal: "यह एक प्रसिद्ध चेहरा था जिस पर आप भरोसा करते थे। सलाह बिल्कुल प्रामाणिक लगी।",
     s4Result: "🟢 अच्छा हुआ पकड़ा गया। यह चेहरा/आवाज़ एक डीपफेक लगती है।",
-    s4Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
-    
+
     // Interactive
     interTitle: "आज आप क्या परखना चाहेंगे?",
     interDrop: "फ़ाइल यहाँ छोड़ें या अपलोड करें",
@@ -178,7 +169,7 @@ const T = {
     tabDoc: "दस्तावेज़",
     tabImage: "छवि",
     tabVideo: "वीडियो",
-    
+
     // Trust
     trustH: "भरोसा अब कोई जुआ नहीं होना चाहिए।",
     trustP1: "हमने PARAKH बनाया क्योंकि हर कोई ऑनलाइन सुरक्षित महसूस करने का हकदार है।",
@@ -188,13 +179,13 @@ const T = {
     trustP5: "हर AI जनित आवाज़—",
     trustP6: "विश्वास से पहले सत्यापन की हकदार है।",
     trustP7: "PARAKH लोगों को भरोसा करने से पहले विश्वास दिलाने के लिए मौजूद है।",
-    
+
     // CTA
     ctaH1: "शक होने पर परखें ऐसा नहीं है।",
     ctaH2: "परखें क्योंकि इंटरनेट बदल गया है।",
     ctaBtn: "परखना शुरू करें",
-    
-    // News reference
+
+    // News
     heroNews1: "लखनऊ में AI वॉइस क्लोन स्कैम से ₹1.4 करोड़ का नुकसान",
     heroNews1Src: "टाइम्स ऑफ़ इंडिया, 2024",
     heroNews2: "नकली नौकरी ऑफर रैकेट का भंडाफोड़ — 3,200 छात्र ठगे गए",
@@ -221,6 +212,23 @@ const LOADING_LINES = [
   "सत्य की जाँच की जा रही है…",
 ];
 
+/* ─── Scrollytelling human messages between sections ─── */
+const INTERSTITIAL_MESSAGES_EN = [
+  { icon: "💬", text: "Forwarded many times doesn't mean true." },
+  { icon: "🛑", text: "Pause for five seconds." },
+  { icon: "🤝", text: "Trust people. Verify files." },
+  { icon: "🧠", text: "Doubt isn't disrespect." },
+  { icon: "🔍", text: "The safest click is the informed one." },
+];
+
+const INTERSTITIAL_MESSAGES_HI = [
+  { icon: "💬", text: "बहुत बार फॉरवर्ड होने का मतलब सच नहीं होता।" },
+  { icon: "🛑", text: "पाँच सेकंड रुकें।" },
+  { icon: "🤝", text: "लोगों पर भरोसा करें। फ़ाइलें परखें।" },
+  { icon: "🧠", text: "संदेह करना अपमान नहीं है।" },
+  { icon: "🔍", text: "सबसे सुरक्षित क्लिक वही है जो जानकारी के बाद हो।" },
+];
+
 /* ─── Fade-in wrapper ─── */
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
@@ -235,6 +243,27 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
     >
       {children}
     </motion.div>
+  );
+}
+
+/* ─── Scrollytelling Interstitial Banner ─── */
+function InterstitialMessage({ icon, text }: { icon: string; text: string }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  return (
+    <div ref={ref} className="relative z-10 py-10 flex items-center justify-center overflow-hidden">
+      {/* Decorative hairline */}
+      <div className="absolute inset-x-0 top-1/2 h-px bg-[#E4E1DA]/50 pointer-events-none" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 10 }}
+        animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
+        transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
+        className="relative bg-[#F6F4EF] px-8 py-4 rounded-2xl flex items-center gap-3 border border-[#E4E1DA] shadow-sm"
+      >
+        <span className="text-[22px] select-none">{icon}</span>
+        <p className="text-[15px] font-bold text-[#444] tracking-tight italic">"{text}"</p>
+      </motion.div>
+    </div>
   );
 }
 
@@ -317,6 +346,25 @@ function FlagLabel({ text, visible, delay = 0 }: { text: string; visible: boolea
   );
 }
 
+/* ─── Scrollytelling verify-card for interactive section ─── */
+function VerifyCard({ icon, label, desc, delay }: { icon: string; label: string; desc: string; delay: number }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 28 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1], delay }}
+      className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 flex flex-col gap-3 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+    >
+      <span className="text-[32px] select-none">{icon}</span>
+      <p className="text-[16px] font-extrabold text-[#181818] leading-snug">{label}</p>
+      <p className="text-[13px] text-[#666] leading-relaxed font-medium">{desc}</p>
+    </motion.div>
+  );
+}
+
 /* ════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════════ */
@@ -325,6 +373,7 @@ export default function Landing() {
   const { setActiveTab } = useStore();
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   const t = T[lang];
+  const interstitials = lang === 'en' ? INTERSTITIAL_MESSAGES_EN : INTERSTITIAL_MESSAGES_HI;
 
   /* Loading screen */
   const [loading, setLoading] = useState(true);
@@ -384,6 +433,21 @@ export default function Landing() {
     document.getElementById('stories')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  /* Verify card data */
+  const verifyCards = lang === 'en'
+    ? [
+        { icon: '🎙️', label: 'Suspicious voice call', desc: 'An AI-cloned voice sounds exactly like someone you love. PARAKH spots the difference.' },
+        { icon: '📄', label: 'Offer letter or certificate', desc: 'A forged document from a dream company. Signature looks real. Date looks off.' },
+        { icon: '🖼️', label: 'Viral image or screenshot', desc: 'A government notice forwarded on WhatsApp. Logos, seals — but no official source.' },
+        { icon: '🎬', label: 'Video of a public figure', desc: 'A famous face promoting something suspicious. Real voice or deepfake?' },
+      ]
+    : [
+        { icon: '🎙️', label: 'संदिग्ध वॉयस कॉल', desc: 'एक AI क्लोन आवाज़ बिल्कुल किसी प्रियजन जैसी लगती है। PARAKH फ़र्क पहचानता है।' },
+        { icon: '📄', label: 'ऑफर लेटर या सर्टिफ़िकेट', desc: 'एक ड्रीम कंपनी का जाली दस्तावेज़। हस्ताक्षर असली लगते हैं। तारीख अजीब है।' },
+        { icon: '🖼️', label: 'वायरल छवि या स्क्रीनशॉट', desc: 'व्हाट्सएप पर फॉरवर्ड की गई एक सरकारी सूचना। लोगो, सील — लेकिन कोई आधिकारिक स्रोत नहीं।' },
+        { icon: '🎬', label: 'किसी सार्वजनिक हस्ती का वीडियो', desc: 'एक प्रसिद्ध चेहरा कुछ संदिग्ध प्रचार कर रहा है। असली आवाज़ या डीपफेक?' },
+      ];
+
   return (
     <>
       {/* ─── LOADING SCREEN ─── */}
@@ -433,16 +497,16 @@ export default function Landing() {
         {/* Subtle background textures */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
           {/* Dot grid */}
-          <div 
-            className="absolute inset-0 opacity-[0.02]" 
+          <div
+            className="absolute inset-0 opacity-[0.02]"
             style={{
               backgroundImage: 'radial-gradient(#181818 1px, transparent 1px)',
               backgroundSize: '24px 24px'
             }}
           />
           {/* Soft paper noise texture */}
-          <div 
-            className="absolute inset-0 opacity-[0.015]" 
+          <div
+            className="absolute inset-0 opacity-[0.015]"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
             }}
@@ -664,6 +728,9 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* ── INTERSTITIAL 1 ── */}
+        <InterstitialMessage icon={interstitials[0].icon} text={interstitials[0].text} />
+
         {/* ════════════════════════════════════════════
             STORY 1 — Voice Clone (Phone Call)
             ════════════════════════════════════════════ */}
@@ -725,25 +792,16 @@ export default function Landing() {
                       <p className="text-[28px] font-extrabold leading-tight text-[#181818]">
                         {t.s1Reveal}
                       </p>
-                      
+
                       <div className="flex items-center gap-4">
                         <WaveformBars error />
                         <span className="text-[13px] text-[#666] font-mono font-bold">0:18</span>
                       </div>
-                      
+
                       {/* Verification Badge */}
                       <div className="relative">
                         <ResultBadge text={t.s1Result} visible />
                       </div>
-
-                      {/* Relief Message card */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
-                      >
-                        😊 {t.s1Relief}
-                      </motion.div>
 
                       {/* Real incident card */}
                       <motion.div
@@ -774,6 +832,9 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* ── INTERSTITIAL 2 ── */}
+        <InterstitialMessage icon={interstitials[1].icon} text={interstitials[1].text} />
+
         {/* ════════════════════════════════════════════
             STORY 2 — Fake Document (Email)
             ════════════════════════════════════════════ */}
@@ -796,15 +857,6 @@ export default function Landing() {
                       <div className="relative">
                         <ResultBadge text={t.s2Result} visible={story2.revealed} />
                       </div>
-
-                      {/* Relief Message card */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
-                      >
-                        😊 {t.s2Relief}
-                      </motion.div>
 
                       {/* Real incident card */}
                       <motion.div
@@ -891,6 +943,9 @@ export default function Landing() {
             </div>
           </div>
         </section>
+
+        {/* ── INTERSTITIAL 3 ── */}
+        <InterstitialMessage icon={interstitials[2].icon} text={interstitials[2].text} />
 
         {/* ─── STORY 3 — Manipulated Image (WhatsApp) ─── */}
         <section className="relative z-10 py-18 flex items-center justify-center" ref={story3.ref}>
@@ -984,15 +1039,6 @@ export default function Landing() {
                       <div className="relative">
                         <ResultBadge text={t.s3Result} visible={story3.revealed} />
                       </div>
-                      
-                      {/* Relief Message card */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
-                      >
-                        😊 {t.s3Relief}
-                      </motion.div>
 
                       {/* Real incident card */}
                       <motion.div
@@ -1023,6 +1069,9 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* ── INTERSTITIAL 4 ── */}
+        <InterstitialMessage icon={interstitials[3].icon} text={interstitials[3].text} />
+
         {/* ════════════════════════════════════════════
             STORY 4 — Deepfake (Instagram Reel)
             ════════════════════════════════════════════ */}
@@ -1050,15 +1099,6 @@ export default function Landing() {
                       <div className="relative">
                         <ResultBadge text={t.s4Result} visible />
                       </div>
-
-                      {/* Relief Message card */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
-                      >
-                        😊 {t.s4Relief}
-                      </motion.div>
 
                       {/* Real incident card */}
                       <motion.div
@@ -1132,16 +1172,37 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* ── INTERSTITIAL 5 ── */}
+        <InterstitialMessage icon={interstitials[4].icon} text={interstitials[4].text} />
+
         {/* ════════════════════════════════════════════
-            INTERACTIVE VERIFICATION
+            INTERACTIVE VERIFICATION — Scrollytelling cards
             ════════════════════════════════════════════ */}
         <section className="relative z-10 py-24">
-          <div className="max-w-[640px] mx-auto px-6">
+          <div className="max-w-[960px] mx-auto px-6">
             <Reveal>
-              <h2 className="text-center font-bold tracking-tight text-[#181818] mb-10" style={{ fontSize: 'clamp(30px, 4vw, 44px)' }}>
+              <h2 className="text-center font-bold tracking-tight text-[#181818] mb-4" style={{ fontSize: 'clamp(30px, 4vw, 44px)' }}>
                 {t.interTitle}
               </h2>
+              <p className="text-center text-[#666] text-[16px] font-medium mb-12 max-w-[520px] mx-auto leading-relaxed">
+                {lang === 'en'
+                  ? 'Every day, people encounter something online that doesn\'t feel quite right. These are the moments PARAKH was built for.'
+                  : 'हर दिन, लोग ऑनलाइन कुछ ऐसा देखते हैं जो सही नहीं लगता। इन्हीं पलों के लिए PARAKH बना है।'}
+              </p>
             </Reveal>
+
+            {/* Scrollytelling verify cards — staggered on scroll */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-14">
+              {verifyCards.map((card, i) => (
+                <VerifyCard
+                  key={i}
+                  icon={card.icon}
+                  label={card.label}
+                  desc={card.desc}
+                  delay={i * 0.1}
+                />
+              ))}
+            </div>
 
             <Reveal delay={0.12}>
               {/* Tabs */}
@@ -1166,7 +1227,7 @@ export default function Landing() {
               </div>
 
               {/* Drop zone */}
-              <div className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-8 shadow-[0_12px_32px_rgba(0,0,0,0.03)]">
+              <div className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-8 shadow-[0_12px_32px_rgba(0,0,0,0.03)] max-w-[640px] mx-auto">
                 {demoState === 'idle' && (
                   <div
                     onClick={startDemo}
