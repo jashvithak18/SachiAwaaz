@@ -116,7 +116,7 @@ export default function Dashboard() {
               {user?.profile?.name && user.profile.name.trim().length > 0
                 ? user.profile.name 
                 : (user?.email ? user.email.split('@')[0].split(/[\._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Investigator')}
-            </span> ({user?.role})
+            </span>
           </p>
         </div>
         <div className="flex gap-2">

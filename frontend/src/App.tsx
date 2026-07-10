@@ -189,7 +189,7 @@ export default function App() {
                   ? user.profile.name 
                   : (user?.email ? user.email.split('@')[0].split(/[\._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Investigator')}
               </p>
-              <p className="text-[10px] text-brand-500 capitalize">{user?.role} Account</p>
+              <p className="text-[10px] text-brand-500 capitalize">{user?.role === 'user' ? 'investigator' : user?.role} Account</p>
             </div>
           </div>
           <button 
