@@ -72,8 +72,19 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="bg-brand-100 text-brand-850 min-h-screen flex items-center justify-center relative px-6 py-12" style={{ backgroundColor: '#FFF8F2' }}>
+    <div className="bg-brand-100 text-brand-850 min-h-screen flex flex-col items-center justify-center relative px-6 py-12 animate-fade-in" style={{ backgroundColor: '#FFF8F2' }}>
       
+      {/* Back Button */}
+      <div className="w-full max-w-md mb-4 flex justify-start z-10">
+        <button
+          type="button"
+          onClick={() => setActiveTab('landing')}
+          className="flex items-center space-x-1.5 text-xs font-bold text-brand-600 hover:text-accent-blue transition bg-white border border-brand-200 py-1.5 px-3 rounded-xl shadow-md hover:scale-[1.01]"
+        >
+          <span>←</span> <span>Back to Home</span>
+        </button>
+      </div>
+
       {/* Background decoration */}
       <div className="absolute top-[20%] left-[10%] w-[350px] h-[350px] rounded-full bg-accent-blue/5 blur-[80px] pointer-events-none"></div>
 

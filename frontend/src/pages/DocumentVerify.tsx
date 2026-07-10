@@ -66,7 +66,18 @@ export default function DocumentVerify() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-4xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 max-w-4xl mx-auto">
+      {/* Back Button */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setActiveTab('dashboard')}
+          className="flex items-center space-x-1.5 text-xs font-bold text-brand-600 hover:text-accent-blue transition bg-white border border-brand-200 py-1.5 px-3 rounded-xl shadow-sm hover:scale-[1.01]"
+        >
+          <span>←</span> <span>Back to Dashboard</span>
+        </button>
+      </div>
+
       {/* Title */}
       <div>
         <h2 className="text-3xl font-black font-devanagari tracking-tight text-brand-850 flex items-center space-x-3">
