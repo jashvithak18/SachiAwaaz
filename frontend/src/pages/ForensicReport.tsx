@@ -363,10 +363,28 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
 
           {report.mediaType === 'document' && details && (
             <div className="bg-white border border-brand-200 p-6 rounded-2xl text-xs space-y-3">
-              <h4 className="font-bold text-brand-850 uppercase tracking-wider">Document Integrity</h4>
-              <p>OCR Layer Consistency: <span className="font-bold">{details.ocrConsistency}</span></p>
-              <p>Signature Block Check: <span className="font-bold">{details.signaturePresence}</span></p>
-              <p>Extracted Text Snippet: <span className="font-bold italic">"{details.extractedText}"</span></p>
+              <h4 className="font-bold text-brand-850 uppercase tracking-wider flex items-center gap-1.5 pb-1 border-b border-brand-100">
+                <span>📄</span> Document Integrity Diagnostics
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div className="space-y-2">
+                  <p className="font-semibold text-brand-500">Structural Auditing:</p>
+                  <p>OCR Layer Consistency: <span className="font-bold">{details.ocrConsistency}</span></p>
+                  <p>Digital Signature Block: <span className="font-bold">{details.signaturePresence}</span></p>
+                  <p className="truncate">Extracted Text Snippet: <span className="font-bold italic">"{details.extractedText}"</span></p>
+                </div>
+                {details.metadata && details.metadata.isInternshipDoc && (
+                  <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl space-y-1.5">
+                    <div className="font-bold text-brand-850 uppercase text-[9px] tracking-wider mb-1 flex items-center gap-1">
+                      <span>🎓</span> Internship Certificate / Document Audit
+                    </div>
+                    <p>Verified Recipient: <span className="font-bold text-brand-900">{details.metadata.recipientName}</span></p>
+                    <p>Name Alignment: <span className={`font-bold ${details.metadata.nameVerified === 'Verified Match' ? 'text-accent-green' : 'text-accent-amber'}`}>{details.metadata.nameVerified}</span></p>
+                    <p>Issuing Organisation: <span className="font-bold text-brand-900">{details.metadata.organization}</span></p>
+                    <p>Signature Verification: <span className="font-bold text-brand-900">{details.metadata.signaturesVerified}</span></p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
