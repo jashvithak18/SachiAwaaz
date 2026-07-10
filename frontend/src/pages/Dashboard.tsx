@@ -25,7 +25,7 @@ interface Case {
 }
 
 export default function Dashboard() {
-  const { token, user, setActiveTab, notifications, markAsRead } = useStore();
+  const { token, user, setActiveTab, notifications, markAsRead, logout } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
 
@@ -303,6 +303,17 @@ export default function Dashboard() {
                     className="w-1/2 bg-accent-blue hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-xl transition"
                   >
                     {saveLoading ? 'Saving...' : 'Save Profile'}
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-brand-100 font-bold">
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="w-full bg-accent-red/10 hover:bg-accent-red/20 text-accent-red text-xs font-black py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5"
+                  >
+                    <span>🚪</span>
+                    <span>Logout Account</span>
                   </button>
                 </div>
               </form>
