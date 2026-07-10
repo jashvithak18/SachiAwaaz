@@ -7,7 +7,7 @@ interface User {
   role: 'user' | 'admin';
   profile?: {
     name?: string;
-    company?: string;
+    avatar?: string;
   };
 }
 

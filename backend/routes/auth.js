@@ -164,6 +164,8 @@ router.put('/profile', authMiddleware, async (req, res) => {
     if (name !== undefined) user.profile.name = name;
     if (avatar !== undefined) user.profile.avatar = avatar;
 
+    // Explicitly notify Mongoose of nested profile subdocument modifications
+    user.markModified('profile');
     const updatedUser = await user.save();
     res.json({
       id: updatedUser._id,
