@@ -268,7 +268,9 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
             </button>
             <span className="text-4xl">{isSafe ? '✅' : (isSusp ? '⚠️' : '🚨')}</span>
             <h2 className={`text-2xl font-black ${isSafe ? 'text-accent-green' : (isSusp ? 'text-accent-amber' : 'text-accent-red')}`}>
-              {isSafe ? 'Likely Authentic' : (isSusp ? 'Needs Manual Review' : 'Highly Suspicious')}
+              {isSafe 
+                ? (report.mediaType === 'document' && (details?.metadata?.aiTextDetected || report.aiExplanation?.includes('AI-assisted')) ? 'AI Generated but Authentic' : 'Likely Authentic')
+                : (isSusp ? 'Needs Manual Review' : 'Highly Suspicious')}
             </h2>
             <p className="text-xs text-brand-500 uppercase tracking-widest font-bold">Trust Score: {report.authenticityScore}%</p>
           </div>
@@ -577,7 +579,11 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
                   report.verdict === 'safe'
                     ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
                     : (report.verdict === 'suspicious' ? 'bg-accent-amber/10 text-accent-amber border-accent-amber/20' : 'bg-accent-red/10 text-accent-red border-accent-red/20')
-                }`}>{report.verdict}</span>
+                }`}>
+                  {report.verdict === 'safe' && report.mediaType === 'document' && report.aiExplanation?.includes('AI-assisted')
+                    ? 'AI Generated but Authentic'
+                    : report.verdict}
+                </span>
               </div>
 
               {/* Stats detail */}
