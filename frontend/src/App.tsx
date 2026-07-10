@@ -194,10 +194,11 @@ export default function App() {
           </div>
           <button 
             onClick={logout}
-            className="text-brand-500 hover:text-accent-red p-2 rounded-lg transition"
+            className="flex items-center space-x-1 py-1.5 px-2.5 bg-brand-100/80 hover:bg-accent-red/10 text-brand-600 hover:text-accent-red rounded-lg transition font-bold text-xs shrink-0 border border-brand-200/50"
             title="Log Out"
           >
-            🚪
+            <span>🚪</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
