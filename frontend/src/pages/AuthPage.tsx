@@ -11,7 +11,6 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [company, setCompany] = useState('');
   const [tokenInput, setTokenInput] = useState('');
   
   const [loading, setLoading] = useState(false);
@@ -31,7 +30,7 @@ export default function AuthPage() {
 
     if (mode === 'signup') {
       endpoint = '/auth/signup';
-      body = { email, password, name, company };
+      body = { email, password, name };
     } else if (mode === 'forgot') {
       endpoint = '/auth/forgot-password';
       body = { email };
@@ -109,29 +108,17 @@ export default function AuthPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {mode === 'signup' && (
-            <>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
-                  placeholder="e.g. Arthur Pendragon"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Company / Organization</label>
-                <input
-                  type="text"
-                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
-                  placeholder="e.g. PARAKH Forensics"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                />
-              </div>
-            </>
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-brand-500 tracking-wider mb-2">Full Name</label>
+              <input
+                type="text"
+                required
+                className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
+                placeholder="e.g. Arthur Pendragon"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
           )}
 
           {mode !== 'verify' && (

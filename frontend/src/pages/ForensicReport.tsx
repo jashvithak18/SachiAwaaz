@@ -167,7 +167,7 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
       });
       if (response.ok) {
         queryClient.invalidateQueries({ queryKey: ['reportsList'] });
-        if (reportId) setActiveTab('reports');
+        if (reportId) setActiveTab(reportDetail?.report?.mediaType || 'dashboard');
       }
     } catch (err) {
       console.error(err);
@@ -240,8 +240,8 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
     return (
       <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto">
         <div className="flex justify-between items-center">
-          <button onClick={() => setActiveTab('reports')} className="text-brand-500 hover:text-brand-800 text-xs font-bold flex items-center gap-1.5 focus:outline-none">
-            <span>←</span> Back to ledger
+          <button onClick={() => setActiveTab(report.mediaType)} className="text-brand-500 hover:text-brand-800 text-xs font-bold flex items-center gap-1.5 focus:outline-none">
+            <span>←</span> Back to {report.mediaType === 'qr' ? 'QR Code Scanner' : report.mediaType.charAt(0).toUpperCase() + report.mediaType.slice(1) + ' Verification'}
           </button>
           <div className="flex gap-2">
             <button onClick={downloadForensicPDF} className="bg-accent-blue text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition hover:bg-blue-700">

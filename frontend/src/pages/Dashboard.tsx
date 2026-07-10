@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useQuery } from '@tanstack/react-query';
 
@@ -30,6 +30,77 @@ export default function Dashboard() {
   const [filterType, setFilterType] = useState<string>('all');
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [editName, setEditName] = useState(user?.profile?.name || '');
+  const [editAvatar, setEditAvatar] = useState(user?.profile?.avatar || '');
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setEditName(user.profile?.name || '');
+      setEditAvatar(user.profile?.avatar || '');
+    }
+  }, [user]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveError('');
+    setSaveSuccess('');
+    setSaveLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: editName, avatar: editAvatar })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Profile update failed.');
+
+      const formattedUser = {
+        id: user?.id,
+        email: user?.email,
+        role: user?.role,
+        profile: data.profile
+      };
+      localStorage.setItem('aegis_user', JSON.stringify(formattedUser));
+      useStore.setState({ user: formattedUser });
+      
+      setSaveSuccess('Profile updated successfully!');
+      setTimeout(() => {
+        setShowProfileEdit(false);
+        setSaveSuccess('');
+      }, 1500);
+    } catch (err: any) {
+      setSaveError(err.message);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024) {
+        setSaveError('Image size exceeds 200KB limit.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditAvatar(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const presetAvatars = [
+    '🕵️‍♂️', '👩‍💻', '👮‍♀️', '🤖', '🦸‍♂️', '🧑‍🚀', '🦁', '🦉', '🦊', '🧠'
+  ];
 
   // 1. Fetch user reports dynamically
   const { data: reports = [], isLoading: reportsLoading, refetch: refetchReports } = useQuery<Report[]>({
@@ -119,19 +190,124 @@ export default function Dashboard() {
             </span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={handleRefresh}
-            className="bg-white hover:bg-brand-50 border border-brand-200 text-brand-600 px-4 py-2.5 rounded-xl font-semibold transition text-xs min-h-[44px] shadow-sm"
+        
+        {/* Profile Card Place */}
+        <div className="relative">
+          <div 
+            onClick={() => setShowProfileEdit(!showProfileEdit)}
+            className="flex items-center space-x-3 bg-white border border-brand-200 hover:border-brand-350 p-2.5 pr-4 rounded-2xl shadow-sm cursor-pointer transition select-none hover:scale-[1.01]"
           >
-            🔄 Refresh Metrics
-          </button>
-          <button 
-            onClick={() => setActiveTab('image')}
-            className="bg-accent-blue hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition text-xs shadow-md shadow-accent-blue/10 min-h-[44px]"
-          >
-            + Run Forensic Audit
-          </button>
+            {user?.profile?.avatar ? (
+              user.profile.avatar.startsWith('data:image') ? (
+                <img 
+                  src={user.profile.avatar} 
+                  alt="Avatar" 
+                  className="w-10 h-10 rounded-full object-cover border border-accent-blue/20" 
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-accent-blue/10 border border-accent-blue/25 flex items-center justify-center text-xl">
+                  {user.profile.avatar}
+                </div>
+              )
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-accent-blue/10 text-accent-blue font-bold flex items-center justify-center border border-accent-blue/25">
+                {(user?.profile?.name || user?.email || 'I')[0].toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p className="text-xs font-black text-brand-850">
+                {user?.profile?.name || 'Investigator'}
+              </p>
+              <p className="text-[10px] text-brand-500 truncate max-w-[150px]">
+                {user?.email}
+              </p>
+            </div>
+            <span className="text-xs text-brand-400">▼</span>
+          </div>
+
+          {/* Edit Modal Popover */}
+          {showProfileEdit && (
+            <div className="absolute right-0 mt-3 w-80 bg-white border border-brand-250 p-5 rounded-2xl shadow-2xl z-50 space-y-4 animate-fade-in">
+              <div className="flex justify-between items-center border-b border-brand-100 pb-2">
+                <span className="text-xs font-bold text-brand-850 uppercase tracking-wide">Edit Investigator Profile</span>
+                <button 
+                  onClick={() => setShowProfileEdit(false)}
+                  className="text-brand-400 hover:text-brand-700 text-sm font-black p-1"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {saveError && (
+                <div className="bg-accent-red/10 border border-accent-red/20 text-accent-red text-[10px] font-semibold p-2.5 rounded-xl">
+                  {saveError}
+                </div>
+              )}
+              {saveSuccess && (
+                <div className="bg-accent-green/10 border border-accent-green/20 text-accent-green text-[10px] font-semibold p-2.5 rounded-xl">
+                  {saveSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateProfile} className="space-y-3.5">
+                <div>
+                  <label className="block text-[9px] font-bold uppercase text-brand-500 tracking-wider mb-1.5 font-bold">Investigator Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-3.5 py-2.5 text-xs focus:outline-none placeholder-brand-400 text-brand-800 font-bold"
+                    placeholder="Name"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[9px] font-bold uppercase text-brand-500 tracking-wider mb-1.5 font-bold">Choose Preset Avatar</label>
+                  <div className="grid grid-cols-5 gap-2 pb-1.5">
+                    {presetAvatars.map((av) => (
+                      <button
+                        key={av}
+                        type="button"
+                        onClick={() => setEditAvatar(av)}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition ${editAvatar === av ? 'bg-accent-blue/15 border-2 border-accent-blue' : 'bg-brand-50 border border-brand-200 hover:bg-brand-100'}`}
+                      >
+                        {av}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[9px] font-bold uppercase text-brand-500 tracking-wider mb-1 font-bold">Or Upload Custom Avatar</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFileChange}
+                    className="w-full text-[10px] text-brand-550 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-semibold file:bg-brand-100 file:text-brand-700 hover:file:bg-brand-200"
+                  />
+                  <p className="text-[8px] text-brand-450 mt-1">PNG, JPG formats supported (max 200KB size).</p>
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t border-brand-100 font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setShowProfileEdit(false)}
+                    className="w-1/2 bg-brand-100 hover:bg-brand-200 text-brand-700 text-xs font-semibold py-2 px-3 rounded-xl transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saveLoading}
+                    className="w-1/2 bg-accent-blue hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-xl transition"
+                  >
+                    {saveLoading ? 'Saving...' : 'Save Profile'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </div>
 

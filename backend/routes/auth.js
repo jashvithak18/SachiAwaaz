@@ -8,7 +8,7 @@ const { authMiddleware, JWT_SECRET } = require('../auth');
 
 // Register User
 router.post('/signup', async (req, res) => {
-  const { email, password, name, company } = req.body;
+  const { email, password, name, avatar } = req.body;
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required.' });
   }
@@ -29,7 +29,7 @@ router.post('/signup', async (req, res) => {
       email,
       password: hashedPassword,
       verificationToken,
-      profile: { name, company }
+      profile: { name, avatar: avatar || '' }
     });
 
     const savedUser = await user.save();
@@ -154,15 +154,15 @@ router.get('/profile', authMiddleware, async (req, res) => {
 });
 
 router.put('/profile', authMiddleware, async (req, res) => {
-  const { name, company } = req.body;
+  const { name, avatar } = req.body;
   try {
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    if (name) user.profile.name = name;
-    if (company) user.profile.company = company;
+    if (name !== undefined) user.profile.name = name;
+    if (avatar !== undefined) user.profile.avatar = avatar;
 
     const updatedUser = await user.save();
     res.json({

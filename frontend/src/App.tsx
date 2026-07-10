@@ -9,7 +9,6 @@ import ImageVerify from './pages/ImageVerify';
 import DocumentVerify from './pages/DocumentVerify';
 import CaseWorkspace from './pages/CaseWorkspace';
 import ForensicReport from './pages/ForensicReport';
-import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
 import WebsiteVerify from './pages/WebsiteVerify';
 import EmailVerify from './pages/EmailVerify';
@@ -154,13 +153,6 @@ export default function App() {
               tab="reports" 
               active={activeTab === 'reports' || activeTab.startsWith('report_detail:')} 
             />
-            <SidebarItem 
-              icon="⚙️" 
-              label="System Settings" 
-              tab="settings" 
-              active={activeTab === 'settings'} 
-            />
-
             {user?.role === 'admin' && (
               <>
                 <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-accent-teal uppercase tracking-widest">
@@ -180,9 +172,17 @@ export default function App() {
         {/* User Card */}
         <div className="p-4 border-t border-brand-200 bg-brand-50 flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-full bg-accent-blue/10 text-accent-blue font-bold flex items-center justify-center border border-accent-blue/20 shrink-0">
-              {(user?.profile?.name || user?.email || 'I')[0].toUpperCase()}
-            </div>
+            {user?.profile?.avatar ? (
+              <img 
+                src={user.profile.avatar} 
+                alt="Avatar" 
+                className="w-9 h-9 rounded-full object-cover border border-accent-blue/20 shrink-0" 
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-accent-blue/10 text-accent-blue font-bold flex items-center justify-center border border-accent-blue/20 shrink-0">
+                {(user?.profile?.name || user?.email || 'I')[0].toUpperCase()}
+              </div>
+            )}
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-brand-800 truncate">
                 {user?.profile?.name && user.profile.name.trim().length > 0
@@ -211,7 +211,6 @@ export default function App() {
         {activeTab === 'image' && <ImageVerify />}
         {activeTab === 'document' && <DocumentVerify />}
         {activeTab === 'reports' && <ForensicReport />}
-        {activeTab === 'settings' && <Settings />}
         {activeTab === 'admin' && <AdminPanel />}
         {activeTab === 'website' && <WebsiteVerify />}
         {activeTab === 'email' && <EmailVerify />}

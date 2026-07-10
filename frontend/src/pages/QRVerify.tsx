@@ -175,10 +175,10 @@ export default function QRVerify() {
 
             <div className="text-center md:text-right">
               <button
-                onClick={() => setActiveTab('reports')}
+                onClick={() => setResult(null)}
                 className="bg-brand-50 hover:bg-brand-200 border border-brand-200 text-brand-700 px-4 py-2 rounded-xl text-xs font-bold transition"
               >
-                💾 View in Ledger
+                ← Back to Verification
               </button>
             </div>
           </div>
