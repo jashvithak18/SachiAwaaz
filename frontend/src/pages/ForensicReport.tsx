@@ -306,18 +306,61 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
           )}
 
           {report.mediaType === 'email' && details && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-              <div className="bg-white border border-brand-200 p-5 rounded-2xl space-y-2">
-                <h4 className="font-bold text-brand-800 uppercase tracking-wider">Header Alignments</h4>
-                <div className="flex justify-between"><span>SPF:</span><span className="font-bold text-accent-green">{details.spf}</span></div>
-                <div className="flex justify-between"><span>DKIM:</span><span className="font-bold text-accent-green">{details.dkim}</span></div>
-                <div className="flex justify-between"><span>DMARC:</span><span className="font-bold text-accent-green">{details.dmarc}</span></div>
-                <div className="flex justify-between"><span>Sender IP:</span><span className="font-bold">{details.senderIp}</span></div>
+            <div className="space-y-6 text-xs">
+              {/* Email Envelope Summary */}
+              <div className="bg-white border border-brand-200 p-6 rounded-2xl space-y-4 shadow-sm">
+                <h4 className="font-bold text-brand-850 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-brand-100">
+                  <span>✉️</span> Email Envelope Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <p><span className="text-brand-500 font-medium">From (Sender):</span> <span className="font-bold text-brand-800">{details.sender}</span></p>
+                    <p><span className="text-brand-500 font-medium">To (Recipient):</span> <span className="font-bold text-brand-800">{details.recipient}</span></p>
+                    <p><span className="text-brand-500 font-medium">Subject:</span> <span className="font-bold text-brand-800">{details.subject || 'No Subject'}</span></p>
+                  </div>
+                  <div className="p-3.5 bg-brand-50 border border-brand-200 rounded-xl space-y-1">
+                    <div className="font-bold text-[9px] uppercase tracking-wider text-brand-500">Email Authenticity Assessment</div>
+                    {report.verdict === 'safe' ? (
+                      <div className="text-accent-green font-extrabold text-xs flex items-center gap-1">
+                        <span>✅</span> Genuine / Trusted Email
+                      </div>
+                    ) : report.verdict === 'suspicious' ? (
+                      <div className="text-accent-amber font-extrabold text-xs flex items-center gap-1">
+                        <span>⚠️</span> Suspicious / Header Mismatch
+                      </div>
+                    ) : (
+                      <div className="text-accent-red font-extrabold text-xs flex items-center gap-1">
+                        <span>🚨</span> Spam / Phishing Threat
+                      </div>
+                    )}
+                    <p className="text-[10px] text-brand-600 leading-normal pt-1">
+                      {report.verdict === 'safe'
+                        ? 'Email authentication (SPF/DKIM/DMARC) aligns correctly and the sending domain is verified as safe.'
+                        : report.verdict === 'suspicious'
+                        ? 'Mismatches detected in Reply-To channels, or SPF alignment fails. Caution advised.'
+                        : 'High risk detected. Domain spoofing, fee-charging internship solicitation, or credential phishing flags triggered.'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-white border border-brand-200 p-5 rounded-2xl space-y-2">
-                <h4 className="font-bold text-brand-800 uppercase tracking-wider">Spoofing Indicators</h4>
-                <div className="flex justify-between"><span>Display Name Spoof:</span><span className="font-bold text-accent-red">{details.displayNameSpoofing ? 'Yes' : 'No'}</span></div>
-                <div className="flex justify-between"><span>Reply-To Address Mismatch:</span><span className="font-bold text-accent-red">{details.replyToMismatch ? 'Mismatch' : 'None'}</span></div>
+
+              {/* Detailed technical indicators */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white border border-brand-200 p-5 rounded-2xl space-y-2.5">
+                  <h4 className="font-bold text-brand-800 uppercase tracking-wider pb-1 border-b border-brand-100">Header Alignments</h4>
+                  <div className="flex justify-between"><span>SPF (Sender Policy Framework):</span><span className={`font-bold ${details.spf === 'PASS' ? 'text-accent-green' : 'text-accent-red'}`}>{details.spf}</span></div>
+                  <div className="flex justify-between"><span>DKIM (Cryptographic Sign):</span><span className={`font-bold ${details.dkim === 'PASS' ? 'text-accent-green' : 'text-accent-red'}`}>{details.dkim}</span></div>
+                  <div className="flex justify-between"><span>DMARC (Domain Alignment):</span><span className={`font-bold ${details.dmarc === 'PASS' ? 'text-accent-green' : 'text-accent-red'}`}>{details.dmarc}</span></div>
+                  <div className="flex justify-between"><span>Sender Origin IP:</span><span className="font-bold font-mono">{details.senderIp || '127.0.0.1'}</span></div>
+                </div>
+
+                <div className="bg-white border border-brand-200 p-5 rounded-2xl space-y-2.5">
+                  <h4 className="font-bold text-brand-800 uppercase tracking-wider pb-1 border-b border-brand-100">Spoofing Indicators</h4>
+                  <div className="flex justify-between"><span>Display Name Spoofing:</span><span className={`font-bold ${details.displayNameSpoofing ? 'text-accent-red' : 'text-brand-600'}`}>{details.displayNameSpoofing ? 'YES (Risk)' : 'None'}</span></div>
+                  <div className="flex justify-between"><span>Reply-To Address Mismatch:</span><span className={`font-bold ${details.replyToMismatch ? 'text-accent-red' : 'text-brand-600'}`}>{details.replyToMismatch ? 'Mismatch (Risk)' : 'None'}</span></div>
+                  <div className="flex justify-between"><span>Suspicious Attachments:</span><span className="font-bold text-brand-600">{details.suspiciousAttachments?.length || 0}</span></div>
+                  <div className="flex justify-between"><span>Malicious URL Links:</span><span className="font-bold text-brand-600">{details.maliciousLinks?.length || 0}</span></div>
+                </div>
               </div>
             </div>
           )}
