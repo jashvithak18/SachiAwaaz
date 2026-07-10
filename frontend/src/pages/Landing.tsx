@@ -7,6 +7,20 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* ─── Brand palette (matches tailwind.config.js exactly) ─── */
+const C = {
+  bg:        '#F6F4EF',   // cream background
+  card:      '#FBFAF8',   // card surface
+  text:      '#181818',   // brand-800 — primary text
+  muted:     '#4b4845',   // brand-600 — secondary text (darker than old #666)
+  subtle:    '#666666',   // brand-500 — captions / meta
+  green:     '#3E5C4B',   // accent-blue — the app's green
+  greenDim:  '#3E5C4B26', // green at 15% opacity
+  greenBorder:'#3E5C4B44',
+  red:       '#A1493F',   // accent-red
+  border:    '#E4E1DA',   // border colour
+};
+
 /* ─── Copy ─── */
 const copy = {
   heroH1: "Some lies don't look like lies.",
@@ -115,18 +129,19 @@ const INTERSTITIALS = [
   { icon: "🔍", text: "The safest click is the informed one." },
 ];
 
-/* ─── Dark green accent used throughout ─── */
-const GREEN = '#2D5A3D';
-
-/* ─── Fade-in wrapper ─── */
-function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+/* ─── Generic scroll-reveal wrapper ─── */
+function Reveal({ children, className = '', delay = 0, from = 'bottom' }:
+  { children: React.ReactNode; className?: string; delay?: number; from?: 'bottom' | 'left' | 'right' }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
+  const initial = from === 'left' ? { opacity: 0, x: -24 }
+    : from === 'right' ? { opacity: 0, x: 24 }
+    : { opacity: 0, y: 24 };
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
+      initial={initial}
+      animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
       transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1], delay }}
       className={className}
     >
@@ -135,38 +150,25 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
   );
 }
 
-/* ─── Scrollytelling interstitial banner ─── */
+/* ─── Interstitial scrollytelling banner ─── */
 function InterstitialMessage({ icon, text }: { icon: string; text: string }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   return (
     <div ref={ref} className="relative z-10 py-10 flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-x-0 top-1/2 h-px bg-[#E4E1DA]/60 pointer-events-none" />
+      <div className="absolute inset-x-0 top-1/2 h-px pointer-events-none" style={{ backgroundColor: `${C.border}` }} />
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 12 }}
+        initial={{ opacity: 0, scale: 0.9, y: 14 }}
         animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
         transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
-        className="relative bg-[#F6F4EF] px-8 py-4 rounded-2xl flex items-center gap-3 border border-[#E4E1DA] shadow-md"
+        className="relative px-8 py-4 rounded-2xl flex items-center gap-3 shadow-md border"
+        style={{ backgroundColor: C.card, borderColor: C.border }}
       >
         <span className="text-[20px] select-none">{icon}</span>
-        <p className="text-[15px] font-bold tracking-tight italic" style={{ color: GREEN }}>"{text}"</p>
+        <p className="text-[15px] font-bold tracking-tight italic" style={{ color: C.green }}>"{text}"</p>
       </motion.div>
     </div>
   );
-}
-
-/* ─── Story reveal hook ─── */
-function useStoryReveal() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-140px' });
-  const [revealed, setRevealed] = useState(false);
-  useEffect(() => {
-    if (inView && !revealed) {
-      const timer = setTimeout(() => setRevealed(true), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [inView, revealed]);
-  return { ref, revealed, inView };
 }
 
 /* ─── Phone Frame ─── */
@@ -185,11 +187,7 @@ function WaveformBars({ error = false }: { error?: boolean }) {
   return (
     <div className="flex items-end gap-[2px] h-[28px]">
       {heights.map((h, i) => (
-        <div
-          key={i}
-          className={`w-[3px] rounded-full ${error ? 'bg-[#A1493F]' : 'bg-[#3E5C4B]'}`}
-          style={{ height: `${h}px` }}
-        />
+        <div key={i} className="w-[3px] rounded-full" style={{ height: `${h}px`, backgroundColor: error ? C.red : C.green }} />
       ))}
     </div>
   );
@@ -204,9 +202,10 @@ function ResultBadge({ text, visible }: { text: string; visible: boolean }) {
           initial={{ opacity: 0, y: 12, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-6 inline-flex items-center gap-3 border border-[#A1493F]/35 bg-[#A1493F]/5 px-5 py-3 rounded-2xl shadow-[0_12px_32px_rgba(161,73,63,0.12)]"
+          className="mt-5 inline-flex items-center gap-3 px-5 py-3 rounded-2xl border shadow-md"
+          style={{ borderColor: `${C.red}55`, backgroundColor: `${C.red}0D` }}
         >
-          <span className="text-[14px] font-black text-[#A1493F] tracking-tight">{text}</span>
+          <span className="text-[14px] font-black tracking-tight" style={{ color: C.red }}>{text}</span>
         </motion.div>
       )}
     </AnimatePresence>
@@ -222,7 +221,8 @@ function FlagLabel({ text, visible, delay = 0 }: { text: string; visible: boolea
           initial={{ opacity: 0, scale: 0.9, y: 4 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4, delay }}
-          className="inline-block text-[11px] font-black text-[#A1493F] bg-[#A1493F]/8 border border-[#A1493F]/20 px-3 py-1.5 rounded-xl shadow-sm"
+          className="inline-block text-[11px] font-black px-3 py-1.5 rounded-xl border"
+          style={{ color: C.red, backgroundColor: `${C.red}0D`, borderColor: `${C.red}33` }}
         >
           {text}
         </motion.span>
@@ -241,30 +241,111 @@ function VerifyCard({ icon, label, desc, delay }: { icon: string; label: string;
       initial={{ opacity: 0, y: 28 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1], delay }}
-      className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 flex flex-col gap-3 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="rounded-3xl p-6 flex flex-col gap-3 border-2 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      style={{ backgroundColor: C.card, borderColor: C.border }}
     >
       <span className="text-[32px] select-none">{icon}</span>
-      <p className="text-[16px] font-extrabold text-[#181818] leading-snug">{label}</p>
-      <p className="text-[13px] text-[#666] leading-relaxed font-medium">{desc}</p>
+      <p className="text-[16px] font-extrabold leading-snug" style={{ color: C.text }}>{label}</p>
+      <p className="text-[13px] leading-relaxed font-medium" style={{ color: C.muted }}>{desc}</p>
     </motion.div>
   );
 }
 
-/* ─── Animated trust line that slides in ─── */
+/* ─── Trust section animated line ─── */
 function TrustLine({ text, delay }: { text: string; delay: number }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-30px' });
+  const inView = useInView(ref, { once: true, margin: '-20px' });
   return (
     <motion.p
       ref={ref}
-      initial={{ opacity: 0, x: -18 }}
+      initial={{ opacity: 0, x: -20 }}
       animate={inView ? { opacity: 1, x: 0 } : {}}
       transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1], delay }}
       className="text-[22px] leading-snug font-medium"
-      style={{ color: '#555' }}
+      style={{ color: C.muted }}
     >
       {text}
     </motion.p>
+  );
+}
+
+/* ─── Story text panel — each element has its own scroll trigger ─── */
+function StoryText({ quote, badge, news, newsSrc, flags }: {
+  quote: string;
+  badge: string;
+  news: string;
+  newsSrc: string;
+  flags?: string[];
+}) {
+  const quoteRef = useRef(null);
+  const badgeRef = useRef(null);
+  const newsRef  = useRef(null);
+  const quoteInView = useInView(quoteRef, { once: true, margin: '-60px' });
+  const badgeInView = useInView(badgeRef, { once: true, margin: '-60px' });
+  const newsInView  = useInView(newsRef,  { once: true, margin: '-60px' });
+
+  return (
+    <div className="max-w-[480px] space-y-6">
+      {/* Quote */}
+      <motion.p
+        ref={quoteRef}
+        initial={{ opacity: 0, y: 22 }}
+        animate={quoteInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
+        className="text-[26px] font-extrabold leading-tight"
+        style={{ color: C.text }}
+      >
+        {quote}
+      </motion.p>
+
+      {/* Optional flag pills */}
+      {flags && (
+        <motion.div
+          ref={badgeRef}
+          initial={{ opacity: 0, y: 14 }}
+          animate={badgeInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
+          className="flex flex-wrap gap-2"
+        >
+          {flags.map((f, i) => <FlagLabel key={i} text={f} visible delay={i * 0.12} />)}
+        </motion.div>
+      )}
+
+      {/* Result badge */}
+      {!flags && (
+        <motion.div
+          ref={badgeRef}
+          initial={{ opacity: 0, y: 14 }}
+          animate={badgeInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.08 }}
+        >
+          <ResultBadge text={badge} visible={badgeInView} />
+        </motion.div>
+      )}
+
+      {/* When flags AND badge both needed */}
+      {flags && (
+        <ResultBadge text={badge} visible={badgeInView} />
+      )}
+
+      {/* News card */}
+      <motion.div
+        ref={newsRef}
+        initial={{ opacity: 0, y: 18 }}
+        animate={newsInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1], delay: 0.12 }}
+        className="rounded-3xl p-6 border-2 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+        style={{ backgroundColor: C.card, borderColor: C.border }}
+      >
+        <p className="text-[10px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: C.red }}>
+          <span>📰</span><span>Real Incident</span>
+        </p>
+        <p className="text-[14px] font-bold leading-relaxed" style={{ color: C.text }}>{news}</p>
+        <p className="text-[11px] mt-2 flex items-center gap-1 font-bold" style={{ color: C.subtle }}>
+          <span>📰</span><span>{newsSrc}</span>
+        </p>
+      </motion.div>
+    </div>
   );
 }
 
@@ -299,11 +380,23 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const story1 = useStoryReveal();
-  const story2 = useStoryReveal();
-  const story3 = useStoryReveal();
-  const story4 = useStoryReveal();
+  /* Story image reveal refs (immediate on scroll into view) */
+  const s1imgRef = useRef(null);
+  const s2imgRef = useRef(null);
+  const s3imgRef = useRef(null);
+  const s4imgRef = useRef(null);
+  const s1ImgView = useInView(s1imgRef, { once: true, margin: '-80px' });
+  const s2ImgView = useInView(s2imgRef, { once: true, margin: '-80px' });
+  const s3ImgView = useInView(s3imgRef, { once: true, margin: '-80px' });
+  const s4ImgView = useInView(s4imgRef, { once: true, margin: '-80px' });
 
+  /* Story glitch (triggered ~1s after image appears) */
+  const [s1glitch, setS1glitch] = useState(false);
+  const [s4glitch, setS4glitch] = useState(false);
+  useEffect(() => { if (s1ImgView) { setTimeout(() => setS1glitch(true), 1200); } }, [s1ImgView]);
+  useEffect(() => { if (s4ImgView) { setTimeout(() => setS4glitch(true), 1200); } }, [s4ImgView]);
+
+  /* Interactive demo */
   const [activeTab, setTab] = useState('voice');
   const [demoState, setDemoState] = useState<'idle' | 'progress' | 'done'>('idle');
   const [progress, setProgress] = useState(0);
@@ -314,11 +407,7 @@ export default function Landing() {
     setProgress(0);
     const interval = setInterval(() => {
       setProgress((p) => {
-        if (p >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setDemoState('done'), 300);
-          return 100;
-        }
+        if (p >= 100) { clearInterval(interval); setTimeout(() => setDemoState('done'), 300); return 100; }
         return p + 2;
       });
     }, 40);
@@ -333,7 +422,6 @@ export default function Landing() {
     { icon: '🎬', label: 'Video of a public figure', desc: 'A famous face promoting something suspicious. Real voice or deepfake?' },
   ];
 
-  /* trust section ref for stagger */
   const trustRef = useRef(null);
   const trustInView = useInView(trustRef, { once: true, margin: '-80px' });
 
@@ -346,14 +434,9 @@ export default function Landing() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
-            style={{ backgroundColor: '#F6F4EF' }}
+            style={{ backgroundColor: C.bg }}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-[200px]"
-            >
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="max-w-[200px]">
               <Logo />
             </motion.div>
             <div className="mt-8 h-[24px] relative">
@@ -364,8 +447,8 @@ export default function Landing() {
                   animate={{ opacity: 0.6, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="text-[15px] text-[#666] absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
-                  style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}
+                  className="text-[15px] absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
+                  style={{ color: C.muted, fontFamily: 'Noto Sans Devanagari, sans-serif' }}
                 >
                   {LOADING_LINES[loadLineIdx]}
                 </motion.p>
@@ -375,22 +458,20 @@ export default function Landing() {
         )}
       </AnimatePresence>
 
-      <div
-        className="min-h-screen overflow-x-hidden antialiased relative"
-        style={{ backgroundColor: '#F6F4EF', color: '#181818', fontFamily: 'Inter, system-ui, sans-serif' }}
-      >
+      <div className="min-h-screen overflow-x-hidden antialiased relative" style={{ backgroundColor: C.bg, color: C.text, fontFamily: 'Inter, system-ui, sans-serif' }}>
+
         {/* Background textures */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#181818 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `radial-gradient(${C.text} 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
           <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }} />
-          <div className="absolute top-0 left-1/4 w-[80vw] h-[80vw] rounded-full blur-[120px] -translate-y-1/2" style={{ backgroundColor: 'rgba(45,90,61,0.025)' }} />
-          <div className="absolute top-[40%] right-0 w-[60vw] h-[60vw] rounded-full blur-[140px]" style={{ backgroundColor: 'rgba(161,73,63,0.015)' }} />
-          <div className="absolute bottom-[10%] left-10 w-[70vw] h-[70vw] rounded-full blur-[150px]" style={{ backgroundColor: 'rgba(45,90,61,0.02)' }} />
+          <div className="absolute top-0 left-1/4 w-[80vw] h-[80vw] rounded-full blur-[120px] -translate-y-1/2" style={{ backgroundColor: `${C.green}12` }} />
+          <div className="absolute top-[40%] right-0 w-[60vw] h-[60vw] rounded-full blur-[140px]" style={{ backgroundColor: `${C.red}0A` }} />
+          <div className="absolute bottom-[10%] left-10 w-[70vw] h-[70vw] rounded-full blur-[150px]" style={{ backgroundColor: `${C.green}10` }} />
         </div>
 
-        {/* Margin grid lines */}
-        <div className="hidden lg:block fixed left-[5%] top-0 bottom-0 w-[1px] bg-[#E4E1DA]/45 z-0 pointer-events-none" />
-        <div className="hidden lg:block fixed right-[5%] top-0 bottom-0 w-[1px] bg-[#E4E1DA]/45 z-0 pointer-events-none" />
+        {/* Margin guide lines */}
+        <div className="hidden lg:block fixed left-[5%] top-0 bottom-0 w-[1px] pointer-events-none z-0" style={{ backgroundColor: `${C.border}80` }} />
+        <div className="hidden lg:block fixed right-[5%] top-0 bottom-0 w-[1px] pointer-events-none z-0" style={{ backgroundColor: `${C.border}80` }} />
 
         {/* ─── FIXED NAV ─── */}
         <AnimatePresence>
@@ -401,7 +482,7 @@ export default function Landing() {
               exit={{ y: -72, opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl border-b"
-              style={{ backgroundColor: 'rgba(246,244,239,0.88)', borderColor: '#E4E1DA' }}
+              style={{ backgroundColor: `${C.bg}E0`, borderColor: C.border }}
             >
               <div className="max-w-[1200px] mx-auto px-6 h-[72px] flex items-center justify-between">
                 <div className="cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -410,7 +491,7 @@ export default function Landing() {
                 <button
                   onClick={() => setActiveTab('auth_signup')}
                   className="text-[13px] font-bold text-white px-6 py-3.5 rounded-2xl transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ backgroundColor: '#181818' }}
+                  style={{ backgroundColor: C.text }}
                 >
                   {copy.navVerify}
                 </button>
@@ -426,7 +507,7 @@ export default function Landing() {
             <button
               onClick={() => setActiveTab('auth_signup')}
               className="text-[13px] font-bold text-white px-6 py-3.5 rounded-2xl transition-all duration-200 hover:-translate-y-0.5"
-              style={{ backgroundColor: '#181818' }}
+              style={{ backgroundColor: C.text }}
             >
               {copy.navVerify}
             </button>
@@ -434,9 +515,9 @@ export default function Landing() {
 
           <div className="flex-1 flex items-center">
             <div className="max-w-[1200px] w-full mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
-              {/* Left text */}
               <div className="relative">
-                <svg className="absolute -left-12 -top-16 w-[380px] h-[380px] text-[#E4E1DA]/45 pointer-events-none -z-10 select-none animate-[spin_180s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5">
+                {/* Rotating seal anchor */}
+                <svg className="absolute -left-12 -top-16 w-[380px] h-[380px] pointer-events-none -z-10 select-none animate-[spin_180s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke={`${C.border}`} strokeWidth="0.5">
                   <circle cx="50" cy="50" r="48" strokeDasharray="3 3" />
                   <circle cx="50" cy="50" r="42" />
                   <polygon points="50,15 53,30 68,30 56,40 60,55 50,45 40,55 44,40 32,30 47,30" />
@@ -444,83 +525,59 @@ export default function Landing() {
                 </svg>
 
                 <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  initial={{ opacity: 0, y: 20 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.7, delay: 0.1 }}
-                  className="font-extrabold tracking-tight leading-[1.05] text-[#181818]"
-                  style={{ fontSize: 'clamp(44px, 6vw, 82px)' }}
+                  className="font-extrabold tracking-tight leading-[1.05]"
+                  style={{ fontSize: 'clamp(44px, 6vw, 82px)', color: C.text }}
                 >
                   {copy.heroH1}
                 </motion.h1>
 
                 <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  initial={{ opacity: 0, y: 20 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.7, delay: 0.25 }}
-                  className="mt-5 text-[#666] font-normal"
-                  style={{ fontSize: 'clamp(22px, 2.5vw, 34px)' }}
+                  className="mt-5 font-normal"
+                  style={{ fontSize: 'clamp(22px, 2.5vw, 34px)', color: C.muted }}
                 >
                   {copy.heroH2}
                 </motion.p>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  initial={{ opacity: 0, y: 20 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.7, delay: 0.4 }}
-                  className="mt-8 max-w-[480px] text-[#666] leading-relaxed text-[16px] space-y-4"
+                  className="mt-8 max-w-[480px] leading-relaxed text-[16px] space-y-4"
                 >
-                  <div className="space-y-2 bg-white/40 backdrop-blur-sm border border-[#E4E1DA] p-5 rounded-2xl shadow-sm">
-                    <p className="flex items-center gap-2.5 font-bold text-[#181818]"><span className="text-sm">📩</span><span>{copy.heroP1}</span></p>
-                    <p className="flex items-center gap-2.5 font-bold text-[#181818]"><span className="text-[#A1493F] text-sm">❓</span><span>{copy.heroP2}</span></p>
-                    <p className="flex items-center gap-2.5 font-bold text-[#181818]"><span className="text-sm">🔍</span><span>{copy.heroP3}</span></p>
-                    <p className="flex items-center gap-2.5 font-bold" style={{ color: GREEN }}><span className="text-sm">🟢</span><span>{copy.heroP4}</span></p>
+                  <div className="space-y-2 border rounded-2xl p-5 shadow-sm" style={{ backgroundColor: 'rgba(255,255,255,0.45)', borderColor: C.border }}>
+                    <p className="flex items-center gap-2.5 font-bold" style={{ color: C.text }}><span className="text-sm">📩</span><span>{copy.heroP1}</span></p>
+                    <p className="flex items-center gap-2.5 font-bold" style={{ color: C.text }}><span className="text-sm" style={{ color: C.red }}>❓</span><span>{copy.heroP2}</span></p>
+                    <p className="flex items-center gap-2.5 font-bold" style={{ color: C.text }}><span className="text-sm">🔍</span><span>{copy.heroP3}</span></p>
+                    <p className="flex items-center gap-2.5 font-bold" style={{ color: C.green }}><span className="text-sm">🟢</span><span>{copy.heroP4}</span></p>
                   </div>
-                  <p className="text-[14px] leading-relaxed mt-2">{copy.heroP5}</p>
-                  <p className="text-[#181818] font-extrabold">{copy.heroP6} {copy.heroP7}</p>
+                  <p className="text-[14px] leading-relaxed mt-2" style={{ color: C.muted }}>{copy.heroP5}</p>
+                  <p className="font-extrabold" style={{ color: C.text }}>{copy.heroP6} {copy.heroP7}</p>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={!loading ? { opacity: 1, y: 0 } : {}}
+                  initial={{ opacity: 0, y: 16 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.6, delay: 0.55 }}
                   className="mt-8 flex items-center gap-6"
                 >
                   <button
                     onClick={() => setActiveTab('auth_signup')}
                     className="text-[15px] font-bold text-white px-8 py-4 rounded-2xl transition-all duration-200 hover:-translate-y-0.5"
-                    style={{ backgroundColor: '#181818' }}
+                    style={{ backgroundColor: C.text }}
                   >
                     {copy.btnVerify}
                   </button>
-                  <button
-                    onClick={scrollToStories}
-                    className="text-[15px] text-[#666] hover:text-[#181818] transition-colors font-bold"
-                  >
+                  <button onClick={scrollToStories} className="text-[15px] font-bold transition-colors hover:opacity-70" style={{ color: C.muted }}>
                     ↓ {copy.btnStories}
                   </button>
                 </motion.div>
-
-                {/* Mobile news */}
-                <div className="block md:hidden mt-10 space-y-4 pt-6 border-t border-[#E4E1DA]">
-                  <p className="text-[11px] font-extrabold text-[#A1493F] uppercase tracking-wider mb-2">Real Incidents</p>
-                  {[
-                    { text: copy.heroNews1, src: copy.heroNews1Src },
-                    { text: copy.heroNews2, src: copy.heroNews2Src },
-                    { text: copy.heroNews3, src: copy.heroNews3Src },
-                    { text: copy.heroNews4, src: copy.heroNews4Src },
-                  ].map((item, i) => (
-                    <div key={i} className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-2xl p-5 text-left shadow-sm">
-                      <p className="text-[13px] font-bold text-[#181818] leading-snug">{item.text}</p>
-                      <p className="text-[10px] text-[#666] mt-2 flex items-center gap-1 font-semibold"><span>📰</span><span>{item.src}</span></p>
-                    </div>
-                  ))}
-                </div>
               </div>
 
-              {/* Right news cards */}
+              {/* Right: Rotated news cards */}
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={!loading ? { opacity: 1, x: 0 } : {}}
+                initial={{ opacity: 0, x: 20 }} animate={!loading ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.8, delay: 0.35 }}
                 className="space-y-4 hidden md:block"
               >
@@ -532,22 +589,23 @@ export default function Landing() {
                 ].map((item, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={!loading ? { opacity: 1, y: 0 } : {}}
+                    initial={{ opacity: 0, y: 15 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.5, delay: 0.5 + i * 0.12 }}
-                    className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-2xl p-5 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-                    style={{ transform: `rotate(${item.rotate})` }}
+                    className="rounded-2xl p-5 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 border-2"
+                    style={{ backgroundColor: C.card, borderColor: C.border, transform: `rotate(${item.rotate})` }}
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#A1493F] mt-2 shrink-0 animate-pulse" />
+                      <div className="w-2.5 h-2.5 rounded-full mt-2 shrink-0 animate-pulse" style={{ backgroundColor: C.red }} />
                       <div>
-                        <p className="text-[14px] font-bold text-[#181818] leading-snug">{item.text}</p>
-                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold"><span>📰</span><span>{item.src}</span></p>
+                        <p className="text-[14px] font-bold leading-snug" style={{ color: C.text }}>{item.text}</p>
+                        <p className="text-[11px] mt-2 flex items-center gap-1 font-bold" style={{ color: C.subtle }}>
+                          <span>📰</span><span>{item.src}</span>
+                        </p>
                       </div>
                     </div>
                   </motion.div>
                 ))}
-                <p className="text-[11px] text-[#666]/40 text-center mt-2 italic font-medium">These are real incidents.</p>
+                <p className="text-[11px] text-center mt-2 italic font-medium" style={{ color: `${C.subtle}66` }}>These are real incidents.</p>
               </motion.div>
             </div>
           </div>
@@ -557,10 +615,17 @@ export default function Landing() {
         <InterstitialMessage icon={INTERSTITIALS[0].icon} text={INTERSTITIALS[0].text} />
 
         {/* ════ STORY 1 — Voice Clone ════ */}
-        <section id="stories" className="relative z-10 py-20 flex items-center justify-center" ref={story1.ref}>
-          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="flex flex-col items-center">
-              <PhoneFrame glitch={story1.revealed}>
+        <section id="stories" className="relative z-10 py-20">
+          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Phone — appears immediately on scroll */}
+            <motion.div
+              ref={s1imgRef}
+              initial={{ opacity: 0, y: 30 }}
+              animate={s1ImgView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex flex-col items-center"
+            >
+              <PhoneFrame glitch={s1glitch}>
                 <div className="h-[552px] flex flex-col items-center justify-between py-12" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)' }}>
                   <div className="text-center">
                     <div className="w-[72px] h-[72px] rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/5">
@@ -571,13 +636,13 @@ export default function Landing() {
                   </div>
                   <div className="flex items-center gap-16">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="w-[56px] h-[56px] rounded-full bg-[#A1493F] flex items-center justify-center">
+                      <div className="w-[56px] h-[56px] rounded-full flex items-center justify-center" style={{ backgroundColor: C.red }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </div>
                       <span className="text-white/50 text-[11px]">Decline</span>
                     </div>
                     <div className="flex flex-col items-center gap-2">
-                      <div className="w-[56px] h-[56px] rounded-full flex items-center justify-center" style={{ backgroundColor: GREEN }}>
+                      <div className="w-[56px] h-[56px] rounded-full flex items-center justify-center" style={{ backgroundColor: C.green }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                       </div>
                       <span className="text-white/50 text-[11px]">Accept</span>
@@ -587,42 +652,28 @@ export default function Landing() {
               </PhoneFrame>
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
-                animate={story1.inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                animate={s1ImgView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 className="mt-6 text-center"
               >
-                <div className="inline-block bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-2xl px-5 py-3 text-[15px] text-[#181818] italic shadow-sm">
+                <div className="inline-block rounded-2xl px-5 py-3 text-[15px] italic shadow-sm border-2" style={{ backgroundColor: C.card, borderColor: C.border, color: C.text }}>
                   {copy.s1Bubble}
                 </div>
               </motion.div>
-            </div>
+            </motion.div>
 
-            <div className="max-w-[480px]">
-              <Reveal>
-                <AnimatePresence>
-                  {story1.revealed && (
-                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="space-y-5">
-                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">{copy.s1Reveal}</p>
-                      <div className="flex items-center gap-4">
-                        <WaveformBars error />
-                        <span className="text-[13px] text-[#666] font-mono font-bold">0:18</span>
-                      </div>
-                      <ResultBadge text={copy.s1Result} visible />
-                      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                        <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5"><span>📰</span><span>Real Incident</span></p>
-                        <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{copy.s1News}</p>
-                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold"><span>📰</span><span>{copy.s1NewsSrc}</span></p>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {!story1.revealed && story1.inView && (
-                  <div className="flex items-center gap-3 text-[#666] text-[14px] font-bold">
-                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: GREEN }} />
-                    Scroll to reveal...
-                  </div>
-                )}
-              </Reveal>
+            {/* Text — scrollytelling, each element has its own trigger */}
+            <div className="pt-8 lg:pt-20">
+              <div className="flex items-center gap-3 mb-4">
+                <WaveformBars error />
+                <span className="text-[13px] font-mono font-bold" style={{ color: C.subtle }}>0:18</span>
+              </div>
+              <StoryText
+                quote={copy.s1Reveal}
+                badge={copy.s1Result}
+                news={copy.s1News}
+                newsSrc={copy.s1NewsSrc}
+              />
             </div>
           </div>
         </section>
@@ -631,72 +682,70 @@ export default function Landing() {
         <InterstitialMessage icon={INTERSTITIALS[1].icon} text={INTERSTITIALS[1].text} />
 
         {/* ════ STORY 2 — Fake Document ════ */}
-        <section className="relative z-10 py-20 flex items-center justify-center" ref={story2.ref}>
-          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="max-w-[480px]">
-              <Reveal>
-                <AnimatePresence>
-                  {story2.revealed && (
-                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">{copy.s2Reveal}</p>
-                      <ResultBadge text={copy.s2Result} visible={story2.revealed} />
-                      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                        <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5"><span>📰</span><span>Real Incident</span></p>
-                        <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{copy.s2News}</p>
-                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold"><span>📰</span><span>{copy.s2NewsSrc}</span></p>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {!story2.revealed && story2.inView && (
-                  <div className="flex items-center gap-3 text-[#666] text-[14px] font-bold">
-                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: GREEN }} />
-                    Scroll to reveal...
-                  </div>
-                )}
-              </Reveal>
+        <section className="relative z-10 py-20">
+          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Text first (alternating layout) */}
+            <div className="pt-4 order-2 lg:order-1">
+              <StoryText
+                quote={copy.s2Reveal}
+                badge={copy.s2Result}
+                news={copy.s2News}
+                newsSrc={copy.s2NewsSrc}
+              />
             </div>
 
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-[520px] bg-white rounded-2xl border-2 border-[#E4E1DA] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.1)] overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3.5 border-b border-[#E4E1DA] bg-[#FBFAF8]">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#A1493F]/60" />
+            {/* Email UI — appears immediately */}
+            <motion.div
+              ref={s2imgRef}
+              initial={{ opacity: 0, y: 30 }}
+              animate={s2ImgView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+              className="w-full flex justify-center order-1 lg:order-2"
+            >
+              <div className="w-full max-w-[520px] bg-white rounded-2xl border-2 shadow-[0_32px_96px_-16px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderColor: C.border }}>
+                <div className="flex items-center gap-2 px-4 py-3.5 border-b" style={{ backgroundColor: C.card, borderColor: C.border }}>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: `${C.red}99` }} />
                   <div className="w-2.5 h-2.5 rounded-full bg-[#C4A24E]/60" />
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: `${GREEN}99` }} />
-                  <span className="ml-3 text-[12px] text-[#666] font-bold">Mail</span>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: `${C.green}99` }} />
+                  <span className="ml-3 text-[12px] font-bold" style={{ color: C.subtle }}>Mail</span>
                 </div>
-                <div className="px-6 py-4 border-b border-[#E4E1DA]/60">
-                  <p className="text-[13px] text-[#666]">
-                    From: <span className={`font-bold ${story2.revealed ? 'text-[#A1493F] underline decoration-wavy decoration-[#A1493F]/50' : 'text-[#181818]'}`}>{copy.s2From}</span>
-                    {story2.revealed && <FlagLabel text={copy.s2Flag1} visible delay={0.2} />}
+                <div className="px-6 py-4 border-b" style={{ borderColor: `${C.border}88` }}>
+                  <p className="text-[13px]" style={{ color: C.subtle }}>
+                    From: <span className="font-bold" style={{ color: C.red, textDecoration: s2ImgView ? 'underline wavy' : 'none' }}>{copy.s2From}</span>
+                    {s2ImgView && <FlagLabel text={copy.s2Flag1} visible delay={0.4} />}
                   </p>
-                  <p className="text-[15px] font-bold text-[#181818] mt-1">{copy.s2Subject}</p>
+                  <p className="text-[15px] font-bold mt-1" style={{ color: C.text }}>{copy.s2Subject}</p>
                 </div>
-                <div className="px-6 py-5 space-y-4 text-[14px] text-[#181818] leading-relaxed">
+                <div className="px-6 py-5 space-y-4 text-[14px] leading-relaxed" style={{ color: C.text }}>
                   <p>{copy.s2Body1}</p>
-                  <p className="text-[#666]">{copy.s2Body2}</p>
+                  <p style={{ color: C.muted }}>{copy.s2Body2}</p>
                   <p className="font-extrabold">{copy.s2Body3}</p>
-                  <p className="text-[#666]">{copy.s2Body4}</p>
-                  <div className="flex items-center gap-3 mt-4 p-3 bg-[#F6F4EF] rounded-xl border border-[#E4E1DA]">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    <span className="text-[13px] text-[#666] font-bold">{copy.s2Attach}</span>
+                  <p style={{ color: C.muted }}>{copy.s2Body4}</p>
+                  <div className="flex items-center gap-3 mt-4 p-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.subtle} strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span className="text-[13px] font-bold" style={{ color: C.muted }}>{copy.s2Attach}</span>
                   </div>
-                  <div className={`mt-4 pt-4 border-t border-[#E4E1DA]/60 ${story2.revealed ? 'bg-[#A1493F]/5 -mx-6 px-6 py-4 border border-[#A1493F]/20 rounded-xl relative' : ''}`}>
-                    <p className="text-[13px] text-[#666]">Best regards,</p>
-                    <p className="text-[14px] font-bold text-[#181818] italic mt-1">Ravi Mehta</p>
-                    <p className="text-[12px] text-[#666] font-medium">Talent Acquisition Lead</p>
-                    {story2.revealed && <div className="absolute top-2 right-3"><FlagLabel text={copy.s2Flag2} visible delay={0.4} /></div>}
+                  <div className={`mt-4 pt-4 border-t relative`} style={{ borderColor: `${C.border}88` }}>
+                    <p className="text-[13px]" style={{ color: C.subtle }}>Best regards,</p>
+                    <p className="text-[14px] font-bold italic mt-1" style={{ color: C.text }}>Ravi Mehta</p>
+                    <p className="text-[12px] font-medium" style={{ color: C.subtle }}>Talent Acquisition Lead</p>
+                    {s2ImgView && <div className="absolute top-2 right-0"><FlagLabel text={copy.s2Flag2} visible delay={0.6} /></div>}
                   </div>
                 </div>
                 <AnimatePresence>
-                  {story2.revealed && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} transition={{ duration: 0.4, delay: 0.5 }} className="px-6 py-3.5 bg-[#A1493F]/5 border-t border-[#A1493F]/20 text-[12px] text-[#A1493F] font-bold">
+                  {s2ImgView && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.7 }}
+                      className="px-6 py-3.5 border-t text-[12px] font-bold"
+                      style={{ backgroundColor: `${C.red}0D`, borderColor: `${C.red}33`, color: C.red }}
+                    >
                       {copy.s2Meta}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -704,10 +753,17 @@ export default function Landing() {
         <InterstitialMessage icon={INTERSTITIALS[2].icon} text={INTERSTITIALS[2].text} />
 
         {/* ════ STORY 3 — WhatsApp Image ════ */}
-        <section className="relative z-10 py-20 flex items-center justify-center" ref={story3.ref}>
-          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-[390px] rounded-2xl overflow-hidden border-2 border-[#E4E1DA] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.1)]">
+        <section className="relative z-10 py-20">
+          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* WhatsApp UI — appears immediately */}
+            <motion.div
+              ref={s3imgRef}
+              initial={{ opacity: 0, y: 30 }}
+              animate={s3ImgView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+              className="w-full flex justify-center"
+            >
+              <div className="w-full max-w-[390px] rounded-2xl overflow-hidden border-2 shadow-[0_32px_96px_-16px_rgba(0,0,0,0.1)]" style={{ borderColor: C.border }}>
                 <div className="flex items-center gap-3 px-4 py-3.5" style={{ backgroundColor: '#1F4539' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
                   <div className="w-[32px] h-[32px] rounded-full bg-white/20 flex items-center justify-center">
@@ -720,10 +776,10 @@ export default function Landing() {
                 </div>
                 <div className="p-4 space-y-3" style={{ backgroundColor: '#ECE5DD' }}>
                   <div className="max-w-[85%]">
-                    <div className="bg-white rounded-xl rounded-tl-sm px-3.5 py-2 text-[13px] text-[#181818] shadow-sm">{copy.s3Msg1}</div>
+                    <div className="bg-white rounded-xl rounded-tl-sm px-3.5 py-2 text-[13px] shadow-sm" style={{ color: C.text }}>{copy.s3Msg1}</div>
                   </div>
                   <div className="max-w-[85%] relative">
-                    <div className={`bg-white rounded-xl rounded-tl-sm overflow-hidden shadow-sm relative ${story3.revealed ? 'ring-2 ring-[#A1493F]/40' : ''}`}>
+                    <div className="bg-white rounded-xl rounded-tl-sm overflow-hidden shadow-sm relative" style={s3ImgView ? { outline: `2px solid ${C.red}66` } : {}}>
                       <div className="bg-[#1a3a5c] px-3 py-2">
                         <div className="flex items-center gap-2">
                           <div className="w-[20px] h-[20px] rounded-full bg-white/20" />
@@ -731,53 +787,39 @@ export default function Landing() {
                         </div>
                       </div>
                       <div className="px-3 py-3 bg-white">
-                        <p className="text-[12px] font-bold text-[#181818] leading-tight">{copy.s3Headline}</p>
-                        <p className="text-[10px] text-[#666] mt-1 font-bold">governmentnews.co.in</p>
+                        <p className="text-[12px] font-bold leading-tight" style={{ color: C.text }}>{copy.s3Headline}</p>
+                        <p className="text-[10px] mt-1 font-bold" style={{ color: C.subtle }}>governmentnews.co.in</p>
                       </div>
-                      {story3.revealed && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 pointer-events-none" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(161,73,63,0.08) 4px, rgba(161,73,63,0.08) 5px)' }} />
+                      {s3ImgView && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="absolute inset-0 pointer-events-none" style={{ background: `repeating-linear-gradient(0deg, transparent, transparent 4px, ${C.red}12 4px, ${C.red}12 5px)` }} />
                       )}
                     </div>
-                    {story3.revealed && (
+                    {s3ImgView && (
                       <div className="flex flex-wrap gap-1.5 mt-2.5">
-                        <FlagLabel text={copy.s3Flag1} visible delay={0.1} />
-                        <FlagLabel text={copy.s3Flag2} visible delay={0.25} />
-                        <FlagLabel text={copy.s3Flag3} visible delay={0.4} />
+                        <FlagLabel text={copy.s3Flag1} visible delay={0.5} />
+                        <FlagLabel text={copy.s3Flag2} visible delay={0.65} />
+                        <FlagLabel text={copy.s3Flag3} visible delay={0.8} />
                       </div>
                     )}
                   </div>
                   <div className="max-w-[85%]">
-                    <div className="bg-white rounded-xl rounded-tl-sm px-3.5 py-2 text-[13px] text-[#181818] shadow-sm">{copy.s3Msg2}</div>
+                    <div className="bg-white rounded-xl rounded-tl-sm px-3.5 py-2 text-[13px] shadow-sm" style={{ color: C.text }}>{copy.s3Msg2}</div>
                   </div>
                   <div className="max-w-[75%] ml-auto">
-                    <div className="rounded-xl rounded-tr-sm px-3.5 py-2 text-[13px] text-[#181818] shadow-sm" style={{ backgroundColor: '#DCF8C6' }}>{copy.s3Sent}</div>
+                    <div className="rounded-xl rounded-tr-sm px-3.5 py-2 text-[13px] shadow-sm" style={{ backgroundColor: '#DCF8C6', color: C.text }}>{copy.s3Sent}</div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="max-w-[480px]">
-              <Reveal>
-                <AnimatePresence>
-                  {story3.revealed && (
-                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">{copy.s3Reveal}</p>
-                      <ResultBadge text={copy.s3Result} visible={story3.revealed} />
-                      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }} className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                        <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5"><span>📰</span><span>Real Incident</span></p>
-                        <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{copy.s3News}</p>
-                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold"><span>📰</span><span>{copy.s3NewsSrc}</span></p>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {!story3.revealed && story3.inView && (
-                  <div className="flex items-center gap-3 text-[#666] text-[14px] font-bold">
-                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: GREEN }} />
-                    Scroll to reveal...
-                  </div>
-                )}
-              </Reveal>
+            {/* Text — scrollytelling */}
+            <div className="pt-4 lg:pt-16">
+              <StoryText
+                quote={copy.s3Reveal}
+                badge={copy.s3Result}
+                news={copy.s3News}
+                newsSrc={copy.s3NewsSrc}
+              />
             </div>
           </div>
         </section>
@@ -786,38 +828,28 @@ export default function Landing() {
         <InterstitialMessage icon={INTERSTITIALS[3].icon} text={INTERSTITIALS[3].text} />
 
         {/* ════ STORY 4 — Deepfake Reel ════ */}
-        <section className="relative z-10 py-20 flex items-center justify-center" ref={story4.ref}>
-          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="max-w-[480px]">
-              <Reveal>
-                <AnimatePresence>
-                  {story4.revealed && (
-                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">{copy.s4Reveal}</p>
-                      <div className="flex flex-wrap gap-2">
-                        <FlagLabel text={copy.s4Flag1} visible delay={0.1} />
-                        <FlagLabel text={copy.s4Flag2} visible delay={0.25} />
-                      </div>
-                      <ResultBadge text={copy.s4Result} visible />
-                      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                        <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5"><span>📰</span><span>Real Incident</span></p>
-                        <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{copy.s4News}</p>
-                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold"><span>📰</span><span>{copy.s4NewsSrc}</span></p>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                {!story4.revealed && story4.inView && (
-                  <div className="flex items-center gap-3 text-[#666] text-[14px] font-bold">
-                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: GREEN }} />
-                    Scroll to reveal...
-                  </div>
-                )}
-              </Reveal>
+        <section className="relative z-10 py-20">
+          <div className="max-w-[1200px] w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Text (alternating) */}
+            <div className="pt-8 lg:pt-20 order-2 lg:order-1">
+              <StoryText
+                quote={copy.s4Reveal}
+                badge={copy.s4Result}
+                news={copy.s4News}
+                newsSrc={copy.s4NewsSrc}
+                flags={[copy.s4Flag1, copy.s4Flag2]}
+              />
             </div>
 
-            <div className="flex flex-col items-center">
-              <PhoneFrame glitch={story4.revealed}>
+            {/* Reel Phone — appears immediately */}
+            <motion.div
+              ref={s4imgRef}
+              initial={{ opacity: 0, y: 30 }}
+              animate={s4ImgView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex flex-col items-center order-1 lg:order-2"
+            >
+              <PhoneFrame glitch={s4glitch}>
                 <div className="h-[552px] relative flex flex-col justify-end" style={{ backgroundColor: '#111' }}>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-[100px] h-[100px] rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
@@ -839,12 +871,12 @@ export default function Landing() {
                     <p className="text-white font-extrabold text-[13px] mb-1">{copy.s4User}</p>
                     <p className="text-white/80 text-[12px] leading-relaxed">{copy.s4Caption}</p>
                   </div>
-                  {story4.revealed && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="absolute inset-0 pointer-events-none z-20" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(161,73,63,0.1) 3px, rgba(161,73,63,0.1) 4px)' }} />
+                  {s4glitch && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="absolute inset-0 pointer-events-none z-20" style={{ background: `repeating-linear-gradient(0deg, transparent, transparent 3px, ${C.red}18 3px, ${C.red}18 4px)` }} />
                   )}
                 </div>
               </PhoneFrame>
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -855,10 +887,10 @@ export default function Landing() {
         <section className="relative z-10 py-24">
           <div className="max-w-[960px] mx-auto px-6">
             <Reveal>
-              <h2 className="text-center font-bold tracking-tight text-[#181818] mb-3" style={{ fontSize: 'clamp(30px, 4vw, 44px)' }}>
+              <h2 className="text-center font-bold tracking-tight mb-3" style={{ fontSize: 'clamp(30px, 4vw, 44px)', color: C.text }}>
                 {copy.interTitle}
               </h2>
-              <p className="text-center text-[#666] text-[16px] font-medium mb-12 max-w-[520px] mx-auto leading-relaxed">
+              <p className="text-center text-[16px] font-medium mb-12 max-w-[520px] mx-auto leading-relaxed" style={{ color: C.muted }}>
                 Every day, people encounter something online that doesn't feel quite right. These are the moments PARAKH was built for.
               </p>
             </Reveal>
@@ -879,9 +911,9 @@ export default function Landing() {
                       onClick={() => { setTab(tab); setDemoState('idle'); setProgress(0); }}
                       className="px-5 py-3 rounded-xl text-[14px] font-bold transition-all"
                       style={{
-                        backgroundColor: activeTab === tab ? '#181818' : 'transparent',
-                        color: activeTab === tab ? '#fff' : '#666',
-                        border: activeTab === tab ? 'none' : '2px solid #E4E1DA',
+                        backgroundColor: activeTab === tab ? C.text : 'transparent',
+                        color: activeTab === tab ? '#fff' : C.muted,
+                        border: activeTab === tab ? 'none' : `2px solid ${C.border}`,
                       }}
                     >
                       {labels[tab]}
@@ -889,28 +921,28 @@ export default function Landing() {
                   );
                 })}
               </div>
-              <div className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-8 shadow-[0_12px_32px_rgba(0,0,0,0.03)] max-w-[640px] mx-auto">
+              <div className="rounded-3xl p-8 border-2 shadow-sm max-w-[640px] mx-auto" style={{ backgroundColor: C.card, borderColor: C.border }}>
                 {demoState === 'idle' && (
-                  <div onClick={startDemo} className="border-2 border-dashed border-[#E4E1DA] hover:border-[#2D5A3D] rounded-2xl p-14 text-center cursor-pointer transition-colors">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5" className="mx-auto mb-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    <p className="text-[15px] text-[#666] font-bold">{copy.interDrop}</p>
+                  <div onClick={startDemo} className="border-2 border-dashed rounded-2xl p-14 text-center cursor-pointer transition-colors hover:border-green-600" style={{ borderColor: C.border }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={C.subtle} strokeWidth="1.5" className="mx-auto mb-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <p className="text-[15px] font-bold" style={{ color: C.muted }}>{copy.interDrop}</p>
                   </div>
                 )}
                 {demoState === 'progress' && (
                   <div className="py-8 text-center space-y-5">
-                    <p className="text-[15px] text-[#666] font-bold">{copy.interAnalyze}</p>
-                    <div className="w-full h-[4px] bg-[#E4E1DA] rounded-full overflow-hidden">
-                      <motion.div className="h-full rounded-full" style={{ backgroundColor: GREEN, width: `${progress}%` }} transition={{ ease: 'linear' }} />
+                    <p className="text-[15px] font-bold" style={{ color: C.muted }}>{copy.interAnalyze}</p>
+                    <div className="w-full h-[4px] rounded-full overflow-hidden" style={{ backgroundColor: C.border }}>
+                      <motion.div className="h-full rounded-full" style={{ backgroundColor: C.green, width: `${progress}%` }} transition={{ ease: 'linear' }} />
                     </div>
                   </div>
                 )}
                 {demoState === 'done' && (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="py-8 text-center space-y-4">
-                    <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center mx-auto border" style={{ backgroundColor: `${GREEN}1A`, borderColor: `${GREEN}33` }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center mx-auto border" style={{ backgroundColor: `${C.green}1A`, borderColor: `${C.green}44` }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <p className="text-[18px] font-extrabold" style={{ color: GREEN }}>{copy.interDone}</p>
-                    <button onClick={() => setActiveTab('auth_signup')} className="text-[13px] text-[#666] hover:text-[#181818] underline underline-offset-4 transition-colors font-bold">
+                    <p className="text-[18px] font-extrabold" style={{ color: C.green }}>{copy.interDone}</p>
+                    <button onClick={() => setActiveTab('auth_signup')} className="text-[13px] underline underline-offset-4 transition-colors font-bold" style={{ color: C.muted }}>
                       Sign up for full reports
                     </button>
                   </motion.div>
@@ -920,87 +952,67 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* ════ TRUST — Emotional staggered section ════ */}
+        {/* ════ TRUST — Emotional staggered ════ */}
         <section className="relative z-10 py-28 overflow-hidden" ref={trustRef}>
-          {/* Soft full-width green ambient wash */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={trustInView ? { opacity: 1 } : {}}
-            transition={{ duration: 1.2 }}
+            initial={{ opacity: 0 }} animate={trustInView ? { opacity: 1 } : {}}
+            transition={{ duration: 1.4 }}
             className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse 80% 60% at 50% 50%, ${GREEN}0D 0%, transparent 70%)` }}
+            style={{ background: `radial-gradient(ellipse 80% 60% at 50% 50%, ${C.green}0F 0%, transparent 70%)` }}
           />
 
           <div className="max-w-[760px] mx-auto px-6">
-            {/* Opening headline */}
             <motion.div
-              initial={{ opacity: 0, y: 32 }}
-              animate={trustInView ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0, y: 32 }} animate={trustInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
               className="text-center mb-16"
             >
-              <h2
-                className="font-extrabold tracking-tight leading-tight"
-                style={{ fontSize: 'clamp(32px, 4.5vw, 52px)', color: GREEN }}
-              >
+              <h2 className="font-extrabold tracking-tight leading-tight" style={{ fontSize: 'clamp(32px, 4.5vw, 52px)', color: C.green }}>
                 {copy.trustH}
               </h2>
               <motion.p
-                initial={{ opacity: 0 }}
-                animate={trustInView ? { opacity: 1 } : {}}
+                initial={{ opacity: 0 }} animate={trustInView ? { opacity: 1 } : {}}
                 transition={{ duration: 0.7, delay: 0.4 }}
-                className="mt-5 text-[18px] font-semibold text-[#181818] leading-relaxed"
+                className="mt-5 text-[18px] font-semibold leading-relaxed"
+                style={{ color: C.text }}
               >
                 {copy.trustP1}
               </motion.p>
             </motion.div>
 
-            {/* Animated "every..." lines — stagger in from left */}
-            <div className="space-y-4 mb-10 pl-2 border-l-4 ml-4" style={{ borderColor: `${GREEN}33` }}>
+            {/* Staggered lines */}
+            <div className="space-y-4 mb-10 pl-4 border-l-4 ml-4" style={{ borderColor: `${C.green}44` }}>
               {copy.trustLines.map((line, i) => (
                 <TrustLine key={i} text={line} delay={i * 0.18} />
               ))}
             </div>
 
-            {/* Conclusion line — bigger, bolder, centered */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={trustInView ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0, y: 20 }} animate={trustInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: copy.trustLines.length * 0.18 + 0.1 }}
               className="text-center my-10"
             >
-              <p className="text-[26px] font-extrabold text-[#181818]">
-                {copy.trustConclusion}
-              </p>
+              <p className="text-[26px] font-extrabold" style={{ color: C.text }}>{copy.trustConclusion}</p>
             </motion.div>
 
-            {/* Closing statement — green, centered, with a soft divider line above */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={trustInView ? { opacity: 1, scale: 1 } : {}}
+              initial={{ opacity: 0, scale: 0.97 }} animate={trustInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.8, delay: copy.trustLines.length * 0.18 + 0.4 }}
               className="relative text-center pt-10"
             >
-              {/* Decorative mark */}
-              <div className="w-12 h-[3px] rounded-full mx-auto mb-6" style={{ backgroundColor: `${GREEN}66` }} />
-              <p
-                className="text-[20px] font-extrabold leading-relaxed"
-                style={{ color: GREEN }}
-              >
+              <div className="w-12 h-[3px] rounded-full mx-auto mb-6" style={{ backgroundColor: `${C.green}66` }} />
+              <p className="text-[20px] font-extrabold leading-relaxed" style={{ color: C.green }}>
                 {copy.trustClose}
               </p>
-              {/* Floating ambient orbs */}
               <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -right-8 top-0 w-[80px] h-[80px] rounded-full blur-2xl pointer-events-none"
-                style={{ backgroundColor: `${GREEN}18` }}
+                style={{ backgroundColor: `${C.green}18` }}
               />
               <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                animate={{ y: [0, 6, 0] }} transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 className="absolute -left-10 bottom-0 w-[60px] h-[60px] rounded-full blur-2xl pointer-events-none"
-                style={{ backgroundColor: `${GREEN}12` }}
+                style={{ backgroundColor: `${C.green}12` }}
               />
             </motion.div>
           </div>
@@ -1010,10 +1022,10 @@ export default function Landing() {
         <section className="relative z-10 min-h-[70vh] flex items-center justify-center py-20">
           <div className="max-w-[760px] mx-auto px-6 text-center">
             <Reveal>
-              <h2 className="font-extrabold tracking-tight text-[#181818] leading-[1.15]" style={{ fontSize: 'clamp(34px, 5vw, 60px)' }}>
+              <h2 className="font-extrabold tracking-tight leading-[1.15]" style={{ fontSize: 'clamp(34px, 5vw, 60px)', color: C.text }}>
                 {copy.ctaH1}
               </h2>
-              <p className="mt-5 text-[#666]" style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}>
+              <p className="mt-5" style={{ fontSize: 'clamp(22px, 3vw, 30px)', color: C.muted }}>
                 {copy.ctaH2}
               </p>
             </Reveal>
@@ -1021,7 +1033,7 @@ export default function Landing() {
               <button
                 onClick={() => setActiveTab('auth_signup')}
                 className="mt-10 text-[16px] font-bold text-white px-9 py-4 rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                style={{ backgroundColor: '#181818' }}
+                style={{ backgroundColor: C.text }}
               >
                 {copy.ctaBtn}
               </button>
@@ -1030,31 +1042,25 @@ export default function Landing() {
         </section>
 
         {/* ════ FOOTER ════ */}
-        <footer className="relative z-10 border-t border-[#E4E1DA]">
+        <footer className="relative z-10 border-t" style={{ borderColor: C.border }}>
           <div className="max-w-[1200px] mx-auto px-6 py-14">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
-              {/* Brand */}
               <div>
-                <div className="max-w-[110px] mb-4">
-                  <Logo showTagline={false} />
-                </div>
-                <p className="text-[13px] font-medium leading-relaxed max-w-[220px]" style={{ color: GREEN }}>
+                <div className="max-w-[110px] mb-4"><Logo showTagline={false} /></div>
+                <p className="text-[13px] font-medium leading-relaxed max-w-[220px]" style={{ color: C.green }}>
                   Digital verification for a world where everything looks real.
                 </p>
               </div>
 
-              {/* Verify */}
               <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] mb-4" style={{ color: GREEN }}>
-                  Verify
-                </p>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] mb-4" style={{ color: C.green }}>Verify</p>
                 <ul className="space-y-2.5">
                   {['Voice & Audio', 'Documents & PDFs', 'Images & Screenshots', 'Websites & Links', 'QR Codes', 'Emails'].map((item) => (
                     <li key={item}>
                       <button
                         onClick={() => setActiveTab('auth_signup')}
                         className="text-[13px] font-medium hover:underline underline-offset-4 transition-colors"
-                        style={{ color: GREEN }}
+                        style={{ color: C.green }}
                       >
                         {item}
                       </button>
@@ -1063,32 +1069,28 @@ export default function Landing() {
                 </ul>
               </div>
 
-              {/* Trust note */}
               <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] mb-4" style={{ color: GREEN }}>
-                  Why PARAKH
-                </p>
-                <p className="text-[13px] font-medium leading-relaxed" style={{ color: GREEN }}>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] mb-4" style={{ color: C.green }}>Why PARAKH</p>
+                <p className="text-[13px] font-medium leading-relaxed" style={{ color: C.green }}>
                   Built for people who want to be sure before they trust. Every verification is private, instant, and yours.
                 </p>
                 <button
                   onClick={() => setActiveTab('auth_signup')}
                   className="mt-5 inline-block text-[13px] font-extrabold px-5 py-2.5 rounded-xl border-2 transition-all hover:-translate-y-0.5"
-                  style={{ color: GREEN, borderColor: `${GREEN}44`, backgroundColor: `${GREEN}08` }}
+                  style={{ color: C.green, borderColor: `${C.green}44`, backgroundColor: `${C.green}08` }}
                 >
                   Get started free →
                 </button>
               </div>
             </div>
 
-            {/* Bottom bar */}
-            <div className="mt-10 pt-6 border-t border-[#E4E1DA] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-[12px] font-medium" style={{ color: `${GREEN}99` }}>
+            <div className="mt-10 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderColor: C.border }}>
+              <p className="text-[12px] font-medium" style={{ color: `${C.green}99` }}>
                 © 2025 PARAKH. All rights reserved.
               </p>
               <div className="flex items-center gap-5">
                 {['Privacy', 'Terms', 'Contact'].map((link) => (
-                  <button key={link} className="text-[12px] font-semibold transition-colors hover:underline underline-offset-4" style={{ color: GREEN }}>
+                  <button key={link} className="text-[12px] font-semibold transition-colors hover:underline underline-offset-4" style={{ color: C.green }}>
                     {link}
                   </button>
                 ))}
@@ -1098,7 +1100,6 @@ export default function Landing() {
         </footer>
       </div>
 
-      {/* ─── KEYFRAMES ─── */}
       <style>{`
         @keyframes float {
           0% { transform: translateY(0px); }
