@@ -12,21 +12,25 @@ const T = {
   en: {
     heroH1: "Some lies don't look like lies.",
     heroH2: "That's what makes them dangerous.",
-    heroP1: "Every day someone trusts",
-    heroP2: "a fake internship,",
-    heroP3: "an AI generated voice,",
-    heroP4: "an edited screenshot,",
-    heroP5: "or a forged document.",
+    // Homepage Flow: Situation -> Fear -> Verification -> Relief
+    heroP1: "You receive something online.",
+    heroP2: "You aren't sure if it's real.",
+    heroP3: "PARAKH checks it in seconds.",
+    heroP4: "Now you can decide with confidence.",
+    heroP5: "Every day someone trusts a fake internship, an AI generated voice, an edited screenshot, or a forged document.",
     heroP6: "Not because they were careless.",
     heroP7: "Because everything looked real.",
     btnVerify: "Verify Something",
     btnStories: "See Real Stories",
     navVerify: "Verify Now",
-    // Story 1
+    
+    // Story 1 (Voice)
     s1Bubble: '"Papa, I\'m in trouble. Send money."',
-    s1Reveal: "It sounded exactly like her.",
-    s1Result: "AI Generated Voice",
-    // Story 2
+    s1Reveal: "It sounded exactly like her. The panic felt real.",
+    s1Result: "🟢 Good catch. This voice appears AI-generated.",
+    s1Relief: "Good thing you checked first. You're safer because you verified first.",
+    
+    // Story 2 (Doc)
     s2From: "hiring@goggle-careers.co",
     s2Subject: "Congratulations! You've been selected",
     s2Body1: "Dear Candidate,",
@@ -37,8 +41,11 @@ const T = {
     s2Flag1: "Wrong domain",
     s2Flag2: "Fake signature",
     s2Meta: "PDF created: 2 hours ago · Creator: Canva",
-    s2Result: "Forged Document Detected",
-    // Story 3
+    s2Reveal: "You wanted to believe it. But something felt slightly off.",
+    s2Result: "🟢 Good catch. This document contains forged details.",
+    s2Relief: "Good thing you checked first. You're safer because you verified first.",
+    
+    // Story 3 (Image)
     s3Name: "Uncle Sharma",
     s3Msg1: "Did you see this? Government just announced free laptop scheme for students!",
     s3Msg2: "Forward this to everyone. Last date tomorrow!",
@@ -47,34 +54,44 @@ const T = {
     s3Flag1: "Fake watermark",
     s3Flag2: "Edited header",
     s3Flag3: "No official source",
-    s3Result: "Manipulated Image",
-    // Story 4
+    s3Reveal: "It had government logos. Everyone was sharing it.",
+    s3Result: "🟢 Good catch. This image has been manipulated.",
+    s3Relief: "Good thing you checked first. You're safer because you verified first.",
+    
+    // Story 4 (Reel)
     s4Caption: "I invested just ₹500 and earned ₹5,00,000 in 3 months! Use this app now!",
     s4User: "@wealth_guru_official",
     s4Flag1: "Face manipulation detected",
     s4Flag2: "Voice pattern mismatch",
-    s4Result: "Deepfake Detected",
+    s4Reveal: "It was a famous face you trusted. The advice felt authentic.",
+    s4Result: "🟢 Good catch. This face/voice appears to be a deepfake.",
+    s4Relief: "Good thing you checked first. You're safer because you verified first.",
+    
     // Interactive
     interTitle: "What would you verify today?",
     interDrop: "Drop a file or click to upload",
-    interAnalyze: "Analyzing...",
-    interDone: "Verification Complete",
+    interAnalyze: "Looking for signs that something isn’t right…",
+    interDone: "Done. Here’s what we found.",
     tabVoice: "Voice",
     tabDoc: "Document",
     tabImage: "Image",
     tabVideo: "Video",
+    
     // Trust
-    trustH: "Built because digital trust is disappearing.",
-    trustP1: "Every forwarded message,",
-    trustP2: "every unknown call,",
-    trustP3: "every edited document,",
-    trustP4: "every AI generated voice—",
-    trustP5: "deserves verification before belief.",
-    trustP6: "PARAKH exists to give people confidence before they trust.",
+    trustH: "Trust shouldn’t be a gamble anymore.",
+    trustP1: "We built PARAKH because everyone deserves to feel safe online.",
+    trustP2: "Every forwarded message,",
+    trustP3: "every unknown call,",
+    trustP4: "every edited document,",
+    trustP5: "every AI generated voice—",
+    trustP6: "deserves verification before belief.",
+    trustP7: "PARAKH exists to give people confidence before they trust.",
+    
     // CTA
     ctaH1: "Don't verify because you're suspicious.",
     ctaH2: "Verify because the internet has changed.",
     ctaBtn: "Start Verifying",
+    
     // Hero headlines
     heroNews1: "₹1.4 crore lost to AI voice clone scam in Lucknow",
     heroNews1Src: "Times of India, 2024",
@@ -84,6 +101,7 @@ const T = {
     heroNews3Src: "India Today, 2024",
     heroNews4: "WhatsApp forwards caused mob violence in 6 states",
     heroNews4Src: "The Hindu, 2023",
+    
     // Story headlines
     s1News: "Kerala: Man loses ₹40,000 after scammer clones son's voice using AI",
     s1NewsSrc: "Manorama Online, Jan 2025",
@@ -97,19 +115,24 @@ const T = {
   hi: {
     heroH1: "कुछ झूठ, झूठ जैसे नहीं दिखते।",
     heroH2: "यही उन्हें खतरनाक बनाता है।",
-    heroP1: "हर दिन कोई भरोसा करता है",
-    heroP2: "एक नकली इंटर्नशिप पर,",
-    heroP3: "एक AI-जनित आवाज़ पर,",
-    heroP4: "एक संपादित स्क्रीनशॉट पर,",
-    heroP5: "या एक जाली दस्तावेज़ पर।",
+    heroP1: "आपको ऑनलाइन कुछ प्राप्त होता है।",
+    heroP2: "आपको यकीन नहीं है कि यह असली है या नहीं।",
+    heroP3: "PARAKH इसे कुछ सेकंड में परख लेता है।",
+    heroP4: "अब आप पूरे विश्वास के साथ निर्णय ले सकते हैं।",
+    heroP5: "हर दिन कोई भरोसा करता है एक नकली इंटर्नशिप पर, एक AI-जनित आवाज़ पर, एक संपादित स्क्रीनशॉट पर, या एक जाली दस्तावेज़ पर।",
     heroP6: "इसलिए नहीं कि वे लापरवाह थे।",
     heroP7: "क्योंकि सब कुछ असली दिख रहा था।",
     btnVerify: "कुछ परखें",
     btnStories: "असली कहानियाँ देखें",
     navVerify: "अभी परखें",
+    
+    // Story 1 (Voice)
     s1Bubble: '"पापा, मैं मुसीबत में हूँ। पैसे भेजो।"',
-    s1Reveal: "आवाज़ बिल्कुल उसी जैसी थी।",
-    s1Result: "AI जनित आवाज़",
+    s1Reveal: "आवाज़ बिल्कुल उसी जैसी थी। घबराहट बिल्कुल असली लगी।",
+    s1Result: "🟢 अच्छा हुआ पकड़ा गया। यह आवाज़ AI द्वारा बनाई गई लगती है।",
+    s1Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
+    
+    // Story 2 (Doc)
     s2From: "hiring@goggle-careers.co",
     s2Subject: "बधाई! आपका चयन हो गया है",
     s2Body1: "प्रिय उम्मीदवार,",
@@ -120,7 +143,11 @@ const T = {
     s2Flag1: "गलत डोमेन",
     s2Flag2: "नकली हस्ताक्षर",
     s2Meta: "PDF बनाया: 2 घंटे पहले · निर्माता: Canva",
-    s2Result: "जाली दस्तावेज़ पाया गया",
+    s2Reveal: "आप इस पर विश्वास करना चाहते थे। लेकिन कुछ थोड़ा अजीब लग रहा था।",
+    s2Result: "🟢 अच्छा हुआ पकड़ा गया। इस दस्तावेज़ में जाली विवरण हैं।",
+    s2Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
+    
+    // Story 3 (Image)
     s3Name: "शर्मा अंकल",
     s3Msg1: "ये देखा? सरकार ने छात्रों के लिए मुफ्त लैपटॉप योजना घोषित की!",
     s3Msg2: "सबको फॉरवर्ड करो। कल आखिरी तारीख है!",
@@ -129,37 +156,52 @@ const T = {
     s3Flag1: "नकली वॉटरमार्क",
     s3Flag2: "संपादित हेडर",
     s3Flag3: "कोई आधिकारिक स्रोत नहीं",
-    s3Result: "हेरफेर की गई छवि",
+    s3Reveal: "इस पर सरकारी लोगो थे। हर कोई इसे साझा कर रहा था।",
+    s3Result: "🟢 अच्छा हुआ पकड़ा गया। इस छवि के साथ छेड़छाड़ की गई है।",
+    s3Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
+    
+    // Story 4 (Reel)
     s4Caption: "मैंने बस ₹500 लगाए और 3 महीने में ₹5,00,000 कमाए! अभी ये ऐप इस्तेमाल करो!",
     s4User: "@wealth_guru_official",
     s4Flag1: "चेहरे में हेरफेर पाया गया",
     s4Flag2: "आवाज़ पैटर्न मेल नहीं खाता",
-    s4Result: "डीपफेक पाया गया",
+    s4Reveal: "यह एक प्रसिद्ध चेहरा था जिस पर आप भरोसा करते थे। सलाह बिल्कुल प्रामाणिक लगी।",
+    s4Result: "🟢 अच्छा हुआ पकड़ा गया। यह चेहरा/आवाज़ एक डीपफेक लगती है।",
+    s4Relief: "अच्छा हुआ आपने पहले परख लिया। पहले सत्यापित करने से आप अधिक सुरक्षित हैं।",
+    
+    // Interactive
     interTitle: "आज आप क्या परखना चाहेंगे?",
     interDrop: "फ़ाइल यहाँ छोड़ें या अपलोड करें",
-    interAnalyze: "विश्लेषण हो रहा है...",
-    interDone: "सत्यापन पूर्ण",
+    interAnalyze: "खोज रहे हैं कि कहीं कुछ गलत तो नहीं है...",
+    interDone: "हो गया। यहाँ देखें हमें क्या मिला।",
     tabVoice: "आवाज़",
     tabDoc: "दस्तावेज़",
     tabImage: "छवि",
     tabVideo: "वीडियो",
-    trustH: "बनाया गया क्योंकि डिजिटल भरोसा गायब हो रहा है।",
-    trustP1: "हर फॉरवर्ड किया गया संदेश,",
-    trustP2: "हर अनजान कॉल,",
-    trustP3: "हर संपादित दस्तावेज़,",
-    trustP4: "हर AI जनित आवाज़—",
-    trustP5: "विश्वास से पहले सत्यापन की हकदार है।",
-    trustP6: "PARAKH लोगों को भरोसा करने से पहले विश्वास दिलाने के लिए मौजूद है।",
+    
+    // Trust
+    trustH: "भरोसा अब कोई जुआ नहीं होना चाहिए।",
+    trustP1: "हमने PARAKH बनाया क्योंकि हर कोई ऑनलाइन सुरक्षित महसूस करने का हकदार है।",
+    trustP2: "हर फॉरवर्ड किया गया संदेश,",
+    trustP3: "हर अनजान कॉल,",
+    trustP4: "हर संपादित दस्तावेज़,",
+    trustP5: "हर AI जनित आवाज़—",
+    trustP6: "विश्वास से पहले सत्यापन की हकदार है।",
+    trustP7: "PARAKH लोगों को भरोसा करने से पहले विश्वास दिलाने के लिए मौजूद है।",
+    
+    // CTA
     ctaH1: "शक होने पर परखें ऐसा नहीं है।",
     ctaH2: "परखें क्योंकि इंटरनेट बदल गया है।",
     ctaBtn: "परखना शुरू करें",
+    
+    // News reference
     heroNews1: "लखनऊ में AI वॉइस क्लोन स्कैम से ₹1.4 करोड़ का नुकसान",
     heroNews1Src: "टाइम्स ऑफ़ इंडिया, 2024",
     heroNews2: "नकली नौकरी ऑफर रैकेट का भंडाफोड़ — 3,200 छात्र ठगे गए",
     heroNews2Src: "NDTV, 2025",
     heroNews3: "अभिनेत्री का डीपफेक वीडियो क्रिप्टो बेचने के लिए इस्तेमाल",
     heroNews3Src: "इंडिया टुडे, 2024",
-    heroNews4: "व्हाट्सएप फॉरवर्ड से 6 राज्यों में भीड़ हिंसा",
+    heroNews4: "WhatsApp forwards caused mob violence in 6 states",
     heroNews4Src: "द हिंदू, 2023",
     s1News: "केरल: ठग ने AI से बेटे की आवाज़ क्लोन कर ₹40,000 ठगे",
     s1NewsSrc: "मनोरमा ऑनलाइन, जनवरी 2025",
@@ -169,7 +211,7 @@ const T = {
     s3NewsSrc: "प्रेस सूचना ब्यूरो, 2024",
     s4News: "रश्मिका मंदाना का डीपफेक वीडियो वायरल — अमिताभ बच्चन, सरकार की प्रतिक्रिया",
     s4NewsSrc: "NDTV, नवंबर 2023",
-  },
+  }
 };
 
 const LOADING_LINES = [
@@ -250,7 +292,6 @@ function ResultBadge({ text, visible }: { text: string; visible: boolean }) {
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
           className="mt-6 inline-flex items-center gap-3 border border-[#A1493F]/35 bg-[#A1493F]/5 px-5 py-3 rounded-2xl shadow-[0_12px_32px_rgba(161,73,63,0.12)] z-30"
         >
-          <div className="w-2.5 h-2.5 rounded-full bg-[#A1493F] animate-pulse" />
           <span className="text-[14px] font-black text-[#A1493F] tracking-tight">{text}</span>
         </motion.div>
       )}
@@ -523,15 +564,26 @@ export default function Landing() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={!loading ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.7, delay: 0.4 }}
-                  className="mt-8 max-w-[480px] text-[#666] leading-relaxed text-[16px] space-y-1"
+                  className="mt-8 max-w-[480px] text-[#666] leading-relaxed text-[16px] space-y-4"
                 >
-                  <p>{t.heroP1}</p>
-                  <p>{t.heroP2}</p>
-                  <p>{t.heroP3}</p>
-                  <p>{t.heroP4}</p>
-                  <p>{t.heroP5}</p>
-                  <p className="mt-5 text-[#181818] font-extrabold">{t.heroP6}</p>
-                  <p className="text-[#181818] font-extrabold">{t.heroP7}</p>
+                  {/* Narrative Flow representation */}
+                  <div className="space-y-2 bg-white/40 backdrop-blur-sm border border-[#E4E1DA] p-5 rounded-2xl shadow-sm">
+                    <p className="flex items-center gap-2.5 font-bold text-[#181818]">
+                      <span className="text-accent-blue text-sm">📩</span> <span>{t.heroP1}</span>
+                    </p>
+                    <p className="flex items-center gap-2.5 font-bold text-[#181818]">
+                      <span className="text-[#A1493F] text-sm">❓</span> <span>{t.heroP2}</span>
+                    </p>
+                    <p className="flex items-center gap-2.5 font-bold text-[#181818]">
+                      <span className="text-[#3E5C4B] text-sm">🔍</span> <span>{t.heroP3}</span>
+                    </p>
+                    <p className="flex items-center gap-2.5 font-bold text-[#3E5C4B]">
+                      <span className="text-sm">🟢</span> <span>{t.heroP4}</span>
+                    </p>
+                  </div>
+
+                  <p className="text-[14px] leading-relaxed mt-2">{t.heroP5}</p>
+                  <p className="text-[#181818] font-extrabold">{t.heroP6} {t.heroP7}</p>
                 </motion.div>
 
                 <motion.div
@@ -566,7 +618,7 @@ export default function Landing() {
                   ].map((item, i) => (
                     <div key={i} className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-2xl p-5 text-left shadow-sm">
                       <p className="text-[13px] font-bold text-[#181818] leading-snug">{item.text}</p>
-                      <p className="text-[10px] text-[#666] mt-2 flex items-center gap-1">
+                      <p className="text-[10px] text-[#666] mt-2 flex items-center gap-1 font-semibold">
                         <span>📰</span> <span>{item.src}</span>
                       </p>
                     </div>
@@ -659,7 +711,7 @@ export default function Landing() {
               </motion.div>
             </div>
 
-            {/* Text side (Right Column) */}
+            {/* Text side (Right Column) - Narrative flow */}
             <div className="max-w-[480px]">
               <Reveal>
                 <AnimatePresence>
@@ -668,20 +720,30 @@ export default function Landing() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6 }}
-                      className="space-y-6"
+                      className="space-y-5"
                     >
-                      <p className="text-[30px] font-extrabold leading-tight text-[#181818]">
+                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">
                         {t.s1Reveal}
                       </p>
+                      
                       <div className="flex items-center gap-4">
                         <WaveformBars error />
                         <span className="text-[13px] text-[#666] font-mono font-bold">0:18</span>
                       </div>
                       
-                      {/* Floating badge */}
+                      {/* Verification Badge */}
                       <div className="relative">
                         <ResultBadge text={t.s1Result} visible />
                       </div>
+
+                      {/* Relief Message card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
+                      >
+                        😊 {t.s1Relief}
+                      </motion.div>
 
                       {/* Real incident card */}
                       <motion.div
@@ -720,25 +782,45 @@ export default function Landing() {
             {/* Text side (Left Column - Visual Rhythm Alternation!) */}
             <div className="max-w-[480px]">
               <Reveal>
-                <div className="relative">
-                  <ResultBadge text={t.s2Result} visible={story2.revealed} />
-                </div>
-                {/* Real incident card */}
                 <AnimatePresence>
                   {story2.revealed && (
                     <motion.div
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.4 }}
-                      className="mt-6 bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 relative group"
+                      className="space-y-5"
                     >
-                      <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span>📰</span> <span>Real Incident</span>
+                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">
+                        {t.s2Reveal}
                       </p>
-                      <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{t.s2News}</p>
-                      <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold">
-                        <span>📰</span> <span>{t.s2NewsSrc}</span>
-                      </p>
+
+                      <div className="relative">
+                        <ResultBadge text={t.s2Result} visible={story2.revealed} />
+                      </div>
+
+                      {/* Relief Message card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
+                      >
+                        😊 {t.s2Relief}
+                      </motion.div>
+
+                      {/* Real incident card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                        className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 relative group"
+                      >
+                        <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <span>📰</span> <span>Real Incident</span>
+                        </p>
+                        <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{t.s2News}</p>
+                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold">
+                          <span>📰</span> <span>{t.s2NewsSrc}</span>
+                        </p>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -888,23 +970,45 @@ export default function Landing() {
             {/* Result (Right Column) */}
             <div className="max-w-[480px]">
               <Reveal>
-                <ResultBadge text={t.s3Result} visible={story3.revealed} />
-                {/* Real incident card */}
                 <AnimatePresence>
                   {story3.revealed && (
                     <motion.div
-                      initial={{ opacity: 0, y: 12 }}
+                      initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.5 }}
-                      className="mt-6 bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 relative group"
+                      className="space-y-5"
                     >
-                      <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span>📰</span> <span>Real Incident</span>
+                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">
+                        {t.s3Reveal}
                       </p>
-                      <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{t.s3News}</p>
-                      <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold">
-                        <span>📰</span> <span>{t.s3NewsSrc}</span>
-                      </p>
+
+                      <div className="relative">
+                        <ResultBadge text={t.s3Result} visible={story3.revealed} />
+                      </div>
+                      
+                      {/* Relief Message card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
+                      >
+                        😊 {t.s3Relief}
+                      </motion.div>
+
+                      {/* Real incident card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.5 }}
+                        className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 relative group"
+                      >
+                        <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <span>📰</span> <span>Real Incident</span>
+                        </p>
+                        <p className="text-[14px] font-bold text-[#181818] leading-relaxed">{t.s3News}</p>
+                        <p className="text-[11px] text-[#666] mt-2 flex items-center gap-1 font-bold">
+                          <span>📰</span> <span>{t.s3NewsSrc}</span>
+                        </p>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -929,20 +1033,39 @@ export default function Landing() {
               <Reveal>
                 <AnimatePresence>
                   {story4.revealed && (
-                    <div className="space-y-4">
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-5"
+                    >
+                      <p className="text-[28px] font-extrabold leading-tight text-[#181818]">
+                        {t.s4Reveal}
+                      </p>
+
                       <div className="flex flex-wrap gap-2">
                         <FlagLabel text={t.s4Flag1} visible delay={0.1} />
                         <FlagLabel text={t.s4Flag2} visible delay={0.25} />
                       </div>
+
                       <div className="relative">
                         <ResultBadge text={t.s4Result} visible />
                       </div>
+
+                      {/* Relief Message card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[14px] font-bold text-[#3E5C4B] bg-[#3E5C4B]/5 border border-[#3E5C4B]/20 p-4.5 rounded-2xl shadow-sm leading-relaxed"
+                      >
+                        😊 {t.s4Relief}
+                      </motion.div>
+
                       {/* Real incident card */}
                       <motion.div
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
-                        className="mt-6 bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 relative group"
+                        className="bg-[#FBFAF8] border-2 border-[#E4E1DA] rounded-3xl p-6 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 relative group"
                       >
                         <p className="text-[10px] font-bold text-[#A1493F] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                           <span>📰</span> <span>Real Incident</span>
@@ -952,7 +1075,7 @@ export default function Landing() {
                           <span>📰</span> <span>{t.s4NewsSrc}</span>
                         </p>
                       </motion.div>
-                    </div>
+                    </motion.div>
                   )}
                 </AnimatePresence>
                 {!story4.revealed && story4.inView && (
@@ -1103,12 +1226,13 @@ export default function Landing() {
             </Reveal>
             <Reveal delay={0.12}>
               <div className="text-[#666] leading-loose space-y-0" style={{ fontSize: '18px' }}>
-                <p>{t.trustP1}</p>
+                <p className="text-[#181818] font-extrabold mb-6">{t.trustP1}</p>
                 <p>{t.trustP2}</p>
                 <p>{t.trustP3}</p>
                 <p>{t.trustP4}</p>
-                <p className="mt-8 text-[#181818] font-extrabold">{t.trustP5}</p>
-                <p className="mt-4 text-[#181818] font-extrabold">{t.trustP6}</p>
+                <p>{t.trustP5}</p>
+                <p className="mt-8 text-[#181818] font-extrabold">{t.trustP6}</p>
+                <p className="mt-4 text-[#181818] font-extrabold">{t.trustP7}</p>
               </div>
             </Reveal>
           </div>
