@@ -43,14 +43,36 @@ router.post('/verify', authMiddleware, async (req, res) => {
     });
 
     // Registrar mock list
-    const registrars = ['GoDaddy.com, LLC', 'Namecheap, Inc.', 'Google Domains', 'Domain.com', 'Hostinger', 'Freenom (Suspicious registrar)'];
-    let registrar = registrars[Math.floor(Math.random() * (registrars.length - 1))];
+    const registrars = ['GoDaddy.com, LLC', 'Namecheap, Inc.', 'Google Domains', 'Domain.com', 'Hostinger'];
+    let registrar = registrars[Math.floor(Math.random() * registrars.length)];
     let domainAge = '5 years, 4 months';
     let safetyRating = 'safe';
     let trustScore = 95;
 
-    // Trigger high risk if scam keywords, shortened, HTTP only, or homograph detected
     const anomalies = [];
+
+    // Detect if this is a shared cloud subdomain
+    const cloudProviders = [
+      { domain: 'vercel.app', label: 'Vercel Cloud Platform' },
+      { domain: 'netlify.app', label: 'Netlify Cloud Platform' },
+      { domain: 'github.io', label: 'GitHub Pages' },
+      { domain: 'pages.dev', label: 'Cloudflare Pages' },
+      { domain: 'onrender.com', label: 'Render Cloud Platform' },
+      { domain: 'firebaseapp.com', label: 'Google Firebase' },
+      { domain: 'herokuapp.com', label: 'Heroku Cloud' },
+      { domain: 'glitch.me', label: 'Glitch App Platform' },
+      { domain: 'weebly.com', label: 'Weebly Site Builder' },
+      { domain: 'wixsite.com', label: 'Wix Site Builder' }
+    ];
+    const matchedCloud = cloudProviders.find(p => domain.toLowerCase().endsWith('.' + p.domain));
+
+    if (matchedCloud) {
+      trustScore -= 25;
+      registrar = `${matchedCloud.label} (Subdomain Hosting)`;
+      domainAge = 'Unknown (Dynamically created subdomain)';
+      anomalies.push(`Shared Hosting Subdomain: This page is hosted on a free/shared cloud platform (${matchedCloud.label}). Subdomains can be created instantly by anyone for deployment, requiring manual verification.`);
+    }
+
     if (!isHttps) {
       anomalies.push('Insecure connection (HTTP only). Data is unencrypted.');
       trustScore -= 20;
@@ -68,15 +90,19 @@ router.post('/verify', authMiddleware, async (req, res) => {
       trustScore -= 15 * suspiciousKeywords.length;
     }
 
-    // Adjust score and set registrar/age based on suspicion level
+    // Adjust safety rating based on final trustScore
     if (trustScore < 45 || isHomograph) {
       safetyRating = 'dangerous';
-      registrar = 'Freenom (Suspicious registrar)';
-      domainAge = '2 days ago (Newly registered)';
-      trustScore = Math.max(10, trustScore - 25);
+      if (!matchedCloud) {
+        registrar = 'Freenom (Suspicious registrar)';
+        domainAge = '2 days ago (Newly registered)';
+      }
+      trustScore = Math.max(10, trustScore);
     } else if (trustScore < 75) {
       safetyRating = 'suspicious';
-      domainAge = '3 months ago';
+      if (!matchedCloud) {
+        domainAge = '3 months ago';
+      }
       trustScore = Math.max(30, trustScore);
     }
 
