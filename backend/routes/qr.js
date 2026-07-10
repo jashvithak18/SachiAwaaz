@@ -125,7 +125,7 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
 
     // Attempt real QR decoding with jsqr + jimp
     try {
-      const Jimp = require('jimp');
+      const { Jimp } = require('jimp');
       const jsQR = require('jsqr');
 
       const image = await Jimp.read(req.file.path);
