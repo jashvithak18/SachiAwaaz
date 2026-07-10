@@ -30,14 +30,71 @@ const upload = multer({
 
 // Analyse a decoded QR URL for safety
 function analyseUrl(rawUrl) {
-  let cleanUrl = rawUrl.trim();
-  if (!/^https?:\/\//i.test(cleanUrl)) {
-    cleanUrl = 'https://' + cleanUrl;
+  const cleanUrl = rawUrl.trim();
+
+  // Handle standard UPI payment QR codes (PhonePe, GPay, Paytm, etc.)
+  if (/^upi:\/\/pay/i.test(cleanUrl)) {
+    let pa = '';
+    let pn = '';
+    let am = '';
+    try {
+      const urlParams = new URLSearchParams(cleanUrl.split('?')[1] || '');
+      pa = urlParams.get('pa') || '';
+      pn = urlParams.get('pn') || '';
+      am = urlParams.get('am') || '';
+    } catch (e) {}
+
+    const anomalies = [];
+    let phishingScore = 0;
+    
+    // Check VPA format: name@bank
+    const vpaRegex = /^[\w\.\-_]+@[\w\-]+$/;
+    const isValidVpa = vpaRegex.test(pa);
+    
+    if (!pa) {
+      phishingScore = 45;
+      anomalies.push('UPI Payment QR does not contain a payee address (VPA).');
+    } else if (!isValidVpa) {
+      phishingScore = 15;
+      anomalies.push(`UPI payee address (${pa}) uses a non-standard handle structure.`);
+    }
+
+    // Check for common scam keywords inside the payee name or VPA
+    const fraudKeywords = ['refund', 'lottery', 'reward', 'win', 'prize', 'double', 'gift', 'bonus'];
+    const hits = fraudKeywords.filter(k => pa.toLowerCase().includes(k) || pn.toLowerCase().includes(k));
+    if (hits.length > 0) {
+      phishingScore += hits.length * 20;
+      anomalies.push(`UPI payment handle or payee name contains potential fraud keywords: ${hits.join(', ')}`);
+    }
+
+    phishingScore = Math.min(phishingScore, 99);
+
+    return {
+      isUpi: true,
+      cleanUrl,
+      pa,
+      pn,
+      am,
+      domain: 'UPI Payment Link',
+      isShortened: false,
+      isHomograph: false,
+      isHttps: true, // virtual trust since it is a secure banking format
+      hitWords: hits,
+      hasSuspiciousTLD: false,
+      isTrusted: true,
+      phishingScore,
+      anomalies
+    };
+  }
+
+  let formattedUrl = cleanUrl;
+  if (!/^https?:\/\//i.test(formattedUrl)) {
+    formattedUrl = 'https://' + formattedUrl;
   }
 
   let urlObj;
   try {
-    urlObj = new URL(cleanUrl);
+    urlObj = new URL(formattedUrl);
   } catch (e) {
     return { safe: false, reason: 'Invalid or malformed URL inside QR code.' };
   }
@@ -169,11 +226,15 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
 
     let aiExplanation = '';
     if (verdict === 'safe') {
-      aiExplanation = `QR code decoded successfully. Destination: ${decodedText}. ${analysis.isTrusted ? 'The link points to a trusted and verified domain.' : 'The URL passes all safety checks — HTTPS is active, no phishing keywords detected, and the domain has a clean profile.'}`;
+      if (analysis.isUpi) {
+        aiExplanation = `Standard UPI Payment QR Code verified. Destination: ${decodedText}. Payee Name: "${analysis.pn || 'Unknown'}", Payee VPA: "${analysis.pa || 'Unknown'}". The payment details conform to secure banking protocols, and no malicious fraud keywords were detected.`;
+      } else {
+        aiExplanation = `QR code decoded successfully. Destination: ${decodedText}. ${analysis.isTrusted ? 'The link points to a trusted and verified domain.' : 'The URL passes all safety checks — HTTPS is active, no phishing keywords detected, and the domain has a clean profile.'}`;
+      }
     } else if (verdict === 'suspicious') {
-      aiExplanation = `QR code decodes to: ${decodedText}. Caution advised — ${anomalies.join('. ')}. Verify the sender before opening this link.`;
+      aiExplanation = `QR code decodes to: ${decodedText}. Caution advised — ${anomalies.join('. ')}. Verify the payee before executing any payment.`;
     } else {
-      aiExplanation = `DANGER: QR code points to a high-risk URL (${analysis.domain}). ${anomalies.join('. ')}. Do NOT open this link. This QR code may be part of a phishing or financial scam.`;
+      aiExplanation = `DANGER: QR code points to a high-risk URL or VPA (${analysis.domain}). ${anomalies.join('. ')}. Do NOT open this link or authorize this transaction.`;
     }
 
     const analysisDetails = {
@@ -183,10 +244,14 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
       safetyRating,
       phishingProbability: phishingScore,
       shortUrlDetection: analysis.isShortened,
-      redirectDetection: analysis.isShortened || analysis.hitWords.length > 0,
+      redirectDetection: analysis.isShortened || (analysis.hitWords && analysis.hitWords.length > 0),
       httpsAvailable: analysis.isHttps,
       isTrustedDomain: analysis.isTrusted,
-      destination: analysis.cleanUrl
+      destination: analysis.cleanUrl,
+      isUpi: analysis.isUpi || false,
+      payeeAddress: analysis.pa || null,
+      payeeName: analysis.pn || null,
+      amount: analysis.am || null
     };
 
     const report = new Report({
