@@ -158,16 +158,25 @@ function getImageInfo(buffer, filename) {
     warnings.push('Canva graphic creation markers detected.');
   }
 
-  if (bufferStr.includes('Midjourney') || bufferStr.includes('midjourney') || lowerName.includes('midjourney') || lowerName.includes('mj')) {
+  if (bufferStr.includes('Midjourney') || bufferStr.includes('midjourney') || lowerName.includes('midjourney') || lowerName.includes('mj_') || lowerName.includes('mj-')) {
     creator = 'Midjourney AI';
     warnings.push('Midjourney generative AI metadata parameters matched.');
-  } else if (bufferStr.includes('Stable Diffusion') || bufferStr.includes('stablediffusion') || lowerName.includes('diffusion') || lowerName.includes('sd')) {
+  } else if (bufferStr.includes('Stable Diffusion') || bufferStr.includes('stablediffusion') || lowerName.includes('diffusion') || lowerName.includes('sd_') || lowerName.includes('sd-')) {
     creator = 'Stable Diffusion';
     warnings.push('Stable Diffusion synthesis generation markers matched.');
-  } else if (bufferStr.includes('DALL-E') || bufferStr.includes('dall-e') || lowerName.includes('dalle') || lowerName.includes('dall-e')) {
+  } else if (bufferStr.includes('DALL-E') || bufferStr.includes('dall-e') || lowerName.includes('dalle') || lowerName.includes('dall_e') || lowerName.includes('dall-e')) {
     creator = 'DALL-E AI';
     warnings.push('DALL-E generative synthetic metadata matched.');
-  } else if (lowerName.includes('ai') || lowerName.includes('synth') || lowerName.includes('generated') || lowerName.includes('fake')) {
+  } else if (bufferStr.includes('Adobe Firefly') || bufferStr.includes('firefly') || lowerName.includes('firefly')) {
+    creator = 'Adobe Firefly AI';
+    warnings.push('Adobe Firefly generative AI signature matched.');
+  } else if (bufferStr.includes('Flux.1') || bufferStr.includes('flux') || lowerName.includes('flux')) {
+    creator = 'Flux.1 generative AI';
+    warnings.push('Flux.1 AI generation markers matched.');
+  } else if (bufferStr.includes('Bing Image') || lowerName.includes('bing_creator') || lowerName.includes('bing-creator')) {
+    creator = 'Bing Image Creator';
+    warnings.push('Bing Image Creator generative markers detected.');
+  } else if (lowerName.includes('ai_generated') || lowerName.includes('ai-generated') || lowerName.includes('synth_') || lowerName.includes('generated_image') || lowerName.includes('fake_image')) {
     if (!creator) {
       creator = 'Generative AI Engine (Heuristic Match)';
       warnings.push('Synthetic file naming heuristics detected.');
@@ -198,20 +207,24 @@ router.post('/verify', authMiddleware, upload.single('image'), async (req, res) 
       aiGenerationScore = 95 + Math.floor(Math.random() * 5);
       aiConfidence = 'definite';
     }
-    // --- Tier 2: Probable AI — square image with no camera hardware metadata at all ---
-    // Only if the image has no EXIF camera info AND no editor software fingerprint
-    // (a real photo cropped to square would typically still retain EXIF from camera)
+    // --- Tier 2: Probable AI — square or standard generator dimensions with zero camera metadata ---
     else if (
       info.width > 0 &&
-      info.width === info.height &&
       !info.make &&
       !info.model &&
       !info.software &&
-      !info.dateTime
+      !info.dateTime &&
+      (
+        (info.width === info.height) || // Square (e.g. 512, 1024, 2048)
+        (info.width === 1344 && info.height === 896) || // Midjourney 3:2
+        (info.width === 896 && info.height === 1344) || // Midjourney 2:3
+        (info.width === 1456 && info.height === 816) ||  // Midjourney 16:9
+        (info.width === 816 && info.height === 1456)    // Midjourney 9:16
+      )
     ) {
       aiGenerationScore = 65 + Math.floor(Math.random() * 15);
       aiConfidence = 'probable';
-      info.warnings.push('No camera metadata found and image is square — consistent with AI generation tools (e.g. Midjourney, DALL-E, Stable Diffusion).');
+      info.warnings.push('No camera metadata found and image dimensions match standard AI generator templates (e.g. Midjourney, DALL-E, Stable Diffusion).');
     }
     // --- Tier 3: Edited by software (Photoshop, GIMP, Canva etc.) — not AI, but modified ---
     else if (info.software) {

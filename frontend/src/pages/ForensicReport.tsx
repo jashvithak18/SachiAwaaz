@@ -398,6 +398,30 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
             </div>
           )}
 
+          {report.mediaType === 'image' && details && (
+            <div className="bg-white border border-brand-200 p-6 rounded-2xl text-xs space-y-4 shadow-sm animate-fade-in">
+              <h4 className="font-bold text-brand-850 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-brand-100">
+                <span>🖼️</span> Image Metadata & Forensics
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="font-bold text-brand-500 uppercase text-[9px] tracking-wider mb-1">Image Properties</div>
+                  <div className="flex justify-between"><span>Resolution:</span><span className="font-bold text-brand-800">{details.metadata?.resolution || 'Unknown'}</span></div>
+                  <div className="flex justify-between"><span>File Size:</span><span className="font-bold text-brand-800">{details.metadata?.fileSize || 'Unknown'}</span></div>
+                  <div className="flex justify-between"><span>Format:</span><span className="font-bold text-brand-800">{details.metadata?.format || 'Unknown'}</span></div>
+                </div>
+                
+                <div className="p-3.5 bg-brand-50 border border-brand-200 rounded-xl space-y-1.5">
+                  <div className="font-bold text-[9px] uppercase tracking-wider text-brand-500">Capture Device & Software</div>
+                  <div className="flex justify-between"><span>Camera Make:</span><span className="font-bold text-brand-800">{details.metadata?.cameraMake || 'None'}</span></div>
+                  <div className="flex justify-between"><span>Camera Model:</span><span className="font-bold text-brand-800">{details.metadata?.cameraModel || 'None'}</span></div>
+                  <div className="flex justify-between"><span>Editing Software:</span><span className={`font-bold ${details.metadata?.software && details.metadata.software !== 'None' ? 'text-accent-amber' : 'text-brand-800'}`}>{details.metadata?.software || 'None'}</span></div>
+                  <div className="flex justify-between"><span>Generative AI Engine:</span><span className={`font-bold ${details.metadata?.creator && details.metadata.creator !== 'None' ? 'text-accent-red' : 'text-brand-800'}`}>{details.metadata?.creator || 'None'}</span></div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {report.mediaType === 'voice' && details && (
             <div className="bg-white border border-brand-200 p-6 rounded-2xl text-xs space-y-2">
               <h4 className="font-bold text-brand-850 uppercase tracking-wider">Voice Biometrics</h4>
