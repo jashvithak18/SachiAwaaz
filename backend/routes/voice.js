@@ -225,8 +225,8 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
                          req.file.originalname.toLowerCase().includes('voice') ||
                          req.file.originalname.toLowerCase().includes('audio');
 
-    // Highly-tuned thresholds: 0.94 for compressed files and 0.88 for uncompressed files to eliminate false positives on real voices
-    const threshold = isCompressed ? 0.94 : 0.88;
+    // Highly-tuned thresholds: 0.965 for compressed files and 0.88 for uncompressed files to eliminate false positives on real voices
+    const threshold = isCompressed ? 0.965 : 0.88;
     let isFake = syntheticScore >= threshold;
 
     let similarityScore = null;
@@ -280,10 +280,15 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
 
     // 3-Tier Classification to handle phone Voice Isolation AI and codec compression
     if (isFake) {
-      if (syntheticScore >= 0.982) {
+      // Compressed messaging audio notes (e.g. WhatsApp) require a much higher confidence limit (0.996) to trigger a manipulated deepfake verdict.
+      const manipulatedThreshold = isCompressed ? 0.996 : 0.982;
+      if (syntheticScore >= manipulatedThreshold) {
         verdict = 'manipulated';
       } else {
         verdict = 'suspicious';
+        // Downscale scores to warning-tier (30% to 48%) to match the suspicious status
+        riskScore = Math.min(Math.max(Math.round(syntheticScore * 50), 30), 48);
+        authenticityScore = 100 - riskScore;
       }
     }
 
