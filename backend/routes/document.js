@@ -64,7 +64,7 @@ function extractCompanyName(text, metadata, filename) {
   
   // 2. Try emails in text
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-  const emails = text.match(emailRegex) || [];
+  const emails = (text || '').match(emailRegex) || [];
   if (emails.length > 0) {
     for (const email of emails) {
       const domain = email.split('@')[1].toLowerCase();
@@ -76,24 +76,27 @@ function extractCompanyName(text, metadata, filename) {
   }
   
   // 3. Scan first 800 characters for typical certificate patterns
-  const textLower = text.toLowerCase();
+  const textLower = (text || '').toLowerCase();
   const patterns = [
     /internship\s+at\s+([a-zA-Z0-9\s,&]{3,35})/i,
     /intern\s+at\s+([a-zA-Z0-9\s,&]{3,35})/i,
     /issued\s+by\s+([a-zA-Z0-9\s,&]{3,35})/i,
-    /certificate\s+of\s+([a-zA-Z0-9\s,&]{3,35})/i,
+    /presented\s+by\s+([a-zA-Z0-9\s,&]{3,35})/i,
+    /awarded\s+by\s+([a-zA-Z0-9\s,&]{3,35})/i,
     /offer\s+from\s+([a-zA-Z0-9\s,&]{3,35})/i
   ];
   for (const pat of patterns) {
-    const match = text.match(pat);
+    const match = textLower.match(pat);
     if (match && match[1]) {
       const cleaned = match[1].replace(/(corporation|company|llc|ltd|limited|technologies|private|pvt)/i, '').trim();
-      if (cleaned.length > 2) return cleaned;
+      if (cleaned.length > 2 && cleaned !== 'completion' && cleaned !== 'internship' && cleaned !== 'participation') {
+        return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      }
     }
   }
   
-  // 4. Try filename word extractor fallback
-  const cleanFilename = filename.replace(/(certificate|internship|offer|letter|document|pdf|docx|png|jpg|jpeg|\d+|-|_)/gi, ' ').trim();
+  // 4. Try filename word extractor fallback (filter out prepositions and articles)
+  const cleanFilename = filename.replace(/(certificate|internship|offer|letter|document|pdf|docx|png|jpg|jpeg|of|for|the|a|an|by|at|in|to|\d+|-|_)/gi, ' ').trim();
   if (cleanFilename.length > 2) {
     const words = cleanFilename.split(/\s+/);
     return words[0].charAt(0).toUpperCase() + words[0].slice(1);
@@ -203,6 +206,29 @@ async function searchCompanyReviews(companyName) {
 }
 
 
+const FormData = require('form-data');
+async function performOCR(fileBuffer, fileName) {
+  try {
+    const form = new FormData();
+    form.append('file', fileBuffer, { filename: fileName });
+    form.append('apikey', 'helloworld');
+    form.append('language', 'eng');
+    form.append('isOverlayRequired', 'false');
+
+    const res = await axios.post('https://api.ocr.space/parse/image', form, {
+      headers: form.getHeaders(),
+      timeout: 15000
+    });
+
+    if (res.data && res.data.ParsedResults && res.data.ParsedResults.length > 0) {
+      return res.data.ParsedResults[0].ParsedText || '';
+    }
+  } catch (err) {
+    console.error('OCR.space API failed fallback:', err.message);
+  }
+  return '';
+}
+
 // Run document analysis
 router.post('/verify', authMiddleware, upload.single('document'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Document file is required.' });
@@ -254,8 +280,23 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       const englishWords = (extractedText || '').match(/[a-zA-Z]{3,}/g) || [];
       isTextReadable = englishWords.length >= 8;
 
+      if (!isTextReadable) {
+        console.log("PDF text layer unextractable. Executing OCR.space API fallback...");
+        const ocrText = await performOCR(fileBuffer, req.file.originalname);
+        if (ocrText && ocrText.trim().length > 10) {
+          extractedText = ocrText;
+          const ocrWords = ocrText.match(/[a-zA-Z]{3,}/g) || [];
+          if (ocrWords.length >= 8) {
+            isTextReadable = true;
+            ocrConsistency = 'Consistent (OCR Restored)';
+          }
+        }
+      }
+
       if (isTextReadable || bufferString.includes('/Text') || bufferString.includes('BT') || bufferString.includes('ET')) {
-        ocrConsistency = 'Consistent';
+        if (ocrConsistency !== 'Consistent (OCR Restored)') {
+          ocrConsistency = 'Consistent';
+        }
       } else {
         ocrConsistency = 'Unextractable Text Layer (Scanned or Vector PDF)';
       }
@@ -271,8 +312,16 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
         metadata.creator = 'Microsoft Word';
       }
     } else {
-      // Images
-      extractedText = 'Image file format uploaded. OCR analysis simulated.';
+      // Images: Call OCR.space to parse actual text from image!
+      console.log("Image format uploaded. Executing OCR.space scanner...");
+      extractedText = await performOCR(fileBuffer, req.file.originalname);
+      const imageWords = (extractedText || '').match(/[a-zA-Z]{3,}/g) || [];
+      isTextReadable = imageWords.length >= 8;
+      if (isTextReadable) {
+        ocrConsistency = 'Consistent';
+      } else {
+        ocrConsistency = 'Unextractable Text Layer (Low Resolution or No Text)';
+      }
     }
 
     // === AI Text Detection ===
