@@ -15,6 +15,211 @@ const C = {
   border: '#E4E1DA',
 };
 
+/* ─── Animated Background Component ─── */
+function AnimatedBackground() {
+  const particles = Array.from({ length: 15 });
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" style={{ backgroundColor: '#F6F4EF' }}>
+      {/* Soft mesh background gradient */}
+      <div 
+        className="absolute inset-0 opacity-40" 
+        style={{
+          backgroundImage: `
+            radial-gradient(at 10% 10%, #EFECE5 0px, transparent 50%),
+            radial-gradient(at 90% 10%, #F5F2EA 0px, transparent 50%),
+            radial-gradient(at 50% 80%, #E9E6DC 0px, transparent 50%)
+          `
+        }}
+      />
+      {/* 3 Slowly drifting organic blobs */}
+      <motion.div
+        animate={{
+          x: [0, 40, -20, 0],
+          y: [0, -30, 20, 0],
+          scale: [1, 1.1, 0.95, 1],
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        className="absolute -top-20 -left-20 w-[450px] h-[450px] rounded-full blur-[110px] opacity-[0.045]"
+        style={{ backgroundColor: '#3E5C4B' }}
+      />
+      <motion.div
+        animate={{
+          x: [0, -30, 30, 0],
+          y: [0, 40, -30, 0],
+          scale: [1, 0.9, 1.15, 1],
+        }}
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        className="absolute -bottom-20 -right-20 w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.04]"
+        style={{ backgroundColor: '#A1493F' }}
+      />
+      <motion.div
+        animate={{
+          x: [0, 20, -40, 0],
+          y: [0, 30, 30, 0],
+          scale: [1, 1.05, 0.9, 1],
+        }}
+        transition={{
+          duration: 22,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        className="absolute top-[40%] left-[30%] w-[350px] h-[350px] rounded-full blur-[100px] opacity-[0.035]"
+        style={{ backgroundColor: '#CBD5E1' }}
+      />
+      {/* Floating particles */}
+      {particles.map((_, i) => {
+        const size = Math.random() * 5 + 3;
+        const startX = Math.random() * 100;
+        const delay = Math.random() * 10;
+        const duration = Math.random() * 12 + 10;
+        return (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              backgroundColor: '#3E5C4B',
+              left: `${startX}%`,
+              bottom: '-5%',
+              opacity: Math.random() * 0.08 + 0.03,
+            }}
+            animate={{
+              y: ['-110%', '110%'],
+              x: [0, Math.random() * 40 - 20, 0],
+            }}
+            transition={{
+              duration,
+              repeat: Infinity,
+              ease: 'linear',
+              delay,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── Floating Verification Icons in Hero ─── */
+function FloatingVerifyObjects({ cursor }: { cursor: { x: number; y: number } }) {
+  const items = [
+    { icon: '📄', label: 'Document', top: '15%', left: '44%', rotSpeed: 25, delay: 0 },
+    { icon: '🎙️', label: 'Voice', top: '38%', left: '50%', rotSpeed: -30, delay: 1.5 },
+    { icon: '🖼️', label: 'Image', top: '65%', left: '42%', rotSpeed: 35, delay: 0.8 },
+    { icon: '🎥', label: 'Video', top: '22%', left: '60%', rotSpeed: -20, delay: 2.2 },
+    { icon: '🔗', label: 'Link', top: '55%', left: '56%', rotSpeed: 28, delay: 1.1 }
+  ];
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0 hidden lg:block overflow-hidden">
+      {items.map((item, i) => {
+        // Dynamic shift based on cursor
+        const offsetX = cursor.x !== -999 ? (cursor.x - window.innerWidth / 2) * 0.018 : 0;
+        const offsetY = cursor.y !== -999 ? (cursor.y - window.innerHeight / 2) * 0.018 : 0;
+
+        return (
+          <motion.div
+            key={i}
+            className="absolute flex items-center justify-center rounded-2xl border bg-white/40 backdrop-blur-sm shadow-sm select-none p-3 pointer-events-none"
+            style={{
+              top: item.top,
+              left: item.left,
+              borderColor: `${C.border}66`,
+              width: '46px',
+              height: '46px',
+            }}
+            animate={{
+              y: [0, -10, 0],
+              x: [0, Math.sin(i) * 5, 0],
+              rotate: [0, 3, -3, 0]
+            }}
+            transition={{
+              duration: 5 + i,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: item.delay
+            }}
+          >
+            <motion.div
+              style={{ x: offsetX, y: offsetY }}
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: Math.abs(item.rotSpeed), repeat: Infinity, ease: 'linear' }}
+              className="text-lg opacity-45"
+            >
+              {item.icon}
+            </motion.div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── Custom Analysis Simulator in Interactive Demo ─── */
+function DemoAnalysisProgress({ activeTab, progress }: { activeTab: string; progress: number }) {
+  return (
+    <div className="py-6 text-center space-y-6 flex flex-col items-center justify-center">
+      {/* Animated Feature Visualizer */}
+      <div className="relative w-48 h-28 rounded-2xl border border-brand-200 bg-brand-50/50 flex items-center justify-center overflow-hidden shadow-inner animate-[softGlow_4s_infinite]" style={{ borderColor: C.border }}>
+        {activeTab === 'voice' || activeTab === 'live' ? (
+          <div className="flex items-end gap-1.5 h-12">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <motion.div
+                key={i}
+                className="w-1 rounded-full bg-accent-green"
+                animate={{ height: [12, Math.random() * 40 + 8, 12] }}
+                transition={{ duration: 0.5 + Math.random() * 0.3, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            ))}
+          </div>
+        ) : activeTab === 'doc' ? (
+          <div className="relative w-16 h-20 bg-white rounded-md border shadow-sm flex flex-col gap-2 p-2.5" style={{ borderColor: C.border }}>
+            <div className="w-full h-2 bg-brand-100 rounded-sm" />
+            <div className="w-4/5 h-2 bg-brand-100 rounded-sm" />
+            <div className="w-full h-2 bg-brand-100 rounded-sm" />
+            {/* Laser beam */}
+            <motion.div 
+              className="absolute left-0 right-0 h-0.5 bg-accent-green shadow-[0_0_8px_#3E5C4B]"
+              animate={{ top: ['0%', '100%', '0%'] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </div>
+        ) : (
+          <div className="relative w-24 h-16 bg-white rounded-md border shadow-sm flex items-center justify-center" style={{ borderColor: C.border }}>
+            <span className="text-2xl">🖼️</span>
+            {/* Laser beam */}
+            <motion.div 
+              className="absolute left-0 right-0 h-0.5 bg-accent-red shadow-[0_0_8px_#A1493F]"
+              animate={{ top: ['0%', '100%', '0%'] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="w-full max-w-sm space-y-2">
+        <p className="text-[14px] font-bold tracking-tight" style={{ color: C.muted }}>
+          {activeTab === 'voice' ? 'Analyzing voice frequency prints...' : 
+           activeTab === 'doc' ? 'Verifying digital signatures & metadata...' : 
+           activeTab === 'image' ? 'Running noise consistency analysis...' : 'Listening for audio stream anomalies...'}
+        </p>
+        <div className="w-full h-1.5 rounded-full overflow-hidden bg-brand-200" style={{ backgroundColor: C.border }}>
+          <motion.div className="h-full rounded-full bg-accent-green" style={{ width: `${progress}%` }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Copy ─── */
 const copy = {
   heroH1: "Some lies don't look like lies.",
@@ -144,13 +349,13 @@ function useParallax(strength: number = 0.12) {
 /* ─── Generic scroll-reveal wrapper ─── */
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const inView = useInView(ref, { once: true, margin: '-60px' });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1], delay }}
+      initial={{ opacity: 0, y: 30, scale: 0.97 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ duration: 0.75, ease: [0.25, 0.1, 0.25, 1], delay }}
       className={className}
     >
       {children}
@@ -207,7 +412,14 @@ function InterstitialMessage({ icon, text }: { icon: string; text: string }) {
   const inView = useInView(ref, { once: true, margin: '-80px' });
   return (
     <div ref={ref} className="relative z-10 py-10 flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-x-0 top-1/2 h-px pointer-events-none" style={{ backgroundColor: C.border }} />
+      {/* Animated growing horizontal line */}
+      <motion.div 
+        className="absolute inset-x-0 top-1/2 h-px pointer-events-none origin-center" 
+        style={{ backgroundColor: C.border }}
+        initial={{ scaleX: 0 }}
+        animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
+        transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+      />
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 14 }}
         animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
@@ -225,10 +437,27 @@ function InterstitialMessage({ icon, text }: { icon: string; text: string }) {
 /* ─── Phone Frame ─── */
 function PhoneFrame({ children, glitch = false }: { children: React.ReactNode; glitch?: boolean }) {
   return (
-    <div className={`relative mx-auto w-[322px] rounded-[42px] bg-[#181818] p-[12px] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.18)] float-phone border border-white/5 ${glitch ? 'animate-[glitch_0.3s_ease-in-out_3]' : ''}`}>
+    <motion.div 
+      className={`relative mx-auto w-[322px] rounded-[42px] bg-[#181818] p-[12px] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.18)] border border-white/5 ${glitch ? 'animate-[glitch_0.3s_ease-in-out_3]' : ''}`}
+      animate={{
+        y: [0, -6, 0],
+        rotate: [0, 0.6, -0.6, 0]
+      }}
+      transition={{
+        y: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+        rotate: { duration: 7, repeat: Infinity, ease: 'easeInOut' }
+      }}
+      whileHover={{
+        scale: 1.025,
+        rotateX: 4,
+        rotateY: -4,
+        boxShadow: '0 45px 120px -20px rgba(0,0,0,0.3)',
+      }}
+      style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
+    >
       <div className="absolute top-[12px] left-1/2 -translate-x-1/2 w-[90px] h-[26px] bg-[#181818] rounded-b-2xl z-10" />
       <div className="rounded-[32px] overflow-hidden bg-[#111]">{children}</div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -372,13 +601,20 @@ function NewsClipping({ text, src, rotate, variant, idx }: {
   variant: 'broadsheet' | 'aged' | 'breaking' | 'digital'; idx: number;
 }) {
   const bgMap = { broadsheet: '#FFFEF9', aged: '#FAF7EE', breaking: '#FFFCFA', digital: '#F8F9FF' };
+  const rotNum = parseFloat(rotate) || 0;
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.5 + idx * 0.12 }}
-      className="relative shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 cursor-default clipping-card"
-      style={{ backgroundColor: bgMap[variant], transform: `rotate(${rotate})`, borderRadius: '2px' }}
+      initial={{ opacity: 0, y: 25, rotate: rotNum }}
+      animate={{ opacity: 1, y: 0, rotate: rotNum }}
+      transition={{ duration: 0.65, delay: 0.45 + idx * 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+      whileHover={{
+        y: -4,
+        scale: 1.02,
+        rotate: rotNum * 0.4,
+        boxShadow: '0 20px 40px rgba(19, 34, 25, 0.12), 0 5px 15px rgba(0, 0, 0, 0.04)',
+      }}
+      className="relative shadow-md transition-shadow duration-300 cursor-default clipping-card origin-center"
+      style={{ backgroundColor: bgMap[variant], borderRadius: '2px' }}
     >
       <div className="h-[3px] w-full" style={{ backgroundColor: variant === 'breaking' ? C.red : variant === 'digital' ? C.green : '#2A2A2A' }} />
       <div className="px-5 py-4">
@@ -587,24 +823,7 @@ export default function Landing() {
         style={{ backgroundColor: bgColor, color: C.text, fontFamily: 'Inter, system-ui, sans-serif' }}>
 
         {/* Background textures */}
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.025] noise-drift"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }} />
-          <div className="absolute inset-0 opacity-[0.018]"
-            style={{ backgroundImage: `radial-gradient(${C.text} 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
-          {/* Parallax ambient orbs */}
-          <motion.div style={{ y: orb1Y }} className="absolute top-0 left-1/4 w-[80vw] h-[80vw] rounded-full blur-[120px] -translate-y-1/2" style2={{ backgroundColor: `${C.green}0F` }}
-            // Note: combine with motion style
-          >
-            <div className="w-full h-full rounded-full" style={{ backgroundColor: `${C.green}0F` }} />
-          </motion.div>
-          <motion.div style={{ y: orb2Y }} className="absolute top-[40%] right-0 w-[60vw] h-[60vw] rounded-full blur-[140px]">
-            <div className="w-full h-full rounded-full" style={{ backgroundColor: `${C.red}0A` }} />
-          </motion.div>
-          <motion.div style={{ y: orb3Y }} className="absolute bottom-[10%] left-10 w-[70vw] h-[70vw] rounded-full blur-[150px]">
-            <div className="w-full h-full rounded-full" style={{ backgroundColor: `${C.green}0C` }} />
-          </motion.div>
-        </div>
+        <AnimatedBackground />
 
         {/* Margin guides */}
         <div className="hidden lg:block fixed left-[5%] top-0 bottom-0 w-[1px] pointer-events-none z-0" style={{ backgroundColor: `${C.border}60` }} />
@@ -656,8 +875,9 @@ export default function Landing() {
             </motion.button>
           </div>
 
-          <div className="flex-1 flex items-center">
-            <div className="max-w-[1200px] w-full mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+          <div className="flex-1 flex items-center relative overflow-hidden">
+            <FloatingVerifyObjects cursor={cursor} />
+            <div className="max-w-[1200px] w-full mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center relative z-10">
 
               {/* Left — hero text with parallax */}
               <motion.div style={{ y: heroTextY }} className="relative">
@@ -703,9 +923,9 @@ export default function Landing() {
                 >
                   <motion.button
                     onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')}
-                    animate={btnNudge ? { y: -4, boxShadow: '0 10px 28px rgba(0,0,0,0.16)' } : { y: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                    transition={{ duration: 0.35, ease: 'easeInOut' }}
-                    className="text-[15px] font-bold text-white px-8 py-4 rounded-2xl"
+                    whileHover={{ scale: 1.03, filter: 'brightness(1.05)', boxShadow: '0 12px 30px rgba(19, 34, 25, 0.22)' }}
+                    whileTap={{ scale: 0.97 }}
+                    className="text-[15px] font-bold text-white px-8 py-4 rounded-2xl cursor-pointer transition-shadow"
                     style={{ backgroundColor: C.text }}
                   >
                     {token ? 'Go to Dashboard' : copy.btnVerify}
@@ -843,9 +1063,16 @@ export default function Landing() {
                     <p style={{ color: C.muted }}>{copy.s2Body2}</p>
                     <p className="font-extrabold">{copy.s2Body3}</p>
                     <p style={{ color: C.muted }}>{copy.s2Body4}</p>
-                    <div className="flex items-center gap-3 mt-4 p-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                    <div className="flex items-center gap-3 mt-4 p-3 rounded-xl border relative overflow-hidden" style={{ backgroundColor: C.bg, borderColor: C.border }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.subtle} strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      <span className="text-[13px] font-bold" style={{ color: C.muted }}>{copy.s2Attach}</span>
+                      <span className="text-[13px] font-bold z-10" style={{ color: C.muted }}>{copy.s2Attach}</span>
+                      {/* Scanning laser beam */}
+                      <motion.div 
+                        className="absolute bottom-0 left-0 h-0.5 bg-accent-green/60 shadow-[0_0_4px_#3E5C4B]"
+                        animate={{ left: ['-100%', '100%'] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                        style={{ width: '100%' }}
+                      />
                     </div>
                     <div className="mt-4 pt-4 border-t relative" style={{ borderColor: `${C.border}88` }}>
                       <p className="text-[13px]" style={{ color: C.subtle }}>Best regards,</p>
@@ -912,9 +1139,17 @@ export default function Landing() {
                           <p className="text-[10px] mt-1 font-bold" style={{ color: C.subtle }}>governmentnews.co.in</p>
                         </div>
                         {s3ImgView && (
-                          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                            className="absolute inset-0 pointer-events-none"
-                            style={{ background: `repeating-linear-gradient(0deg, transparent, transparent 4px, ${C.red}12 4px, ${C.red}12 5px)` }} />
+                          <>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                              className="absolute inset-0 pointer-events-none"
+                              style={{ background: `repeating-linear-gradient(0deg, transparent, transparent 4px, ${C.red}12 4px, ${C.red}12 5px)` }} />
+                            {/* Scanning laser beam */}
+                            <motion.div 
+                              className="absolute left-0 right-0 h-[2px] bg-accent-red/60 pointer-events-none z-10 shadow-[0_0_6px_#A1493F]"
+                              animate={{ top: ['0%', '100%', '0%'] }}
+                              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                          </>
                         )}
                       </div>
                       {s3ImgView && (
@@ -1112,12 +1347,7 @@ export default function Landing() {
                   </div>
                 )}
                 {demoState === 'progress' && (
-                  <div className="py-8 text-center space-y-5">
-                    <p className="text-[15px] font-bold" style={{ color: C.muted }}>{copy.interAnalyze}</p>
-                    <div className="w-full h-[4px] rounded-full overflow-hidden" style={{ backgroundColor: C.border }}>
-                      <motion.div className="h-full rounded-full" style={{ backgroundColor: C.green, width: `${progress}%` }} />
-                    </div>
-                  </div>
+                  <DemoAnalysisProgress activeTab={activeTab} progress={progress} />
                 )}
                 {demoState === 'done' && (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="py-8 text-center space-y-4">
