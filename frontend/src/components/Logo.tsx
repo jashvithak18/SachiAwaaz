@@ -26,6 +26,12 @@ export default function Logo({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <defs>
+        <clipPath id="r-loop-clip">
+          <path d="M 170 45 C 208 45 210 88 170 94 Z" />
+        </clipPath>
+      </defs>
+
       {/* ─── MONOGRAM (Pa + R) ─── */}
       <g id="monogram">
         {/* Devanagari 'Pa' Top horizontal bar */}
@@ -43,6 +49,7 @@ export default function Logo({
           strokeWidth="6"
           strokeLinecap="round"
           strokeLinejoin="round"
+          fill="none"
         />
 
         {/* 'Pa' Main vertical stem (longer, extends down) */}
@@ -77,7 +84,7 @@ export default function Logo({
         />
 
         {/* ─── DETAILED FINGERPRINT RIDGES ─── */}
-        <g id="fingerprint-ridges">
+        <g id="fingerprint-ridges" clipPath="url(#r-loop-clip)">
           {/* Ridge 1 (Outer) */}
           <path
             d="M 173 78 C 173 53, 203 53, 203 78 C 203 86, 185 86, 185 91"
