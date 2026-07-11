@@ -3,8 +3,68 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const Report = require('../models/Report');
 const { authMiddleware } = require('../auth');
+
+// Shared DuckDuckGo search helper
+async function ddgSearch(query) {
+  try {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const res = await axios.get(url, {
+      timeout: 5500,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36' }
+    });
+    if (res.status !== 200 || !res.data) return [];
+    const html = res.data;
+    const snippetRe = /<a class="result__snippet"[^>]*>([\/\S\s]*?)<\/a>/g;
+    const titleRe = /<a class="result__a"[^>]*>([\/\S\s]*?)<\/a>/g;
+    const snippets = [], titles = [];
+    let m;
+    while ((m = snippetRe.exec(html)) !== null && snippets.length < 5)
+      snippets.push(m[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
+    while ((m = titleRe.exec(html)) !== null && titles.length < 5)
+      titles.push(m[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
+    return snippets.map((s, i) => ({ title: titles[i] || '', snippet: s }));
+  } catch { return []; }
+}
+
+async function investigateCompany(domainOrName) {
+  if (!domainOrName) return null;
+  const scamKeywords = ['scam', 'fraud', 'fake', 'phishing', 'not legit', 'charge fees', 'pay money'];
+  const positiveKeywords = ['legitimate', 'trusted', 'reputable', 'genuine', 'verified'];
+  const [infoResults, reviewResults] = await Promise.all([
+    ddgSearch(`${domainOrName} company official about`),
+    ddgSearch(`${domainOrName} scam fraud reviews complaints`)
+  ]);
+  const foundAlerts = new Set();
+  const foundPos = new Set();
+  reviewResults.forEach(r => {
+    const t = (r.title + ' ' + r.snippet).toLowerCase();
+    scamKeywords.forEach(k => { if (t.includes(k)) foundAlerts.add(k); });
+    positiveKeywords.forEach(k => { if (t.includes(k)) foundPos.add(k); });
+  });
+  let summary = `\n🏢 [Sender Company Live Investigation — ${domainOrName}]\n`;
+  if (infoResults.length > 0) {
+    summary += `📌 About: ${infoResults[0].snippet.substring(0, 200)}\n`;
+  } else {
+    summary += `📌 About: No clear public information found for this domain/company.\n`;
+  }
+  summary += `📣 Community Reviews:\n`;
+  if (reviewResults.length > 0) {
+    reviewResults.slice(0, 3).forEach((r, i) => {
+      summary += `${i+1}. ${r.snippet.substring(0, 160)}\n`;
+    });
+  } else {
+    summary += `No significant public discussion found.\n`;
+  }
+  if (foundAlerts.size > 0) summary += `⚠️ Scam Signals: ${[...foundAlerts].join(', ')}\n`;
+  if (foundPos.size > 0) summary += `✅ Trust Signals: ${[...foundPos].join(', ')}\n`;
+  if (foundAlerts.size >= 2) summary += `\n🚨 VERDICT: Multiple scam/fraud signals found for this sender domain. HIGH RISK.`;
+  else if (foundAlerts.size === 0 && foundPos.size > 0) summary += `\n✅ VERDICT: Sender domain appears legitimate based on public records.`;
+  else summary += `\n⚠️ VERDICT: Insufficient public data to fully verify. Exercise caution.`;
+  return { summary, isScam: foundAlerts.size >= 2 };
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -260,6 +320,16 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
       maliciousLinks.forEach(lnk => explanationParts.push(`- Flagged URL: ${lnk}`));
     }
 
+    // === Live Company/Domain Investigation ===
+    const senderCompanyDomain = senderDomainLower.split('@').pop() || senderDomainLower;
+    const companyInvestigation = !isFromTrustedDomain ? await investigateCompany(senderCompanyDomain) : null;
+    if (companyInvestigation) {
+      if (companyInvestigation.isScam) {
+        trustScore -= 30;
+        anomalies.push(`Live web search detected scam/fraud signals for sender domain: ${senderCompanyDomain}`);
+      }
+    }
+
     explanationParts.push(`\n📊 [Threat Verdict]`);
     if (verdict === 'safe') {
       explanationParts.push(`Status: High Trust / Safe. This email passes all sender verification tests and exhibits no fraud keywords. It is safe to interact with.`);
@@ -267,6 +337,10 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
       explanationParts.push(`Status: Warning / Suspicious. Mismatches in Reply-To headers, unauthenticated SPF/DKIM routing, or promotional paid-training flags were found. Proceed with caution.`);
     } else {
       explanationParts.push(`Status: DANGER / Forged. Display name spoofing, failed cryptographic signatures, or critical financial fraud keywords indicate a high likelihood of a phishing/malware delivery attempt. Do NOT click any links or download attachments.`);
+    }
+
+    if (companyInvestigation) {
+      explanationParts.push(companyInvestigation.summary);
     }
 
     const aiExplanation = explanationParts.join('\n');

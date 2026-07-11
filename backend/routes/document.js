@@ -104,72 +104,104 @@ function extractCompanyName(text, metadata, filename) {
 
 // Helper to perform live search lookup for company reviews and scam reports
 const axios = require('axios');
+
+async function ddgSearch(query) {
+  try {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const res = await axios.get(url, {
+      timeout: 6000,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+    });
+    if (res.status !== 200 || !res.data) return [];
+    const html = res.data;
+    const snippetRegex = /<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+    const titleRegex = /<a class="result__a"[^>]*>([\s\S]*?)<\/a>/g;
+    const snippets = [], titles = [];
+    let m;
+    while ((m = snippetRegex.exec(html)) !== null && snippets.length < 6)
+      snippets.push(m[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
+    while ((m = titleRegex.exec(html)) !== null && titles.length < 6)
+      titles.push(m[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
+    return snippets.map((s, i) => ({ title: titles[i] || '', snippet: s }));
+  } catch { return []; }
+}
+
 async function searchCompanyReviews(companyName) {
   if (!companyName || companyName === 'Unregistered Entity') {
     return {
-      reviewsSummary: 'No specific company name could be extracted from the document text or metadata. Verification defaults to structure-only.',
-      safetyAlerts: []
+      officialInfo: null,
+      reviewsSummary: 'No company name provided. Enter the issuing company name in the form for a live investigation.',
+      safetyAlerts: [],
+      isScamDetected: false,
+      officialDomain: null
     };
   }
 
-  try {
-    const query = encodeURIComponent(`${companyName} internship reviews scam complaints`);
-    const searchUrl = `https://html.duckduckgo.com/html/?q=${query}`;
-    
-    const response = await axios.get(searchUrl, {
-      timeout: 5500,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-      }
+  // Run two searches in parallel
+  const [officialResults, reviewResults] = await Promise.all([
+    ddgSearch(`${companyName} official website about company`),
+    ddgSearch(`${companyName} internship scam fraud complaints reviews Quora Reddit`)
+  ]);
+
+  // --- Parse official info ---
+  let officialDomain = null;
+  let officialDescription = null;
+  if (officialResults.length > 0) {
+    officialDescription = officialResults[0].snippet;
+    // Try to extract a domain from snippet or title
+    const domainMatch = (officialResults[0].title + ' ' + officialResults[0].snippet).match(/(?:www\.)?([a-zA-Z0-9-]+\.(com|in|org|net|io|co))/i);
+    if (domainMatch) officialDomain = domainMatch[0].replace(/^www\./, '');
+  }
+
+  // --- Parse scam/reviews ---
+  const scamKeywords = ['scam', 'fraud', 'fake', 'fake offer', 'pay money', 'charge fees', 'deposit', 'not legit', 'waste of money', 'ask for money', 'certificate fee', 'ponzi', 'phishing'];
+  const positiveKeywords = ['legitimate', 'legit', 'genuine', 'trusted', 'reputable', 'real company', 'verified', 'good reviews'];
+  const foundAlerts = new Set();
+  const foundPositives = new Set();
+
+  reviewResults.forEach(r => {
+    const text = (r.title + ' ' + r.snippet).toLowerCase();
+    scamKeywords.forEach(k => { if (text.includes(k)) foundAlerts.add(k); });
+    positiveKeywords.forEach(k => { if (text.includes(k)) foundPositives.add(k); });
+  });
+
+  const isScamDetected = foundAlerts.size >= 2;
+
+  // --- Build human-readable summary ---
+  let reviewsSummary = `🔍 Live Web Investigation for "${companyName}"\n\n`;
+
+  if (officialDescription) {
+    reviewsSummary += `📌 Official Info Found:\n"${officialDescription.substring(0, 220)}"\n`;
+    if (officialDomain) reviewsSummary += `🌐 Detected Domain: ${officialDomain}\n`;
+  } else {
+    reviewsSummary += `📌 Official Info: No clear official website found for "${companyName}" in top search results. This may indicate a very small, local, or unregistered entity.\n`;
+  }
+
+  reviewsSummary += `\n📣 Community Reviews & Complaints:\n`;
+  if (reviewResults.length > 0) {
+    reviewResults.slice(0, 3).forEach((r, i) => {
+      reviewsSummary += `${i + 1}. ${r.title ? `[${r.title.substring(0, 60)}] ` : ''}${r.snippet.substring(0, 180)}\n`;
     });
+  } else {
+    reviewsSummary += `No significant public discussion found for this company on Quora or Reddit.\n`;
+  }
 
-    if (response.status === 200 && response.data) {
-      const html = response.data;
-      
-      const snippetRegex = /<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
-      let match;
-      const snippets = [];
-      while ((match = snippetRegex.exec(html)) !== null && snippets.length < 5) {
-        const cleanSnippet = match[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-        snippets.push(cleanSnippet);
-      }
-
-      const scamKeywords = ['scam', 'fraud', 'fake', 'fake offer', 'pay money', 'charge fees', 'deposit', 'quora scam', 'reddit scam', 'not legit', 'waste of money', 'ask for money', 'certificate fee'];
-      const foundAlerts = [];
-      
-      snippets.forEach(snip => {
-        const lowerSnip = snip.toLowerCase();
-        scamKeywords.forEach(word => {
-          if (lowerSnip.includes(word) && !foundAlerts.includes(word)) {
-            foundAlerts.push(word);
-          }
-        });
-      });
-
-      let reviewsSummary = '';
-      if (snippets.length > 0) {
-        reviewsSummary = `Live web search check completed for "${companyName}". Top search results note:\n`;
-        snippets.slice(0, 3).forEach((s, idx) => {
-          reviewsSummary += `${idx + 1}. "${s.substring(0, 160)}..."\n`;
-        });
-      } else {
-        reviewsSummary = `Live web search queried for "${companyName}" reviews, but no immediate public discussion or Quora records were found.`;
-      }
-
-      return {
-        reviewsSummary,
-        safetyAlerts: foundAlerts
-      };
-    }
-  } catch (err) {
-    console.error(`Live web search reviews failed for ${companyName}:`, err.message);
+  if (foundAlerts.size > 0) {
+    reviewsSummary += `\n⚠️ Scam Alert Keywords Found in Reviews: ${[...foundAlerts].join(', ')}`;
+  }
+  if (foundPositives.size > 0) {
+    reviewsSummary += `\n✅ Positive Signals Found: ${[...foundPositives].join(', ')}`;
   }
 
   return {
-    reviewsSummary: `Live web search for "${companyName}" reviews was bypassed or timed out. (Reputation defaults to neutral).`,
-    safetyAlerts: []
+    officialInfo: officialDescription,
+    reviewsSummary,
+    safetyAlerts: [...foundAlerts],
+    isScamDetected,
+    officialDomain
   };
 }
+
 
 // Run document analysis
 router.post('/verify', authMiddleware, upload.single('document'), async (req, res) => {
@@ -463,10 +495,10 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     } : {
       name: companyName,
       type: companyName === 'Unregistered Entity' ? 'Unknown' : 'Enterprise / External',
-      reputation: searchResult.safetyAlerts.length > 0 ? 'Verification Required / Alerts Found' : 'Neutral / Verification Required',
-      domain: emails.length > 0 ? emails[0].split('@')[1].toLowerCase() : null,
-      reviews: `${searchResult.reviewsSummary}\n\nDisclaimer: Company is not in our static database registry. Live DuckDuckGo reviews were queried to verify status. Genuine corporate internships never require deposits, paid courses, or administrative fees.`,
-      isScam: searchResult.safetyAlerts.length >= 2
+      reputation: searchResult.isScamDetected ? 'High-Risk / Scam Detected' : (searchResult.safetyAlerts.length > 0 ? 'Caution / Alerts Found' : 'Neutral / Unverified'),
+      domain: searchResult.officialDomain || (emails.length > 0 ? emails[0].split('@')[1].toLowerCase() : null),
+      reviews: searchResult.reviewsSummary,
+      isScam: searchResult.isScamDetected
     };
 
     const organization = companyInfo.name;
