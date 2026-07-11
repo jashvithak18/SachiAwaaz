@@ -27,6 +27,10 @@ export default function AuthPage() {
   const [success, setSuccess]   = useState('');
   const [countdown, setCountdown] = useState(0); // resend countdown
 
+  // Code verification states
+  const [codeVerified, setCodeVerified] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   /* ── OTP helpers ── */
@@ -58,12 +62,47 @@ export default function AuthPage() {
     otpRefs.current[lastFilled]?.focus();
   };
 
+  /* ── Password validation indicators ── */
+  const hasCapital = /[A-Z]/.test(newPassword);
+  const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+  const hasMinLength = newPassword.length >= 6;
+  const isPasswordValid = hasCapital && hasSpecial && hasMinLength;
+
   /* ── Resend countdown ── */
   useEffect(() => {
     if (countdown <= 0) return;
     const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [countdown]);
+
+  /* ── Verify Reset Code Only ── */
+  const handleVerifyCode = async () => {
+    if (otpValue.length < 6) {
+      setError('Please enter the complete 6-digit code.');
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setVerifyingCode(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/verify-reset-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: otpValue }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Verification failed.');
+
+      setSuccess('Reset code verified successfully! Now set your new password.');
+      setCodeVerified(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Invalid code verification.');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
 
   /* ── Submit handlers ── */
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,12 +112,12 @@ export default function AuthPage() {
 
     // Client-side validation
     if (mode === 'reset') {
-      if (otpValue.length < 6) {
-        setError('Please enter the full 6-digit code from your email.');
+      if (!codeVerified) {
+        setError('Please verify the reset code first.');
         return;
       }
-      if (newPassword.length < 6) {
-        setError('New password must be at least 6 characters.');
+      if (!isPasswordValid) {
+        setError('Password does not meet the complexity requirements.');
         return;
       }
       if (newPassword !== confirmPassword) {
@@ -122,6 +161,7 @@ export default function AuthPage() {
       } else if (mode === 'forgot') {
         setSuccess(data.message);
         setOtp(['', '', '', '', '', '']);
+        setCodeVerified(false);
         setMode('reset');
         setCountdown(60);
       } else if (mode === 'reset') {
@@ -130,6 +170,7 @@ export default function AuthPage() {
           setSuccess('');
           setMode('login');
           setOtp(['', '', '', '', '', '']);
+          setCodeVerified(false);
           setNewPassword('');
           setConfirmPassword('');
         }, 1800);
@@ -158,6 +199,7 @@ export default function AuthPage() {
       if (!response.ok) throw new Error(data.message);
       setSuccess('A new code has been sent to your email.');
       setOtp(['', '', '', '', '', '']);
+      setCodeVerified(false);
       setCountdown(60);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to resend.');
@@ -297,9 +339,16 @@ export default function AuthPage() {
 
               {/* 6-digit OTP input */}
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: '#666' }}>
-                  6-Digit Reset Code
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: '#666' }}>
+                    6-Digit Reset Code
+                  </label>
+                  {codeVerified && (
+                    <span className="text-[11px] font-bold text-accent-green flex items-center gap-1">
+                      ✓ Verified
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-2 justify-between" onPaste={handleOtpPaste}>
                   {otp.map((digit, idx) => (
                     <input
@@ -308,13 +357,14 @@ export default function AuthPage() {
                       type="text"
                       inputMode="numeric"
                       maxLength={1}
+                      disabled={codeVerified}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="w-full aspect-square text-center text-[22px] font-extrabold rounded-xl border-2 focus:outline-none transition-all"
+                      className="w-full aspect-square text-center text-[22px] font-extrabold rounded-xl border-2 focus:outline-none transition-all disabled:opacity-75 disabled:cursor-not-allowed"
                       style={{
-                        borderColor: digit ? '#3E5C4B' : '#E4E1DA',
-                        backgroundColor: digit ? '#3E5C4B0D' : '#FBFAF8',
+                        borderColor: codeVerified ? '#3E5C4B' : (digit ? '#3E5C4B' : '#E4E1DA'),
+                        backgroundColor: codeVerified ? '#3E5C4B08' : (digit ? '#3E5C4B0D' : '#FBFAF8'),
                         color: '#181818',
                         caretColor: '#3E5C4B',
                         maxWidth: '52px',
@@ -322,53 +372,101 @@ export default function AuthPage() {
                     />
                   ))}
                 </div>
-                {/* Resend */}
-                <div className="mt-3 flex items-center justify-end gap-1">
-                  <span className="text-[12px]" style={{ color: '#999' }}>Didn't get it?</span>
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={countdown > 0 || loading}
-                    className="text-[12px] font-bold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ color: '#3E5C4B' }}
-                  >
-                    {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
-                  </button>
-                </div>
-              </div>
 
-              {/* New password */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#666' }}>
-                  New Password
-                </label>
-                <input
-                  type="password" required minLength={6}
-                  className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
-                  placeholder="At least 6 characters"
-                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
+                {/* Verify Code and Resend panel */}
+                {!codeVerified && (
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={countdown > 0 || verifyingCode || loading}
+                      className="text-[12px] font-bold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ color: '#3E5C4B' }}
+                    >
+                      {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
+                    </button>
 
-              {/* Confirm password */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#666' }}>
-                  Confirm New Password
-                </label>
-                <input
-                  type="password" required
-                  className={`w-full border-2 focus:outline-none rounded-xl px-4 py-3 text-sm transition ${
-                    confirmPassword && confirmPassword !== newPassword
-                      ? 'border-accent-red bg-accent-red/5'
-                      : 'bg-brand-50 border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue'
-                  }`}
-                  placeholder="Repeat new password"
-                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                {confirmPassword && confirmPassword !== newPassword && (
-                  <p className="text-[11px] mt-1 font-semibold" style={{ color: '#A1493F' }}>Passwords don't match</p>
+                    <button
+                      type="button"
+                      onClick={handleVerifyCode}
+                      disabled={otpValue.length < 6 || verifyingCode}
+                      className="bg-brand-800 text-white font-bold py-2 px-5 rounded-lg text-xs shadow hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {verifyingCode ? 'Verifying...' : 'Verify Code'}
+                    </button>
+                  </div>
                 )}
               </div>
+
+              {/* Password inputs (only visible when code is verified) */}
+              {codeVerified && (
+                <>
+                  {/* New password */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#666' }}>
+                      New Password
+                    </label>
+                    <input
+                      type="password" required
+                      className="w-full bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-3 text-sm focus:outline-none placeholder-brand-400 transition"
+                      placeholder="Enter new password"
+                      value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                    />
+
+                    {/* Password requirements indicators */}
+                    <div className="mt-2.5 space-y-1 bg-brand-50/50 rounded-xl p-3 border border-brand-200/50">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-brand-500 mb-1">Requirements:</p>
+                      
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className={hasMinLength ? "text-accent-green" : "text-brand-400"}>
+                          {hasMinLength ? "✓" : "○"}
+                        </span>
+                        <span className={hasMinLength ? "text-brand-800 font-semibold" : "text-brand-500"}>
+                          At least 6 characters
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className={hasCapital ? "text-accent-green" : "text-brand-400"}>
+                          {hasCapital ? "✓" : "○"}
+                        </span>
+                        <span className={hasCapital ? "text-brand-800 font-semibold" : "text-brand-500"}>
+                          At least one Capital letter (A-Z)
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className={hasSpecial ? "text-accent-green" : "text-brand-400"}>
+                          {hasSpecial ? "✓" : "○"}
+                        </span>
+                        <span className={hasSpecial ? "text-brand-800 font-semibold" : "text-brand-500"}>
+                          At least one Special character (e.g. @, #, $, etc.)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Confirm password */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#666' }}>
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password" required
+                      className={`w-full border-2 focus:outline-none rounded-xl px-4 py-3 text-sm transition ${
+                        confirmPassword && confirmPassword !== newPassword
+                          ? 'border-accent-red bg-accent-red/5'
+                          : 'bg-brand-50 border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue'
+                      }`}
+                      placeholder="Repeat new password"
+                      value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    {confirmPassword && confirmPassword !== newPassword && (
+                      <p className="text-[11px] mt-1 font-semibold" style={{ color: '#A1493F' }}>Passwords don't match</p>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
 
@@ -385,10 +483,13 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* ── Submit ── */}
+          {/* ── Submit button ── */}
           <button
             type="submit"
-            disabled={loading || (mode === 'reset' && confirmPassword !== newPassword && confirmPassword.length > 0)}
+            disabled={
+              loading || 
+              (mode === 'reset' && (!codeVerified || !isPasswordValid || confirmPassword !== newPassword))
+            }
             className="w-full font-bold py-3.5 px-4 rounded-xl transition duration-150 text-sm shadow-md min-h-[44px] text-white disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#3E5C4B' }}
           >
@@ -431,7 +532,7 @@ export default function AuthPage() {
           ) : (
             <p className="text-brand-500">
               Remember your password?{' '}
-              <button onClick={() => { setMode('login'); setError(''); setSuccess(''); setOtp(['','','','','','']); }}
+              <button onClick={() => { setMode('login'); setError(''); setSuccess(''); setOtp(['','','','','','']); setCodeVerified(false); }}
                 className="font-bold hover:underline" style={{ color: '#3E5C4B' }}>
                 Sign in
               </button>
