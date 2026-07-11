@@ -361,7 +361,7 @@ export default function EmailVerify() {
                   : 'Alert! This is a dangerous email. Someone is pretending to be a company or person you trust (spoofing) to steal your information. Do not reply, click any links, or download any attachments!'}
               </p>
             ) : (
-              <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>
+              <p className="text-xs text-brand-750 leading-relaxed font-medium whitespace-pre-wrap" style={{ whiteSpace: 'pre-wrap' }}>{result.report.aiExplanation}</p>
             )}
           </div>
         </div>

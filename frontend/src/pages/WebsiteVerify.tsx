@@ -275,7 +275,7 @@ export default function WebsiteVerify() {
                   : 'Danger! This is a fake website. It is designed to look exactly like a real bank, payment portal, or service to trick you into entering your password.'}
               </p>
             ) : (
-              <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>
+              <p className="text-xs text-brand-750 leading-relaxed font-medium whitespace-pre-wrap" style={{ whiteSpace: 'pre-wrap' }}>{result.report.aiExplanation}</p>
             )}
           </div>
 

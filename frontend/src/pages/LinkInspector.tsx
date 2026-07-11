@@ -258,7 +258,7 @@ export default function LinkInspector() {
                     : 'Do not click! This link is a trap. It leads to a fake website designed to steal your passwords or install harmful software on your device.'}
                 </p>
               ) : (
-                <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>
+                <p className="text-xs text-brand-750 leading-relaxed font-medium whitespace-pre-wrap" style={{ whiteSpace: 'pre-wrap' }}>{result.report.aiExplanation}</p>
               )}
             </div>
           </div>

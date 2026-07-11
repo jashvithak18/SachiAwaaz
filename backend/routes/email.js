@@ -231,14 +231,45 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
     const riskScore = 100 - trustScore;
     const verdict = safetyRating === 'safe' ? 'safe' : (safetyRating === 'suspicious' ? 'suspicious' : 'manipulated');
 
-    let aiExplanation = '';
-    if (verdict === 'safe') {
-      aiExplanation = `Email headers audit verified successful SPF, DKIM, and DMARC alignments. Sending IP (${senderIp}) matches the authorized blocklist for the domain. No display name spoofing or mismatched reply channels were detected. Attachments and payload links are fully clean.`;
-    } else if (verdict === 'suspicious') {
-      aiExplanation = `WARNING: Email audit flagged security mismatches. There is a mismatch between the sending header and Reply-To directive, or SPF/DKIM flags failed to align. Attachment formats require scanning.`;
+    // === Email Forensic Summary Builder ===
+    let explanationParts = [];
+    explanationParts.push(`📧 [Email Header Forensic Verification]`);
+    explanationParts.push(`- Sender: ${sender}`);
+    explanationParts.push(`- Recipient: ${recipient}`);
+    explanationParts.push(`- Subject: "${subject}"`);
+    explanationParts.push(`- Sending Server IP: ${senderIp}`);
+
+    explanationParts.push(`\n🔐 [Authentication Controls]`);
+    explanationParts.push(`- SPF (Sender Policy Framework): ${spf === 'PASS' ? '✅ PASS (Authorized sender IP)' : (spf === 'FAIL' ? '❌ FAIL (Sender IP is NOT authorized by domain)' : '⚠️ NONE (No SPF policy published)')}`);
+    explanationParts.push(`- DKIM (DomainKeys Identified Mail): ${dkim === 'PASS' ? '✅ PASS (Cryptographic signature verified, body unaltered)' : (dkim === 'FAIL' ? '❌ FAIL (Signature verification failed, email altered)' : '⚠️ NONE (No DKIM signature found)')}`);
+    explanationParts.push(`- DMARC (Alignment Policy): ${dmarc === 'PASS' ? '✅ PASS (Domain aligned with SPF/DKIM)' : (dmarc === 'FAIL' ? '❌ FAIL (Anti-spoofing alignment failed)' : '⚠️ NONE (No DMARC protection active)')}`);
+
+    explanationParts.push(`\n⚠️ [Anomalies & Threat Vectors]`);
+    if (anomalies.length > 0) {
+      anomalies.forEach(a => explanationParts.push(`- Flagged: ${a}`));
     } else {
-      aiExplanation = `CRITICAL FRAUD ALERT: Highly dangerous email spoofing detected. Display name is disguised as a trusted brand, but the sending mailbox resides on an unrelated domain. DKIM signature validation failed, indicating header alteration. Do NOT click attachments.`;
+      explanationParts.push(`- None detected. Mailbox routing and digital structures align with official templates.`);
     }
+
+    if (suspiciousAttachments.length > 0) {
+      explanationParts.push(`\n📎 [Suspicious Attachments]`);
+      suspiciousAttachments.forEach(att => explanationParts.push(`- Blocked Extension: ${att}`));
+    }
+    if (maliciousLinks.length > 0) {
+      explanationParts.push(`\n🔗 [High-Risk Redirects / Links]`);
+      maliciousLinks.forEach(lnk => explanationParts.push(`- Flagged URL: ${lnk}`));
+    }
+
+    explanationParts.push(`\n📊 [Threat Verdict]`);
+    if (verdict === 'safe') {
+      explanationParts.push(`Status: High Trust / Safe. This email passes all sender verification tests and exhibits no fraud keywords. It is safe to interact with.`);
+    } else if (verdict === 'suspicious') {
+      explanationParts.push(`Status: Warning / Suspicious. Mismatches in Reply-To headers, unauthenticated SPF/DKIM routing, or promotional paid-training flags were found. Proceed with caution.`);
+    } else {
+      explanationParts.push(`Status: DANGER / Forged. Display name spoofing, failed cryptographic signatures, or critical financial fraud keywords indicate a high likelihood of a phishing/malware delivery attempt. Do NOT click any links or download attachments.`);
+    }
+
+    const aiExplanation = explanationParts.join('\n');
 
     const headersList = [
       { key: 'From', value: sender },

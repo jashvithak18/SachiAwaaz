@@ -269,14 +269,37 @@ router.post('/verify', authMiddleware, async (req, res) => {
     const riskScore = 100 - trustScore;
     const verdict = safetyRating === 'safe' ? 'safe' : (safetyRating === 'suspicious' ? 'suspicious' : 'manipulated');
 
-    let aiExplanation = '';
-    if (verdict === 'safe') {
-      aiExplanation = `PARAKH verified the website ${domain}. The connection uses active HTTPS encryption with a valid SSL certificate. The domain is registered with a reputable registrar (${registrar}) and has a stable history of ${domainAge}. Zero phishing keywords or hidden redirect patterns were discovered. Real site crawl succeeded: title "${htmlScan.pageTitle || 'Untitled'}".`;
-    } else if (verdict === 'suspicious') {
-      aiExplanation = `WARNING: Website ${domain} is flagged as Suspicious. It exhibits warning indicators including: ${anomalies.join(' | ')}. Exercise extreme caution before entering credentials.`;
+    // === Website Forensic Summary Builder ===
+    let explanationParts = [];
+    explanationParts.push(`🌐 [Website Security & Domain Forensics]`);
+    explanationParts.push(`- Domain name: ${domain}`);
+    explanationParts.push(`- Connection Security: ${isHttps ? '🔒 Secure HTTPS Active' : '🔓 Insecure HTTP Only'}`);
+    explanationParts.push(`- Registrar Name: ${registrar}`);
+    explanationParts.push(`- Domain Age: ${domainAge}`);
+
+    explanationParts.push(`\n🔍 [Source Code Crawl & Testimonials]`);
+    explanationParts.push(`- Page Title: "${htmlScan.pageTitle || 'No Title Available'}"`);
+    explanationParts.push(`- Marketing Trackers: ${htmlScan.trackersFound.length > 0 ? htmlScan.trackersFound.join(', ') : 'None detected'}`);
+    explanationParts.push(`- Sensitive Form Fields: ${htmlScan.containsPasswordInput ? '⚠️ Password input field detected' : 'None'}${htmlScan.containsOtpInput ? ' | ⚠️ OTP request field detected' : ''}`);
+    explanationParts.push(`- Reviews/Ratings Mentioned: ${htmlScan.containsReviewsMention ? 'Yes (Contains customer review sections)' : 'No'}`);
+
+    explanationParts.push(`\n⚠️ [Anomalies & Reputation Risk]`);
+    if (anomalies.length > 0) {
+      anomalies.forEach(a => explanationParts.push(`- Flagged: ${a}`));
     } else {
-      aiExplanation = `CRITICAL DANGER: The URL ${domain} is identified as an active threat vector. Detected indicators: ${anomalies.join(' | ')}. Do NOT enter credentials or download any files.`;
+      explanationParts.push(`- None detected. The domain behaves naturally and does not match phishing signatures.`);
     }
+
+    explanationParts.push(`\n📊 [Threat Verdict]`);
+    if (verdict === 'safe') {
+      explanationParts.push(`Status: Trusted / Safe. This website has a stable registration history, secure HTTPS protocol, and contains no phishing patterns. It is safe to use.`);
+    } else if (verdict === 'suspicious') {
+      explanationParts.push(`Status: Warning / Suspicious. Hosted on a shared cloud subdomain with dynamic provisioning, lacks HTTPS, or contains borderline keywords. Do NOT enter sensitive credentials without verifying the source.`);
+    } else {
+      explanationParts.push(`Status: DANGER / Blocked. Active homograph phishing (lookalike domains), or credential-harvesting password/OTP forms detected on unverified shared subdomains. Close this tab immediately.`);
+    }
+
+    const aiExplanation = explanationParts.join('\n');
 
     const redirectChain = [url];
     if (isShortened) {

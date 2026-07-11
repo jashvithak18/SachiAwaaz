@@ -337,7 +337,7 @@ export default function QRVerify() {
                   )}
                 </p>
               ) : (
-                <p className="text-xs text-brand-750 leading-relaxed font-medium">{result.report.aiExplanation}</p>
+                <p className="text-xs text-brand-750 leading-relaxed font-medium whitespace-pre-wrap" style={{ whiteSpace: 'pre-wrap' }}>{result.report.aiExplanation}</p>
               )}
             </div>
           </div>
