@@ -173,6 +173,66 @@ router.delete('/family/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Acoustic analysis to distinguish digital synthesis from analog microphone recordings
+function analyzePCMAcoustics(filePath) {
+  try {
+    const fileBuf = fs.readFileSync(filePath);
+    if (fileBuf.length < 100) return { isLikelyRealMicrophone: false };
+
+    // Read 16-bit little-endian samples starting after the WAV header (byte 44)
+    const samples = [];
+    for (let i = 44; i < fileBuf.length - 1; i += 2) {
+      samples.push(fileBuf.readInt16LE(i));
+    }
+
+    if (samples.length === 0) return { isLikelyRealMicrophone: false };
+
+    // Calculate energy levels in blocks of 20ms (320 samples at 16kHz)
+    const blockSize = 320;
+    const blockEnergies = [];
+    let minEnergy = Infinity;
+    
+    for (let i = 0; i < samples.length; i += blockSize) {
+      const block = samples.slice(i, i + blockSize);
+      if (block.length === 0) continue;
+      
+      let sumSq = 0;
+      block.forEach(s => { sumSq += s * s; });
+      const rms = Math.sqrt(sumSq / block.length);
+      blockEnergies.push(rms);
+      
+      if (rms < minEnergy) minEnergy = rms;
+    }
+
+    let maxEnergy = 0;
+    blockEnergies.forEach(e => { if (e > maxEnergy) maxEnergy = e; });
+    const dynamicRange = maxEnergy - minEnergy;
+
+    // Calculate sample-to-sample differences (indicates high frequency vocal jitter & microphone noise)
+    let totalDiff = 0;
+    for (let i = 1; i < samples.length; i++) {
+      totalDiff += Math.abs(samples[i] - samples[i - 1]);
+    }
+    const averageRoughness = totalDiff / samples.length;
+
+    // Heuristics: Real microphones have thermal and ambient room hum (minEnergy > 7).
+    // Digital synthesis outputs perfect silence (minEnergy close to 0) during pauses.
+    // Real voices also exhibit wide dynamic range (> 100) and high-frequency details (roughness > 12).
+    const isLikelyRealMicrophone = minEnergy > 7.0 && dynamicRange > 100.0 && averageRoughness > 12.0;
+
+    return {
+      minEnergy,
+      maxEnergy,
+      dynamicRange,
+      averageRoughness,
+      isLikelyRealMicrophone
+    };
+  } catch (err) {
+    console.error("PCM Acoustic Analysis failed:", err.message);
+    return { isLikelyRealMicrophone: false };
+  }
+}
+
 // 4. Verify voice clip
 router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) => {
   const { familyMemberId } = req.body;
@@ -207,6 +267,9 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     const [embedData, detectData] = await Promise.all([embedPromise, detectPromise]);
     const queryEmbedding = embedData.embedding;
     const detectResults = detectData.results;
+
+    // Run acoustic analysis on the converted WAV file to confirm analog noise signature
+    const pcmAnalysis = analyzePCMAcoustics(processPath);
 
     fs.renameSync(tempPath, finalPath);
 
@@ -286,6 +349,16 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
       syntheticScore = Math.min(syntheticScore, 0.12);
       authenticityScore = Math.max(authenticityScore, 88);
       riskScore = Math.min(riskScore, 12);
+    }
+
+    // Acoustic Validation Override: If the audio exhibits natural microphone background noise 
+    // and sample-to-sample vocal jitter (roughness), override the false positive ML output.
+    if (pcmAnalysis && pcmAnalysis.isLikelyRealMicrophone) {
+      console.log("Acoustic validation confirmed natural microphone noise and vocal tract jitter. Overriding false positive ML classification.");
+      isFake = false;
+      syntheticScore = Math.min(syntheticScore, 0.14);
+      authenticityScore = Math.max(authenticityScore, 86);
+      riskScore = Math.min(riskScore, 14);
     }
 
     // 3-Tier Classification to handle phone Voice Isolation AI and codec compression
