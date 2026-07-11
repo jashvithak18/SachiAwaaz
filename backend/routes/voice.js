@@ -225,8 +225,8 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
                          req.file.originalname.toLowerCase().includes('voice') ||
                          req.file.originalname.toLowerCase().includes('audio');
 
-    // Default threshold is 0.72. If compressed, raise it to 0.90 to avoid codec false positives.
-    const threshold = isCompressed ? 0.90 : 0.72;
+    // Highly-tuned thresholds: 0.94 for compressed files and 0.88 for uncompressed files to eliminate false positives on real voices
+    const threshold = isCompressed ? 0.94 : 0.88;
     let isFake = syntheticScore >= threshold;
 
     let similarityScore = null;
@@ -280,7 +280,7 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
 
     // 3-Tier Classification to handle phone Voice Isolation AI and codec compression
     if (isFake) {
-      if (syntheticScore >= 0.95) {
+      if (syntheticScore >= 0.982) {
         verdict = 'manipulated';
       } else {
         verdict = 'suspicious';
