@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
 const Report = require('../models/Report');
 const DocumentAnalysis = require('../models/DocumentAnalysis');
 const User = require('../models/User');
@@ -65,7 +67,7 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     
     const ext = path.extname(req.file.originalname).toLowerCase();
     
-    let extractedText = 'Simulated OCR: Document content scanning complete.';
+    let extractedText = '';
     let metadata = {
       fileSize: `${(fileBuffer.length / 1024).toFixed(2)} KB`,
       mimeType: req.file.mimetype,
@@ -76,10 +78,18 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     let possibleManipulation = 'None Detected';
     let qrDetection = [];
 
-    // Parse actual metadata if PDF
+    // Parse and extract actual text content
     if (ext === '.pdf') {
       const pdfMeta = parsePDFMetadata(bufferString);
       metadata = { ...metadata, ...pdfMeta };
+
+      try {
+        const parsedPdf = await pdfParse(fileBuffer);
+        extractedText = parsedPdf.text;
+      } catch (err) {
+        console.error('pdf-parse text extraction failed, falling back:', err);
+        extractedText = bufferString;
+      }
 
       // Look for signature triggers
       if (bufferString.includes('/Sig') || bufferString.includes('Signature') || bufferString.includes('signed')) {
@@ -92,16 +102,25 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       }
 
       // Check text streams
-      if (bufferString.includes('/Text') || bufferString.includes('BT') || bufferString.includes('ET')) {
-        extractedText = 'Extracted Text Stream: Verification of structural fonts and characters successful.';
+      if (bufferString.includes('/Text') || bufferString.includes('BT') || bufferString.includes('ET') || (extractedText && extractedText.trim().length > 10)) {
+        ocrConsistency = 'Consistent';
       } else {
         ocrConsistency = 'Potential Inconsistency: Image-only PDF lacking structural text streams.';
       }
-    } else {
-      // DOCX or Images
+    } else if (ext === '.docx') {
+      try {
+        const parsedDocx = await mammoth.extractRawText({ buffer: fileBuffer });
+        extractedText = parsedDocx.value;
+      } catch (err) {
+        console.error('mammoth docx extraction failed, falling back:', err);
+        extractedText = bufferString;
+      }
       if (bufferString.includes('word/') || bufferString.includes('document.xml')) {
         metadata.creator = 'Microsoft Word';
       }
+    } else {
+      // Images
+      extractedText = 'Image file format uploaded. OCR analysis simulated.';
     }
 
     // === AI Text Detection ===
@@ -151,7 +170,8 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     ];
 
     let aiPhraseHits = 0;
-    aiPhrases.forEach(ph => { if (bufStrLow.includes(ph)) aiPhraseHits++; });
+    const textLower = extractedText.toLowerCase();
+    aiPhrases.forEach(ph => { if (textLower.includes(ph)) aiPhraseHits++; });
 
     // PDF metadata absence check: AI-generated PDFs typically have no Author, no Creator (or generic creator like LibreOffice/Word)
     const hasNoAuthor = ext === '.pdf' && !metadata.author;
@@ -180,14 +200,16 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       nameLower.includes('offer') ||
       nameLower.includes('recommendation') ||
       nameLower.includes('lor') ||
-      bufStrLow.includes('certificate') ||
-      bufStrLow.includes('internship') ||
-      bufStrLow.includes('recommendation') ||
-      bufStrLow.includes('offer letter');
+      textLower.includes('certificate') ||
+      textLower.includes('internship') ||
+      textLower.includes('recommendation') ||
+      textLower.includes('offer letter');
 
     // 1. Identify recipient/student name
+    const nameParts = registeredName.toLowerCase().split(/\s+/).filter(Boolean);
     const hasNameMatch = registeredName && (
-      bufStrLow.includes(registeredName.toLowerCase()) ||
+      textLower.includes(registeredName.toLowerCase()) ||
+      (nameParts.length > 0 && nameParts.every(part => textLower.includes(part))) ||
       nameLower.includes(registeredName.toLowerCase().replace(/\s+/g, '')) ||
       nameLower.includes(registeredName.toLowerCase().replace(/\s+/g, '_'))
     );
@@ -205,18 +227,19 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       { key: 'goldman', label: 'Goldman Sachs' },
       { key: 'adobe', label: 'Adobe' }
     ];
-    const detectedOrgObj = orgs.find(o => bufStrLow.includes(o.key) || nameLower.includes(o.key));
+    const detectedOrgObj = orgs.find(o => textLower.includes(o.key) || nameLower.includes(o.key));
     const organization = detectedOrgObj ? detectedOrgObj.label : 'Unknown Organisation';
 
     // 3. Identify signature block presence
     const hasSignatureBlock =
+      textLower.includes('signature') ||
+      textLower.includes('signatory') ||
+      textLower.includes('authorized sign') ||
+      textLower.includes('director') ||
+      textLower.includes('co-ordinator') ||
+      textLower.includes('program manager') ||
+      textLower.includes('seal') ||
       bufferString.toLowerCase().includes('signature') ||
-      bufferString.toLowerCase().includes('signatory') ||
-      bufferString.toLowerCase().includes('authorized sign') ||
-      bufferString.toLowerCase().includes('director') ||
-      bufferString.toLowerCase().includes('co-ordinator') ||
-      bufferString.toLowerCase().includes('program manager') ||
-      bufferString.toLowerCase().includes('seal') ||
       bufferString.includes('/Sig') ||
       bufferString.includes('/Widget');
 
@@ -237,10 +260,21 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     }
 
     // Corizo paid training program scam check
-    const isCorizoScam = bufStrLow.includes('corizo') || nameLower.includes('corizo');
+    const isCorizoScam = textLower.includes('corizo') || nameLower.includes('corizo');
     if (isCorizoScam) {
       riskScore = Math.max(riskScore, 85);
       anomalies.push('Flagged Paid-Training Scam: Document is associated with Corizo, which solicits training program fees under the guise of Microsoft internships.');
+    }
+
+    // Logo & Creator Alignment Verification: Official certificates from premium companies (Google, Microsoft, Amazon, etc.) 
+    // are generated by official automation templates, not Canva design accounts.
+    const claimsOfficialBrand = textLower.includes('google') || textLower.includes('microsoft') || textLower.includes('amazon') || textLower.includes('goldman sachs');
+    const createdByCanva = metadata.creator && metadata.creator.toLowerCase().includes('canva');
+    const createdByGenericWeb = metadata.producer && (metadata.producer.toLowerCase().includes('ilovepdf') || metadata.producer.toLowerCase().includes('smallpdf'));
+
+    if (claimsOfficialBrand && (createdByCanva || createdByGenericWeb)) {
+      riskScore = Math.max(riskScore, 65);
+      anomalies.push(`Alignment anomaly: Document claims official association with a major corporation (${organization}), but metadata reveals it was custom-designed or modified via a consumer design tool (${metadata.creator || metadata.producer}).`);
     }
 
     if (isInternshipDoc && !isCorizoScam) {
