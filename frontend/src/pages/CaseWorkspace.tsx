@@ -177,40 +177,6 @@ export default function CaseWorkspace({ caseId }: CaseWorkspaceProps) {
     }
   };
 
-  // PDF Download Case Report
-  const downloadCaseReportPDF = async () => {
-    const element = document.getElementById('case-report-render');
-    if (!element || !caseDetail) return;
-
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: '#FFF8F2',
-        useCORS: true
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      pdf.save(`PARAKH-Case-Report-${caseDetail.title}.pdf`);
-    } catch (err) {
-      alert('Error rendering PDF case document.');
-    }
-  };
-
   // RENDER DETAILED CASE VIEW
   if (caseId) {
     if (loadingDetail) {
@@ -253,21 +219,13 @@ export default function CaseWorkspace({ caseId }: CaseWorkspaceProps) {
             >
               Status: {caseDetail.status === 'active' ? '📂 Active (Close)' : '✓ Closed (Re-open)'}
             </button>
-            {totalLinked > 0 && (
-              <button
-                onClick={downloadCaseReportPDF}
-                className="bg-accent-blue hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm min-h-[44px]"
-              >
-                📥 Export Case PDF
-              </button>
-            )}
           </div>
         </div>
 
         {/* Workspace Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           
-          {/* Main Case Summary (PDF Target Content) */}
+          {/* Main Case Summary */}
           <div className="lg:col-span-2 space-y-6">
             <div id="case-report-render" className="bg-[#FFFDF9] border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6 text-brand-800">
               

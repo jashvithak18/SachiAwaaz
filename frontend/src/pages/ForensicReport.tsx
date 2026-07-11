@@ -197,24 +197,6 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
     }
   };
 
-  const downloadForensicPDF = async () => {
-    const element = document.getElementById('forensic-report-render');
-    if (!element || !reportDetail) return;
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: '#FFFDF9',
-        useCORS: true
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-      pdf.save(`PARAKH-Report-${reportDetail.report.fileName}.pdf`);
-    } catch (err) {
-      alert('Error rendering PDF report file.');
-    }
-  };
-
   const sortedReports = [...reports].sort((a, b) => {
     if (sortBy === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     if (sortBy === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -243,11 +225,6 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
           <button onClick={() => setActiveTab(report.mediaType)} className="text-brand-500 hover:text-brand-800 text-xs font-bold flex items-center gap-1.5 focus:outline-none">
             <span>←</span> Back to {report.mediaType === 'qr' ? 'QR Code Scanner' : report.mediaType.charAt(0).toUpperCase() + report.mediaType.slice(1) + ' Verification'}
           </button>
-          <div className="flex gap-2">
-            <button onClick={downloadForensicPDF} className="bg-accent-blue text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition hover:bg-blue-700">
-              💾 Export PDF
-            </button>
-          </div>
         </div>
 
         <div id="forensic-report-render" className="bg-[#FFFDF9] border border-brand-200 rounded-3xl p-8 shadow-2xl space-y-8 text-brand-800">
