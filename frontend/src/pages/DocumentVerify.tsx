@@ -5,6 +5,7 @@ import HindiLoader from '../components/HindiLoader';
 export default function DocumentVerify() {
   const { token, setActiveTab } = useStore();
   const [file, setFile] = useState<File | null>(null);
+  const [companyHint, setCompanyHint] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,6 +48,7 @@ export default function DocumentVerify() {
     setIsVerifying(true);
     const formData = new FormData();
     formData.append('document', file);
+    if (companyHint.trim()) formData.append('companyHint', companyHint.trim());
 
     try {
       const response = await fetch(`${API_URL}/document/verify`, {
@@ -126,6 +128,22 @@ export default function DocumentVerify() {
             >
               Browse Files
             </button>
+          </div>
+
+          {/* Company Hint */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-brand-700 flex items-center gap-1.5">
+              🏢 <span>Issuing Company / Organisation Name</span>
+              <span className="text-brand-400 font-normal">(optional but recommended)</span>
+            </label>
+            <input
+              type="text"
+              value={companyHint}
+              onChange={e => setCompanyHint(e.target.value)}
+              placeholder="e.g. Tata Consultancy Services, Infosys, XYZ Startup..."
+              className="w-full border border-brand-250 bg-brand-50 rounded-xl px-4 py-2.5 text-sm text-brand-800 placeholder-brand-400 focus:outline-none focus:ring-2 focus:ring-accent-teal/30 focus:border-accent-teal transition"
+            />
+            <p className="text-[10px] text-brand-400">If the document is a scanned PDF, providing the company name lets us search live reviews, verify the logo, and check for scam reports.</p>
           </div>
 
           {/* Selected File Details */}

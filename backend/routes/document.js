@@ -425,39 +425,34 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       }
     };
 
-    // Smart Company Identification (prevents false binary collisions on raw buffer streams)
-    let detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => 
-      textLower.includes(k) || 
-      nameLower.includes(k)
+    // Smart Company Identification
+    // Priority 1: User-provided company hint (most reliable — comes directly from user)
+    const userHint = (req.body.companyHint || '').trim();
+
+    // Priority 2: Registry keyword match in extracted text or filename
+    let detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k =>
+      textLower.includes(k) || nameLower.includes(k)
     );
 
-    // Metadata search fallback
+    // Priority 3: Metadata search fallback
     if (!detectedCompanyKey) {
       const metaStr = JSON.stringify(metadata).toLowerCase();
       detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => metaStr.includes(k));
     }
 
-    // High-specificity binary search fallback (prevents random byte collisions on short abbreviations like 'tcs')
+    // Priority 4: High-specificity binary search fallback
     if (!detectedCompanyKey) {
       const companyFullNames = {
-        google: 'google llc',
-        microsoft: 'microsoft corporation',
-        amazon: 'amazon',
-        tcs: 'tata consultancy services',
-        infosys: 'infosys limited',
-        wipro: 'wipro',
-        corizo: 'corizo technologies',
-        verzeo: 'verzeo',
-        oasis: 'oasis infobyte',
-        codeclause: 'codeclause'
+        google: 'google llc', microsoft: 'microsoft corporation', amazon: 'amazon',
+        tcs: 'tata consultancy services', infosys: 'infosys limited', wipro: 'wipro',
+        corizo: 'corizo technologies', verzeo: 'verzeo', oasis: 'oasis infobyte', codeclause: 'codeclause'
       };
-      detectedCompanyKey = Object.keys(companyFullNames).find(key => 
-        bufStrLow.includes(companyFullNames[key])
-      );
+      detectedCompanyKey = Object.keys(companyFullNames).find(key => bufStrLow.includes(companyFullNames[key]));
     }
 
-    // 1. Identify organization name (registry or dynamic NLP extraction)
-    const companyName = detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey].name : extractCompanyName(extractedText, metadata, req.file.originalname);
+    // 1. Identify organization name — userHint wins over everything
+    const companyName = userHint ||
+      (detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey].name : extractCompanyName(extractedText, metadata, req.file.originalname));
 
     // 2. Query live web reviews dynamically
     const searchResult = await searchCompanyReviews(companyName);
