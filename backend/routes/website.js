@@ -213,8 +213,45 @@ router.post('/verify', authMiddleware, async (req, res) => {
       }
     });
 
+    // Check for Piracy, Torrent, or Illegal Streaming/Distribution hubs
+    const piracyKeywords = [
+      'torrent', 'torrents', 'yts', '1337x', 'rarbg', 'piratebay', 'thepiratebay',
+      'kickass', 'extratorrent', 'fmovies', 'solarmovie', '123movies', 'putlocker',
+      'popcorntime', 'soap2day', 'filmyzilla', 'tamilrockers', 'movierulz', 'netmirror',
+      'mp4upload', 'vidcloud', 'upstream', 'doodstream', 'openload', 'rapidgator',
+      'uptobox', 'zippyshare', 'flixer', 'hdtoday'
+    ];
+
+    const contentPiracyKeywords = [
+      'watch online', 'free movie', 'free movies', 'watch free', 'download movie',
+      'torrent download', 'streaming online', 'hd movie', 'dual audio', 'watch hd',
+      'unauthorized streaming', 'illegal stream'
+    ];
+
+    let hasPiracySignals = false;
+    const matchedPiracyKeywords = [];
+
+    piracyKeywords.forEach(kw => {
+      if (domain.toLowerCase().includes(kw) || urlObj.pathname.toLowerCase().includes(kw) || (htmlScan.pageTitle && htmlScan.pageTitle.toLowerCase().includes(kw))) {
+        matchedPiracyKeywords.push(kw);
+        hasPiracySignals = true;
+      }
+    });
+
+    contentPiracyKeywords.forEach(kw => {
+      if (htmlScan.pageContentSnippet && htmlScan.pageContentSnippet.toLowerCase().includes(kw)) {
+        matchedPiracyKeywords.push(kw);
+        hasPiracySignals = true;
+      }
+    });
+
     let trustScore = 95;
     const anomalies = [];
+
+    if (hasPiracySignals) {
+      trustScore -= 30;
+      anomalies.push(`Illegal Streaming / Piracy Portal: Domain or content metadata matches indexers/streaming hubs for copyrighted material (keywords: ${matchedPiracyKeywords.slice(0, 5).join(', ')}). These sites represent high malware, cryptojacking, and adware redirect risks.`);
+    }
 
     if (isCloudSubdomain) {
       trustScore -= 20;

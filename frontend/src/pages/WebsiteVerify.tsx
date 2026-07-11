@@ -9,8 +9,6 @@ export default function WebsiteVerify() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
   const [showExplanation, setShowExplanation] = useState(false);
-  const [assistantMessages, setAssistantMessages] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
-  const [customQuestion, setCustomQuestion] = useState('');
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -22,7 +20,6 @@ export default function WebsiteVerify() {
     setScanProgress(0);
     setResult(null);
     setError('');
-    setAssistantMessages([]);
 
     // Progress simulation
     const interval = setInterval(() => {
@@ -58,27 +55,6 @@ export default function WebsiteVerify() {
       setError(err.message || 'Something went wrong.');
       setLoading(false);
     }
-  };
-
-  const handleAskAssistant = (q: string) => {
-    if (!q.trim() || !result) return;
-    const newMsgs = [...assistantMessages, { role: 'user' as const, text: q }];
-    setAssistantMessages(newMsgs);
-    setCustomQuestion('');
-
-    let reply = "I can analyze certificate logs, domain keywords, and potential phishing vectors. Try asking 'Is my data encrypted?' or 'Why is this domain suspicious?'";
-    const qLower = q.toLowerCase();
-    if (qLower.includes('encrypt') || qLower.includes('https') || qLower.includes('ssl')) {
-      reply = result.details.httpsAvailable 
-        ? "Yes, this connection uses HTTPS with valid SSL encryption. Intercepting data transmitted to this domain is extremely difficult."
-        : "No! This domain does not use HTTPS. Any credentials, codes, or private details you enter will transmit in plain text, visible to network eavesdroppers.";
-    } else if (qLower.includes('suspicious') || qLower.includes('registrar') || qLower.includes('why')) {
-      reply = `PARAKH flags this site as ${result.report.verdict.toUpperCase()} because: ${result.report.anomalies.join(' / ') || 'no suspicious factors were found.'}`;
-    }
-
-    setTimeout(() => {
-      setAssistantMessages([...newMsgs, { role: 'assistant' as const, text: reply }]);
-    }, 400);
   };
 
   return (
@@ -279,34 +255,6 @@ export default function WebsiteVerify() {
             )}
           </div>
 
-          {/* Q&A Assistant */}
-          <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-md space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">Ask PARAKH AI</h3>
-            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
-              {assistantMessages.map((msg, idx) => (
-                <div key={idx} className={`p-3 rounded-2xl text-xs max-w-[85%] ${msg.role === 'user' ? 'bg-accent-blue/10 text-brand-850 ml-auto' : 'bg-brand-50 text-brand-700 mr-auto'}`}>
-                  <span className="font-bold block mb-1">{msg.role === 'user' ? 'You' : 'PARAKH AI'}</span>
-                  <span>{msg.text}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="flex-grow bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-xs text-brand-850 outline-none"
-                placeholder="Ask e.g. 'Is my connection secure?' or 'What is homograph?'"
-                value={customQuestion}
-                onChange={(e) => setCustomQuestion(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAskAssistant(customQuestion)}
-              />
-              <button
-                onClick={() => handleAskAssistant(customQuestion)}
-                className="bg-accent-blue hover:bg-blue-700 text-white font-bold px-4 rounded-xl text-xs transition"
-              >
-                Send
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
