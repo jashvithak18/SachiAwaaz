@@ -120,24 +120,70 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
     // Parse typical headers
     const lines = emailContent.split(/\r?\n/);
     lines.forEach(line => {
-      if (/^from:/i.test(line)) {
-        const match = line.match(/from:\s*(.*)/i);
-        if (match) sender = match[1].replace(/["']/g, '');
-      } else if (/^to:/i.test(line)) {
-        const match = line.match(/to:\s*(.*)/i);
-        if (match) recipient = match[1];
-      } else if (/^subject:/i.test(line)) {
-        const match = line.match(/subject:\s*(.*)/i);
-        if (match) subject = match[1];
-      } else if (/^reply-to:/i.test(line)) {
-        const match = line.match(/reply-to:\s*(.*)/i);
-        if (match) replyTo = match[1];
+      // Handle "From: ..." or "From : ..."
+      if (/^\s*from\s*:\s*(.*)/i.test(line)) {
+        const match = line.match(/^\s*from\s*:\s*(.*)/i);
+        if (match) sender = match[1].replace(/["']/g, '').trim();
+      } else if (/^\s*to\s*:\s*(.*)/i.test(line)) {
+        const match = line.match(/^\s*to\s*:\s*(.*)/i);
+        if (match) recipient = match[1].trim();
+      } else if (/^\s*subject\s*:\s*(.*)/i.test(line)) {
+        const match = line.match(/^\s*subject\s*:\s*(.*)/i);
+        if (match) subject = match[1].trim();
+      } else if (/^\s*reply-to\s*:\s*(.*)/i.test(line)) {
+        const match = line.match(/^\s*reply-to\s*:\s*(.*)/i);
+        if (match) replyTo = match[1].trim();
       } else if (/^received:/i.test(line) && senderIp === '127.0.0.1') {
         // Try to extract first sender IP from Received line
         const ipMatch = line.match(/\[(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\]/);
         if (ipMatch) senderIp = ipMatch[1];
       }
     });
+
+    // Heuristic parsing for copy-pasted emails (e.g. from Gmail/Outlook/Yahoo)
+    if (sender === 'unknown@sender.com') {
+      let foundSender = false;
+      let foundSubject = false;
+      let foundRecipient = false;
+
+      for (let i = 0; i < Math.min(lines.length, 15); i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        // 1. Look for lines containing an email address: e.g. "Some Name <email@domain.com>" or just "email@domain.com"
+        // Ignore lines that explicitly start with "To:" or "Cc:" (to avoid picking up recipient)
+        const emailMatch = line.match(/<([^>]+@[^>]+)>/) || line.match(/([a-zA-Z0-9_\-\.\+]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})/);
+        if (emailMatch && !foundSender && !/^(to|cc|bcc)\s*:/i.test(line) && !line.toLowerCase().startsWith('to me') && !line.toLowerCase().startsWith('to:')) {
+          const angleMatch = line.match(/<([^>]+@[^>]+)>/);
+          sender = angleMatch ? angleMatch[1].trim() : emailMatch[0].trim();
+          foundSender = true;
+          continue;
+        }
+
+        // 2. Identify Subject: usually the first non-empty line if it doesn't contain emails or folder markers like "External" or "Inbox"
+        if (!foundSubject && i < 5 && line.length < 150 && !line.includes('@') && !line.includes('<')) {
+          const lowerLine = line.toLowerCase();
+          if (lowerLine !== 'external' && lowerLine !== 'inbox' && lowerLine !== 'important' && !lowerLine.startsWith('to ') && !lowerLine.startsWith('from ')) {
+            subject = line;
+            foundSubject = true;
+          }
+        }
+
+        // 3. Identify Recipient: look for "to me" or "to: <email>"
+        if (!foundRecipient && i < 10) {
+          if (line.toLowerCase() === 'to me' || line.toLowerCase().startsWith('to: me')) {
+            recipient = 'me (Gmail Copy-Paste)';
+            foundRecipient = true;
+          } else if (/^to\s*:\s*(.*)/i.test(line)) {
+            const match = line.match(/^to\s*:\s*(.*)/i);
+            if (match) {
+              recipient = match[1].trim();
+              foundRecipient = true;
+            }
+          }
+        }
+      }
+    }
 
     // Check auth headers if present in raw content
     if (/spf=fail/i.test(emailContent)) spf = 'FAIL';
@@ -262,6 +308,26 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
     if (isFreeMailHR && hasGoogleForm) {
       trustScore -= 15;
       anomalies.push("High-Risk Phishing Combo: Sender claims to be corporate HR from a free Gmail address AND redirects to a Google Form, strongly indicating a fake recruitment/phishing scam.");
+    }
+
+    // Check for corporate domain redirecting to public Gmail/Yahoo addresses (e.g. mentor contact)
+    if (!isFreeDomain && senderEmail.includes('@')) {
+      const bodyEmails = emailBodyLower.match(/([a-zA-Z0-9_\-\.\+]+)@(gmail\.com|yahoo\.[a-z]{2,4}|outlook\.com|hotmail\.com|proton\.me|protonmail\.com)/g);
+      if (bodyEmails && bodyEmails.length > 0) {
+        const containsContactRequest = emailBodyLower.includes('mentor') || 
+                                       emailBodyLower.includes('contact') || 
+                                       emailBodyLower.includes('support') || 
+                                       emailBodyLower.includes('reach out') || 
+                                       emailBodyLower.includes('write to') ||
+                                       emailBodyLower.includes('email id');
+        if (containsContactRequest) {
+          const uniquePublicEmails = bodyEmails.filter(e => e !== senderEmail);
+          if (uniquePublicEmails.length > 0) {
+            anomalies.push(`Public Mailbox Redirect: Corporate sender (${senderEmail}) instructs contacting/mentoring via a free public address ('${uniquePublicEmails[0]}'). While sometimes used for external mentors, this pattern is frequently exploited in fake recruitment/phishing campaigns.`);
+            trustScore -= 15;
+          }
+        }
+      }
     }
 
     // Check for paid-training/internship scam: MUST have both internship keywords AND explicit fee mention
