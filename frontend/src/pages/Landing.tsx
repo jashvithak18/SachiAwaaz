@@ -158,6 +158,49 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
   );
 }
 
+/* ─── Catchy, animated word reveal heading with slow float ─── */
+function CatchyHeading({ text, delay = 0, className = '', style = {} }: {
+  text: string; delay?: number; className?: string; style?: React.CSSProperties;
+}) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const words = text.split(' ');
+
+  return (
+    <motion.h2
+      ref={ref}
+      className={`flex flex-wrap ${className}`}
+      style={style}
+      animate={inView ? { y: [0, -3, 0] } : {}}
+      transition={{
+        y: {
+          duration: 5.5,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: delay + 1.2,
+        }
+      }}
+    >
+      {words.map((word, i) => (
+        <span key={i} className="inline-block overflow-hidden mr-[0.2em] pb-[0.05em]">
+          <motion.span
+            className="inline-block"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={inView ? { y: 0, opacity: 1 } : {}}
+            transition={{
+              duration: 0.8,
+              ease: [0.25, 0.1, 0.25, 1],
+              delay: delay + i * 0.08,
+            }}
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </motion.h2>
+  );
+}
+
 /* ─── Interstitial banner ─── */
 function InterstitialMessage({ icon, text }: { icon: string; text: string }) {
   const ref = useRef(null);
@@ -624,23 +667,17 @@ export default function Landing() {
                   <circle cx="50" cy="50" r="10" />
                 </svg>
 
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.7, delay: 0.1 }}
-                  className="font-extrabold tracking-tight leading-[1.05]"
-                  style={{ fontSize: 'clamp(44px, 6vw, 82px)', color: C.text }}
-                >
-                  {copy.heroH1}
-                </motion.h1>
+                <CatchyHeading
+                  text={copy.heroH1}
+                  delay={0.1}
+                  style={{ fontSize: 'clamp(44px, 6vw, 82px)', color: C.text, fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1.05 }}
+                />
 
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.7, delay: 0.25 }}
-                  className="mt-5 font-normal"
-                  style={{ fontSize: 'clamp(22px, 2.5vw, 34px)', color: C.muted }}
-                >
-                  {copy.heroH2}
-                </motion.p>
+                <CatchyHeading
+                  text={copy.heroH2}
+                  delay={0.25}
+                  style={{ fontSize: 'clamp(22px, 2.5vw, 34px)', color: C.muted, fontWeight: 400, marginTop: '20px', letterSpacing: '-0.01em' }}
+                />
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={!loading ? { opacity: 1, y: 0 } : {}}
@@ -1016,14 +1053,16 @@ export default function Landing() {
 
         <section className="relative z-10 py-24">
           <div className="max-w-[960px] mx-auto px-6">
-            <Reveal>
-              <h2 className="text-center font-bold tracking-tight mb-3" style={{ fontSize: 'clamp(30px, 4vw, 44px)', color: C.text }}>
-                {copy.interTitle}
-              </h2>
-              <p className="text-center text-[16px] font-medium mb-12 max-w-[520px] mx-auto leading-relaxed" style={{ color: C.muted }}>
-                Every day, people encounter something online that doesn't feel quite right. These are the moments PARAKH was built for.
-              </p>
-            </Reveal>
+              <CatchyHeading
+                text={copy.interTitle}
+                className="justify-center text-center font-bold tracking-tight mb-3"
+                style={{ fontSize: 'clamp(30px, 4vw, 44px)', color: C.text }}
+              />
+              <Reveal>
+                <p className="text-center text-[16px] font-medium mb-12 max-w-[520px] mx-auto leading-relaxed" style={{ color: C.muted }}>
+                  Every day, people encounter something online that doesn't feel quite right. These are the moments PARAKH was built for.
+                </p>
+              </Reveal>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-14">
               {verifyCards.map((card, i) => (
@@ -1099,15 +1138,13 @@ export default function Landing() {
           />
           <div className="max-w-[720px] mx-auto px-6">
             <div className="text-center mb-14">
-              <AnimatePresence>
                 {trustStep >= 0 && (
-                  <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75 }}
-                    className="font-extrabold tracking-tight leading-tight"
-                    style={{ fontSize: 'clamp(32px, 4.5vw, 52px)', color: C.green }}>
-                    {copy.trustH}
-                  </motion.h2>
+                  <CatchyHeading
+                    text={copy.trustH}
+                    className="justify-center text-center font-extrabold tracking-tight leading-tight"
+                    style={{ fontSize: 'clamp(32px, 4.5vw, 52px)', color: C.green }}
+                  />
                 )}
-              </AnimatePresence>
               <AnimatePresence>
                 {trustStep >= 1 && (
                   <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}
@@ -1182,10 +1219,12 @@ export default function Landing() {
             ══════════════════════════════════════ */}
         <section className="relative z-10 min-h-[70vh] flex items-center justify-center py-20">
           <div className="max-w-[760px] mx-auto px-6 text-center">
-            <Reveal>
-              <h2 className="font-extrabold tracking-tight leading-[1.15]" style={{ fontSize: 'clamp(34px, 5vw, 60px)', color: C.text }}>
-                {copy.ctaH1}
-              </h2>
+            <CatchyHeading
+              text={copy.ctaH1}
+              className="justify-center text-center font-extrabold tracking-tight leading-[1.15]"
+              style={{ fontSize: 'clamp(34px, 5vw, 60px)', color: C.text }}
+            />
+            <Reveal delay={0.25}>
               <p className="mt-5" style={{ fontSize: 'clamp(22px, 3vw, 30px)', color: C.muted }}>{copy.ctaH2}</p>
             </Reveal>
             <Reveal delay={0.15}>
