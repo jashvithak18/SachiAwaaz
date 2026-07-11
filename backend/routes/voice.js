@@ -219,14 +219,24 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
 
     // Check if the audio file uses a compressed codec or originates from social media (WhatsApp, Instagram, etc.)
     const ext = path.extname(req.file.originalname).toLowerCase();
-    const isCompressed = ['.opus', '.ogg', '.amr', '.aac', '.m4a', '.mp3', '.3gp'].includes(ext) || 
+    const mime = (req.file.mimetype || '').toLowerCase();
+    const isCompressed = ['.opus', '.ogg', '.amr', '.aac', '.m4a', '.mp3', '.3gp', '.webm'].includes(ext) || 
+                         mime.includes('ogg') || 
+                         mime.includes('opus') || 
+                         mime.includes('webm') || 
+                         mime.includes('aac') || 
+                         mime.includes('amr') || 
+                         mime.includes('mp3') || 
+                         mime.includes('mpeg') || 
+                         mime.includes('m4a') || 
+                         mime.includes('mp4') || 
                          req.file.originalname.toLowerCase().includes('whatsapp') || 
                          req.file.originalname.toLowerCase().includes('instagram') ||
                          req.file.originalname.toLowerCase().includes('voice') ||
                          req.file.originalname.toLowerCase().includes('audio');
 
-    // Highly-tuned thresholds: 0.965 for compressed files and 0.88 for uncompressed files to eliminate false positives on real voices
-    const threshold = isCompressed ? 0.965 : 0.88;
+    // Highly-tuned thresholds: 0.94 for compressed files and 0.88 for uncompressed files to eliminate false positives on real voices
+    const threshold = isCompressed ? 0.94 : 0.88;
     let isFake = syntheticScore >= threshold;
 
     let similarityScore = null;
@@ -280,8 +290,8 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
 
     // 3-Tier Classification to handle phone Voice Isolation AI and codec compression
     if (isFake) {
-      // Compressed messaging audio notes (e.g. WhatsApp) require a much higher confidence limit (0.996) to trigger a manipulated deepfake verdict.
-      const manipulatedThreshold = isCompressed ? 0.996 : 0.982;
+      // Compressed messaging audio notes (e.g. WhatsApp) require a much higher confidence limit (0.999) to trigger a manipulated deepfake verdict.
+      const manipulatedThreshold = isCompressed ? 0.999 : 0.985;
       if (syntheticScore >= manipulatedThreshold) {
         verdict = 'manipulated';
       } else {
