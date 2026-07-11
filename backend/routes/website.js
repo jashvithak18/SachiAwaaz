@@ -253,6 +253,115 @@ router.post('/verify', authMiddleware, async (req, res) => {
       anomalies.push(`Illegal Streaming / Piracy Portal: Domain or content metadata matches indexers/streaming hubs for copyrighted material (keywords: ${matchedPiracyKeywords.slice(0, 5).join(', ')}). These sites represent high malware, cryptojacking, and adware redirect risks.`);
     }
 
+    // 4. Typosquatting / Brand Impersonation Check:
+    // If the domain contains a major brand name but is not the official domain of that brand
+    const majorBrands = [
+      { name: 'microsoft', official: ['microsoft.com', 'microsoft.co.in', 'office.com', 'windows.com', 'azure.com', 'live.com', 'outlook.com'] },
+      { name: 'google', official: ['google.com', 'google.co.in', 'youtube.com', 'gmail.com', 'android.com', 'chrome.com'] },
+      { name: 'apple', official: ['apple.com', 'icloud.com', 'appstore.com'] },
+      { name: 'amazon', official: ['amazon.com', 'amazon.in', 'aws.amazon.com', 'media-amazon.com'] },
+      { name: 'paypal', official: ['paypal.com', 'paypal.me'] },
+      { name: 'netflix', official: ['netflix.com'] },
+      { name: 'facebook', official: ['facebook.com', 'fb.com', 'meta.com'] },
+      { name: 'instagram', official: ['instagram.com'] },
+      { name: 'paytm', official: ['paytm.com', 'paytmbank.com'] },
+      { name: 'hdfc', official: ['hdfcbank.com', 'hdfc.com'] },
+      { name: 'sbi', official: ['sbi.co.in', 'statebankofindia.com', 'onlinesbi.sbi'] },
+      { name: 'icici', official: ['icicibank.com', 'icicibank.in'] },
+      { name: 'axisbank', official: ['axisbank.com', 'axisbank.co.in'] },
+      { name: 'fedex', official: ['fedex.com'] },
+      { name: 'dhl', official: ['dhl.com', 'dhl.co.in'] },
+      { name: 'binance', official: ['binance.com', 'binance.us'] },
+      { name: 'coinbase', official: ['coinbase.com'] }
+    ];
+
+    const rootDomain = getRootDomain(domain).toLowerCase();
+    let isTyposquatted = false;
+    let matchedBrandName = '';
+
+    for (const brand of majorBrands) {
+      if (domain.toLowerCase().includes(brand.name)) {
+        // Verify if it is in the official list of root domains
+        const isOfficial = brand.official.some(offDom => rootDomain === offDom || domain.toLowerCase().endsWith('.' + offDom));
+        if (!isOfficial) {
+          isTyposquatted = true;
+          matchedBrandName = brand.name.toUpperCase();
+          break;
+        }
+      }
+    }
+
+    if (isTyposquatted) {
+      trustScore -= 45;
+      anomalies.push(`Typosquatting / Brand Spoofing: Domain incorporates a major trusted brand name ('${matchedBrandName}') but is hosted on an unverified domain rather than the official corporate domain. This is highly diagnostic of phishing clones.`);
+    }
+
+    // 5. Cheap / High-Abuse TLD (Top-Level Domain) penalty:
+    const highAbuseTlds = ['.xyz', '.top', '.click', '.link', '.club', '.work', '.biz', '.info', '.online', '.vip', '.site', '.icu', '.loan', '.win', '.gq', '.cf', '.tk', '.ml', '.ga', '.global'];
+    const matchedTld = highAbuseTlds.find(tld => domain.toLowerCase().endsWith(tld));
+    if (matchedTld) {
+      trustScore -= 15;
+      anomalies.push(`High-Risk TLD: Hosted on a low-cost or high-abuse top-level domain (${matchedTld}), which is statistically dominant in temporary scam redirects and automated spam generation.`);
+    }
+
+    // 6. Age-based Reputation penalties:
+    if (domainAge.includes('days ago') || domainAge.includes('Newly registered')) {
+      trustScore -= 20;
+      anomalies.push(`Newly Registered Domain: This domain was registered very recently (${domainAge}). Temporary scam domains are frequently recycled to bypass blacklists.`);
+    } else if (domainAge.includes('1 month') || domainAge.includes('2 months') || domainAge.includes('3 months')) {
+      trustScore -= 10;
+      anomalies.push(`Recent Domain Registration: Registered less than 90 days ago (${domainAge}). Represents a brief public presence, common with malicious campaigns.`);
+    }
+
+    // 7. Fake E-Commerce / Outlet / Clearance Scams:
+    const ecomDomainKeywords = ['shop', 'store', 'deal', 'deals', 'cheap', 'discount', 'outlet', 'clearance', 'sale', 'buy'];
+    const ecomContentKeywords = ['limited offer', '70% off', '80% off', '90% off', 'discount price', 'add to cart', 'free shipping today', 'buy now'];
+    let hasEcomSignals = false;
+
+    ecomDomainKeywords.forEach(kw => {
+      if (domain.toLowerCase().includes(kw) || urlObj.pathname.toLowerCase().includes(kw)) {
+        hasEcomSignals = true;
+      }
+    });
+    ecomContentKeywords.forEach(kw => {
+      if (htmlScan.pageContentSnippet && htmlScan.pageContentSnippet.toLowerCase().includes(kw)) {
+        hasEcomSignals = true;
+      }
+    });
+
+    if (hasEcomSignals && (matchedTld || domainAge.includes('days ago') || isCloudSubdomain)) {
+      trustScore -= 25;
+      anomalies.push("Suspected Fake E-Commerce/Outlet Scam: Page displays high-discount sales urgency patterns combined with a newly registered or low-cost domain, typical of dropshipping card-skimming frauds.");
+    }
+
+    // 8. Fake Tech Support / Care / Helpline Scams:
+    const supportKeywords = ['customer service', 'helpline', 'support number', 'toll free', 'toll-free', 'customer care', 'contact support', 'tech support'];
+    let hasSupportSignals = false;
+    supportKeywords.forEach(kw => {
+      if (domain.toLowerCase().includes(kw) || (htmlScan.pageTitle && htmlScan.pageTitle.toLowerCase().includes(kw)) || (htmlScan.pageContentSnippet && htmlScan.pageContentSnippet.toLowerCase().includes(kw))) {
+        hasSupportSignals = true;
+      }
+    });
+
+    if (hasSupportSignals && (isCloudSubdomain || matchedTld || domainAge.includes('days ago'))) {
+      trustScore -= 30;
+      anomalies.push("Suspected Tech Support / Helpline Scam: Page claims to host helpdesks, care numbers, or toll-free hotlines on an unverified domain, typical of financial refund scams.");
+    }
+
+    // 9. Fake Crypto Yield / Double-Your-Money Scams:
+    const yieldKeywords = ['double your', 'crypto profit', 'investment return', 'easy earnings', 'earn daily', 'daily return', 'guaranteed profit', 'forex signals', 'mining pool', 'free bitcoin'];
+    let hasYieldSignals = false;
+    yieldKeywords.forEach(kw => {
+      if (domain.toLowerCase().includes(kw) || (htmlScan.pageContentSnippet && htmlScan.pageContentSnippet.toLowerCase().includes(kw))) {
+        hasYieldSignals = true;
+      }
+    });
+
+    if (hasYieldSignals) {
+      trustScore -= 35;
+      anomalies.push("Suspected Fake Investment / Crypto Scam: Content promises guaranteed returns, daily earnings, or cryptocurrency multipliers, which are classic indicators of Ponzi schemes and wallet-drainer scams.");
+    }
+
     if (isCloudSubdomain) {
       trustScore -= 20;
       anomalies.push(`Shared Hosting Subdomain: This page is hosted on a free/shared cloud platform (${cloudLabel}). Subdomains can be created instantly by anyone for deployment, requiring manual verification.`);
