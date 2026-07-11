@@ -1129,7 +1129,7 @@ export default function Landing() {
         {/* ══════════════════════════════════════
             TRUST — Cinematic sequential reveal
             ══════════════════════════════════════ */}
-        <section className="relative z-10 py-28 overflow-hidden" ref={trustRef}>
+        <section className="relative z-10 pt-12 pb-24 overflow-hidden" ref={trustRef}>
           <motion.div
             initial={{ opacity: 0 }} animate={trustInView ? { opacity: 1 } : {}}
             transition={{ duration: 1.6 }}
@@ -1142,7 +1142,7 @@ export default function Landing() {
                   <CatchyHeading
                     text={copy.trustH}
                     className="justify-center text-center font-extrabold tracking-tight leading-tight"
-                    style={{ fontSize: 'clamp(32px, 4.5vw, 52px)', color: C.green }}
+                    style={{ fontSize: 'clamp(32px, 4.5vw, 52px)', color: C.text }}
                   />
                 )}
               <AnimatePresence>
@@ -1217,7 +1217,7 @@ export default function Landing() {
         {/* ══════════════════════════════════════
             FINAL CTA
             ══════════════════════════════════════ */}
-        <section className="relative z-10 min-h-[70vh] flex items-center justify-center py-20">
+        <section className="relative z-10 min-h-[50vh] flex items-center justify-center pt-8 pb-16">
           <div className="max-w-[760px] mx-auto px-6 text-center">
             <CatchyHeading
               text={copy.ctaH1}
