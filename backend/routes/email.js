@@ -213,6 +213,57 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
       trustScore = Math.min(trustScore + 10, 100);
     }
 
+    // Check for free public domain email addresses claiming to represent corporate HR/Recruitment
+    const senderEmail = (emailPart ? emailPart[1] : sender).toLowerCase();
+    const isFreeDomain = senderEmail.includes('@gmail.com') || 
+                         senderEmail.includes('@yahoo.') || 
+                         senderEmail.includes('@outlook.') || 
+                         senderEmail.includes('@hotmail.') || 
+                         senderEmail.includes('@icloud.') ||
+                         senderEmail.includes('@proton.');
+
+    const claimsCorporateHR = emailBodyLower.includes('recruitment') ||
+                              emailBodyLower.includes('hr department') ||
+                              emailBodyLower.includes('human resource') ||
+                              emailBodyLower.includes('hiring manager') ||
+                              emailBodyLower.includes('placement cell') ||
+                              emailBodyLower.includes('talent acquisition') ||
+                              sender.toLowerCase().includes('recruitment') ||
+                              sender.toLowerCase().includes('hr department') ||
+                              sender.toLowerCase().includes('human resource');
+
+    const hasGoogleForm = emailBodyLower.includes('forms.gle') || 
+                           emailBodyLower.includes('docs.google.com/forms');
+
+    const isFreeMailHR = isFreeDomain && claimsCorporateHR;
+
+    if (isFreeMailHR) {
+      trustScore -= 30;
+      anomalies.push(`Free Mail Sender for Corporate HR: Email claims to be from a corporate recruitment/HR team but was sent from a free public domain email address (${senderEmail}). Real corporations use customized branding domains.`);
+    }
+
+    // Check for Vague / Generic Recruitment Campaign (Spam/Harvesting)
+    const hasVagueQualifications = emailBodyLower.includes('any degree') || 
+                                   emailBodyLower.includes('any discipline') || 
+                                   emailBodyLower.includes('any graduate') || 
+                                   emailBodyLower.includes('any branch') ||
+                                   emailBodyLower.includes('eligible to apply') ||
+                                   emailBodyLower.includes('fresher to 2 years');
+
+    const hasGeneralInternship = emailBodyLower.includes('internship') || 
+                                 emailBodyLower.includes('stipend');
+
+    if (hasGeneralInternship && (hasGoogleForm || hasVagueQualifications)) {
+      trustScore -= 20;
+      anomalies.push("Vague/Generic Recruitment Campaign: Email solicits applicants with extremely broad requirements ('any degree') using non-corporate public form host (Google Forms), typical of spam templates or harvesting campaigns.");
+    }
+
+    // High risk combo: Free Gmail HR + Google Forms link (highly diagnostic of scam/phishing)
+    if (isFreeMailHR && hasGoogleForm) {
+      trustScore -= 15;
+      anomalies.push("High-Risk Phishing Combo: Sender claims to be corporate HR from a free Gmail address AND redirects to a Google Form, strongly indicating a fake recruitment/phishing scam.");
+    }
+
     // Check for paid-training/internship scam: MUST have both internship keywords AND explicit fee mention
     const hasFeeKeywords =
       emailBodyLower.includes('program fees') ||
@@ -238,7 +289,7 @@ router.post('/verify', authMiddleware, upload.single('file'), async (req, res) =
     if (isPaidInternshipScam) {
       trustScore -= 30;
       anomalies.push('Suspected Paid-Training Scam: Email promotes an internship/certification program with fee requirements from an unverified sender.');
-    } else if (hasInternshipContext && !hasFeeKeywords) {
+    } else if (hasInternshipContext && !hasFeeKeywords && !isFreeMailHR && !hasGoogleForm) {
       // Genuine internship/opportunity email — just add a note, don't penalize
       anomalies.push('Promotional/Opportunity Email: This appears to be an internship or training opportunity notice. No fees were solicited.');
     }
