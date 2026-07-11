@@ -231,8 +231,10 @@ router.post('/reset-password', async (req, res) => {
   if (!email || !code || !newPassword) {
     return res.status(400).json({ message: 'Email, code, and new password are required.' });
   }
-  if (newPassword.length < 6) {
-    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+  const hasCapital = /[A-Z]/.test(newPassword);
+  const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+  if (newPassword.length < 6 || !hasCapital || !hasSpecial) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters and contain at least one capital letter and one special character.' });
   }
 
   try {
