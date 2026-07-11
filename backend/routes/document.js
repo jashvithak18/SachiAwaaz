@@ -77,6 +77,7 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     let signaturePresence = 'None Detected';
     let possibleManipulation = 'None Detected';
     let qrDetection = [];
+    let isTextReadable = true;
 
     // Parse and extract actual text content
     if (ext === '.pdf') {
@@ -103,7 +104,7 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
 
       // Count extractable words to determine if PDF is text-readable or vector/scanned
       const englishWords = (extractedText || '').match(/[a-zA-Z]{3,}/g) || [];
-      const isTextReadable = englishWords.length >= 8;
+      isTextReadable = englishWords.length >= 8;
 
       if (isTextReadable || bufferString.includes('/Text') || bufferString.includes('BT') || bufferString.includes('ET')) {
         ocrConsistency = 'Consistent';
