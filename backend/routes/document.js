@@ -41,7 +41,7 @@ function parsePDFMetadata(bufferString) {
   if (creatorMatch) meta.creator = creatorMatch[1];
 
   // Extract Producer
-  const producerMatch = bufferString.match(/\/Producer\s*\(([^)]+)\)/);
+  const producerMatch = bufferString.match(/\/Producer\s*\(([^)/]+)\)/);
   if (producerMatch) meta.producer = producerMatch[1];
 
   // Extract Author
@@ -53,6 +53,122 @@ function parsePDFMetadata(bufferString) {
   if (titleMatch) meta.title = titleMatch[1];
 
   return meta;
+}
+
+// Helper to dynamically extract company name from text, metadata, or filename
+function extractCompanyName(text, metadata, filename) {
+  // 1. Try metadata title/author first if clean
+  if (metadata.author && metadata.author.trim().length > 2 && !metadata.author.includes('.') && !metadata.author.includes('/')) {
+    return metadata.author.trim();
+  }
+  
+  // 2. Try emails in text
+  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+  const emails = text.match(emailRegex) || [];
+  if (emails.length > 0) {
+    for (const email of emails) {
+      const domain = email.split('@')[1].toLowerCase();
+      if (!['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'protonmail.com', 'zoho.com', 'mail.com'].includes(domain)) {
+        const companyPart = domain.split('.')[0];
+        return companyPart.charAt(0).toUpperCase() + companyPart.slice(1);
+      }
+    }
+  }
+  
+  // 3. Scan first 800 characters for typical certificate patterns
+  const textLower = text.toLowerCase();
+  const patterns = [
+    /internship\s+at\s+([a-zA-Z0-9\s,&]{3,35})/i,
+    /intern\s+at\s+([a-zA-Z0-9\s,&]{3,35})/i,
+    /issued\s+by\s+([a-zA-Z0-9\s,&]{3,35})/i,
+    /certificate\s+of\s+([a-zA-Z0-9\s,&]{3,35})/i,
+    /offer\s+from\s+([a-zA-Z0-9\s,&]{3,35})/i
+  ];
+  for (const pat of patterns) {
+    const match = text.match(pat);
+    if (match && match[1]) {
+      const cleaned = match[1].replace(/(corporation|company|llc|ltd|limited|technologies|private|pvt)/i, '').trim();
+      if (cleaned.length > 2) return cleaned;
+    }
+  }
+  
+  // 4. Try filename word extractor fallback
+  const cleanFilename = filename.replace(/(certificate|internship|offer|letter|document|pdf|docx|png|jpg|jpeg|\d+|-|_)/gi, ' ').trim();
+  if (cleanFilename.length > 2) {
+    const words = cleanFilename.split(/\s+/);
+    return words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  }
+  
+  return 'Unregistered Entity';
+}
+
+// Helper to perform live search lookup for company reviews and scam reports
+const axios = require('axios');
+async function searchCompanyReviews(companyName) {
+  if (!companyName || companyName === 'Unregistered Entity') {
+    return {
+      reviewsSummary: 'No specific company name could be extracted from the document text or metadata. Verification defaults to structure-only.',
+      safetyAlerts: []
+    };
+  }
+
+  try {
+    const query = encodeURIComponent(`${companyName} internship reviews scam complaints`);
+    const searchUrl = `https://html.duckduckgo.com/html/?q=${query}`;
+    
+    const response = await axios.get(searchUrl, {
+      timeout: 5500,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+      }
+    });
+
+    if (response.status === 200 && response.data) {
+      const html = response.data;
+      
+      const snippetRegex = /<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+      let match;
+      const snippets = [];
+      while ((match = snippetRegex.exec(html)) !== null && snippets.length < 5) {
+        const cleanSnippet = match[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        snippets.push(cleanSnippet);
+      }
+
+      const scamKeywords = ['scam', 'fraud', 'fake', 'fake offer', 'pay money', 'charge fees', 'deposit', 'quora scam', 'reddit scam', 'not legit', 'waste of money', 'ask for money', 'certificate fee'];
+      const foundAlerts = [];
+      
+      snippets.forEach(snip => {
+        const lowerSnip = snip.toLowerCase();
+        scamKeywords.forEach(word => {
+          if (lowerSnip.includes(word) && !foundAlerts.includes(word)) {
+            foundAlerts.push(word);
+          }
+        });
+      });
+
+      let reviewsSummary = '';
+      if (snippets.length > 0) {
+        reviewsSummary = `Live web search check completed for "${companyName}". Top search results note:\n`;
+        snippets.slice(0, 3).forEach((s, idx) => {
+          reviewsSummary += `${idx + 1}. "${s.substring(0, 160)}..."\n`;
+        });
+      } else {
+        reviewsSummary = `Live web search queried for "${companyName}" reviews, but no immediate public discussion or Quora records were found.`;
+      }
+
+      return {
+        reviewsSummary,
+        safetyAlerts: foundAlerts
+      };
+    }
+  } catch (err) {
+    console.error(`Live web search reviews failed for ${companyName}:`, err.message);
+  }
+
+  return {
+    reviewsSummary: `Live web search for "${companyName}" reviews was bypassed or timed out. (Reputation defaults to neutral).`,
+    safetyAlerts: []
+  };
 }
 
 // Run document analysis
@@ -340,28 +456,22 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       );
     }
 
-    // Extract company name from emails if still not found
-    let customCompany = null;
-    if (!detectedCompanyKey) {
-      if (emails && emails.length > 0) {
-        for (const email of emails) {
-          const domain = email.split('@')[1].toLowerCase();
-          if (!['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'protonmail.com', 'zoho.com', 'mail.com'].includes(domain)) {
-            const companyPart = domain.split('.')[0];
-            customCompany = companyPart.charAt(0).toUpperCase() + companyPart.slice(1);
-            break;
-          }
-        }
-      }
-    }
+    // 1. Identify organization name (registry or dynamic NLP extraction)
+    const companyName = detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey].name : extractCompanyName(extractedText, metadata, req.file.originalname);
 
-    const companyInfo = detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey] : {
-      name: customCompany || 'Unregistered Entity',
-      type: customCompany ? 'Enterprise' : 'Unknown',
-      reputation: 'Neutral / Verification Required',
-      domain: null,
-      reviews: 'Company is not registered in our verified registry. Recommend checking Google Reviews, Quora, and the Ministry of Corporate Affairs (MCA) portal. Genuine internships never ask for security deposits, course purchases, or processing fees.',
-      isScam: false
+    // 2. Query live web reviews dynamically
+    const searchResult = await searchCompanyReviews(companyName);
+
+    const companyInfo = detectedCompanyKey ? {
+      ...COMPANY_REGISTRY[detectedCompanyKey],
+      reviews: `${COMPANY_REGISTRY[detectedCompanyKey].reviews}\n\n${searchResult.reviewsSummary}`
+    } : {
+      name: companyName,
+      type: companyName === 'Unregistered Entity' ? 'Unknown' : 'Enterprise / External',
+      reputation: searchResult.safetyAlerts.length > 0 ? 'Verification Required / Alerts Found' : 'Neutral / Verification Required',
+      domain: emails.length > 0 ? emails[0].split('@')[1].toLowerCase() : null,
+      reviews: `${searchResult.reviewsSummary}\n\nDisclaimer: Company is not in our static database registry. Live DuckDuckGo reviews were queried to verify status. Genuine corporate internships never require deposits, paid courses, or administrative fees.`,
+      isScam: searchResult.safetyAlerts.length >= 2
     };
 
     const organization = companyInfo.name;
@@ -399,6 +509,17 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     if (companyInfo.isScam) {
       riskScore = Math.max(riskScore, 85);
       anomalies.push(`Flagged Scam Advisory: Document is associated with "${companyInfo.name}", which is widely reported to run paid training fee structures disguised as internships.`);
+    }
+
+    // Live Web Search Scam & Reputation Analysis
+    if (!detectedCompanyKey && searchResult.safetyAlerts.length > 0) {
+      if (searchResult.safetyAlerts.length >= 2) {
+        riskScore = Math.max(riskScore, 75);
+        anomalies.push(`Flagged Web Scam Advisory: Live web reviews for "${organization}" contain multiple alerts: [${searchResult.safetyAlerts.join(', ')}]. Reports suggest potential fee-charging or fake certificate operations.`);
+      } else {
+        riskScore = Math.max(riskScore, 25);
+        anomalies.push(`Web Review Notice: Search results for "${organization}" mention potential security or registration concerns: [${searchResult.safetyAlerts.join(', ')}]. Please check reviews independently.`);
+      }
     }
 
     // Email Domain spoofing verification
