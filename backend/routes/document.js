@@ -207,13 +207,18 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       textLower.includes('recommendation') ||
       textLower.includes('offer letter');
 
-    // 1. Identify recipient/student name
+    // 1. Identify recipient/student name (with fuzzy initial, space compression, and first name fallback)
+    const cleanText = textLower.replace(/[^a-z0-9]/g, '');
+    const cleanName = registeredName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const firstWord = registeredName.toLowerCase().split(/\s+/).filter(Boolean)[0] || '';
     const nameParts = registeredName.toLowerCase().split(/\s+/).filter(Boolean);
+
     const hasNameMatch = registeredName && (
       textLower.includes(registeredName.toLowerCase()) ||
-      (nameParts.length > 0 && nameParts.every(part => textLower.includes(part))) ||
-      nameLower.includes(registeredName.toLowerCase().replace(/\s+/g, '')) ||
-      nameLower.includes(registeredName.toLowerCase().replace(/\s+/g, '_'))
+      cleanText.includes(cleanName) ||
+      (firstWord && firstWord.length >= 3 && cleanText.includes(firstWord.replace(/[^a-z0-9]/g, ''))) ||
+      (nameParts.length > 0 && nameParts.every(part => cleanText.includes(part))) ||
+      nameLower.includes(registeredName.toLowerCase().replace(/\s+/g, ''))
     );
 
     // 2. Company registry lookup & scam database
