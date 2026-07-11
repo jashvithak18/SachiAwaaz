@@ -86,10 +86,10 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
 
       try {
         const parsedPdf = await pdfParse(fileBuffer);
-        extractedText = parsedPdf.text;
+        extractedText = parsedPdf.text || '';
       } catch (err) {
-        console.error('pdf-parse text extraction failed, falling back:', err);
-        extractedText = bufferString;
+        console.error('pdf-parse text extraction failed, falling back to empty:', err);
+        extractedText = '';
       }
 
       // Look for signature triggers
@@ -114,10 +114,10 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     } else if (ext === '.docx') {
       try {
         const parsedDocx = await mammoth.extractRawText({ buffer: fileBuffer });
-        extractedText = parsedDocx.value;
+        extractedText = parsedDocx.value || '';
       } catch (err) {
-        console.error('mammoth docx extraction failed, falling back:', err);
-        extractedText = bufferString;
+        console.error('mammoth docx extraction failed, falling back to empty:', err);
+        extractedText = '';
       }
       if (bufferString.includes('word/') || bufferString.includes('document.xml')) {
         metadata.creator = 'Microsoft Word';
@@ -381,12 +381,12 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       // For general internship docs: check student name alignment and signatures only if the PDF is text-readable
       if (isTextReadable) {
         if (!hasNameMatch && registeredName) {
-          riskScore = Math.max(riskScore, 35);
-          anomalies.push(`Recipient Name Mismatch: The document text does not contain the registered user's name ("${registeredName}").`);
+          riskScore += 10;
+          anomalies.push(`Recipient Name Warning: The document text does not contain the registered user's name ("${registeredName}"). Please verify that this certificate belongs to you.`);
         }
         if (!hasSignatureBlock) {
-          riskScore = Math.max(riskScore, 40);
-          anomalies.push('Missing Signatures: Document lacks authorized signatory fields, signature blocks, or stamp structures.');
+          riskScore += 8;
+          anomalies.push('Signature Warning: Document lacks visible authorized signatory fields or signature blocks.');
         }
       } else {
         // If it's a scanned/vector PDF with no text layer, add an informational note but bypass penalties to avoid false positives
@@ -400,8 +400,8 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     }
 
     if (ocrConsistency !== 'Consistent') {
-      riskScore = Math.max(riskScore, 55);
-      anomalies.push('No digital text layer — document appears to be a scanned image. OCR inconsistency detected.');
+      riskScore += 12;
+      anomalies.push('Notice: No digital text layer detected — document appears to be a scanned image or uses vector graphics. OCR verification bypassed.');
     }
 
     // Contract/invoice without signature is suspicious
