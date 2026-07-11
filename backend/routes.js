@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const { User, FamilyMember, Log } = require('./models');
 const { authMiddleware, JWT_SECRET } = require('./auth');
 
@@ -133,8 +134,163 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
   }
 });
 
-// ----------------------------------------------------
-// FAMILY ENROLLMENT
+// ── Nodemailer transporter (Gmail) ──────────────────────────────
+function createTransporter() {
+  return nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
+    },
+  });
+}
+
+// ── FORGOT PASSWORD — sends a 6-digit OTP to the user's email ──
+router.post('/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    // Always respond the same way — don't reveal whether email exists
+    if (!user) {
+      return res.json({ message: 'If that email is registered, a reset code has been sent.' });
+    }
+
+    // Generate 6-digit numeric code, expires in 15 minutes
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.resetCode = code;
+    user.resetCodeExpiry = expiry;
+    await user.save();
+
+    // Send email
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"PARAKH" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: `${code} is your PARAKH password reset code`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        </head>
+        <body style="margin:0;padding:0;background:#F6F4EF;font-family:Inter,system-ui,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#F6F4EF;padding:40px 20px;">
+            <tr><td align="center">
+              <table width="520" cellpadding="0" cellspacing="0"
+                style="background:#FBFAF8;border:1px solid #E4E1DA;border-radius:20px;overflow:hidden;max-width:520px;width:100%;">
+
+                <!-- Header bar -->
+                <tr>
+                  <td style="background:#3E5C4B;padding:28px 40px;">
+                    <p style="margin:0;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">PARAKH</p>
+                    <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.65);font-weight:500;">
+                      परखो, फिर भरोसा करो
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                  <td style="padding:40px;">
+                    <p style="margin:0 0 8px;font-size:18px;font-weight:700;color:#181818;">
+                      Password Reset Request
+                    </p>
+                    <p style="margin:0 0 28px;font-size:14px;color:#4b4845;line-height:1.6;">
+                      We received a request to reset the password for your PARAKH account.
+                      Use the code below — it expires in <strong>15 minutes</strong>.
+                    </p>
+
+                    <!-- OTP box -->
+                    <div style="text-align:center;margin:0 0 28px;">
+                      <div style="display:inline-block;background:#F6F4EF;border:2px solid #E4E1DA;
+                                  border-radius:16px;padding:24px 48px;">
+                        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#666;
+                                  text-transform:uppercase;letter-spacing:0.12em;">Your reset code</p>
+                        <p style="margin:0;font-size:42px;font-weight:900;color:#3E5C4B;
+                                  letter-spacing:12px;font-variant-numeric:tabular-nums;">${code}</p>
+                      </div>
+                    </div>
+
+                    <p style="margin:0 0 16px;font-size:13px;color:#4b4845;line-height:1.6;">
+                      Enter this code on the PARAKH password reset page along with your new password.
+                    </p>
+                    <p style="margin:0;font-size:12px;color:#999;line-height:1.6;">
+                      If you did not request a password reset, please ignore this email.
+                      Your account remains secure.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="padding:20px 40px;border-top:1px solid #E4E1DA;background:#F6F4EF;">
+                    <p style="margin:0;font-size:11px;color:#999;text-align:center;">
+                      © 2025 PARAKH · Digital verification for a world where everything looks real.
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td></tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    res.json({ message: 'Reset code sent. Please check your email.' });
+  } catch (err) {
+    console.error('Forgot-password error:', err);
+    res.status(500).json({ message: 'Failed to send reset email. Please try again.' });
+  }
+});
+
+// ── RESET PASSWORD — verify OTP + set new password ──────────────
+router.post('/auth/reset-password', async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  if (!email || !code || !newPassword) {
+    return res.status(400).json({ message: 'Email, code, and new password are all required.' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user || !user.resetCode || !user.resetCodeExpiry) {
+      return res.status(400).json({ message: 'No reset was requested for this email.' });
+    }
+    if (user.resetCode !== code.trim()) {
+      return res.status(400).json({ message: 'Incorrect reset code. Please check your email.' });
+    }
+    if (new Date() > user.resetCodeExpiry) {
+      user.resetCode = null;
+      user.resetCodeExpiry = null;
+      await user.save();
+      return res.status(400).json({ message: 'Reset code has expired. Please request a new one.' });
+    }
+
+    // Hash and save new password, clear reset fields
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.resetCode = null;
+    user.resetCodeExpiry = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully. You can now sign in.' });
+  } catch (err) {
+    console.error('Reset-password error:', err);
+    res.status(500).json({ message: 'Server error: ' + err.message });
+  }
+});
+
 // ----------------------------------------------------
 
 // List all enrolled family members

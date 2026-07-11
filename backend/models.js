@@ -13,6 +13,17 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  profile: {
+    name: { type: String, default: '' },
+    avatar: { type: String, default: '' }
+  },
+  resetCode:       { type: String,  default: null },
+  resetCodeExpiry: { type: Date,    default: null },
   createdAt: {
     type: Date,
     default: Date.now
