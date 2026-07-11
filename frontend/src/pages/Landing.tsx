@@ -17,10 +17,10 @@ const C = {
 
 /* ─── Animated Background Component ─── */
 function AnimatedBackground() {
-  const particles = Array.from({ length: 15 });
+  const particles = Array.from({ length: 8 }); // A few tiny particles
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" style={{ backgroundColor: '#F6F4EF' }}>
-      {/* Soft mesh background gradient */}
+      {/* Soft mesh background gradient (no dark gradients) */}
       <div 
         className="absolute inset-0 opacity-40" 
         style={{
@@ -31,55 +31,57 @@ function AnimatedBackground() {
           `
         }}
       />
-      {/* 3 Slowly drifting organic blobs */}
+      
+      {/* 3 Slowly drifting organic blobs with 4-6% opacity and zero bright colors */}
       <motion.div
         animate={{
-          x: [0, 40, -20, 0],
-          y: [0, -30, 20, 0],
-          scale: [1, 1.1, 0.95, 1],
+          x: [0, 50, -30, 0],
+          y: [0, -40, 30, 0],
+          scale: [1, 1.08, 0.95, 1],
         }}
         transition={{
-          duration: 25,
+          duration: 45,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="absolute -top-20 -left-20 w-[450px] h-[450px] rounded-full blur-[110px] opacity-[0.045]"
-        style={{ backgroundColor: '#3E5C4B' }}
+        className="absolute -top-20 -left-20 w-[450px] h-[450px] rounded-full blur-[120px]"
+        style={{ backgroundColor: '#3E5C4B', opacity: 0.05 }} // 5% Opacity forest green
       />
       <motion.div
         animate={{
-          x: [0, -30, 30, 0],
-          y: [0, 40, -30, 0],
-          scale: [1, 0.9, 1.15, 1],
+          x: [0, -40, 40, 0],
+          y: [0, 50, -40, 0],
+          scale: [1, 0.92, 1.1, 1],
         }}
         transition={{
-          duration: 30,
+          duration: 55,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="absolute -bottom-20 -right-20 w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.04]"
-        style={{ backgroundColor: '#A1493F' }}
+        className="absolute -bottom-20 -right-20 w-[500px] h-[500px] rounded-full blur-[130px]"
+        style={{ backgroundColor: '#8C9C86', opacity: 0.04 }} // 4% Opacity sage green (removed bright red)
       />
       <motion.div
         animate={{
-          x: [0, 20, -40, 0],
-          y: [0, 30, 30, 0],
-          scale: [1, 1.05, 0.9, 1],
+          x: [0, 30, -50, 0],
+          y: [0, 40, 40, 0],
+          scale: [1, 1.05, 0.92, 1],
         }}
         transition={{
-          duration: 22,
+          duration: 50,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="absolute top-[40%] left-[30%] w-[350px] h-[350px] rounded-full blur-[100px] opacity-[0.035]"
-        style={{ backgroundColor: '#CBD5E1' }}
+        className="absolute top-[40%] left-[30%] w-[380px] h-[380px] rounded-full blur-[110px]"
+        style={{ backgroundColor: '#D0C9B7', opacity: 0.06 }} // 6% Opacity muted tan
       />
-      {/* Floating particles */}
+
+      {/* A few tiny floating particles moving randomly at very low opacity */}
       {particles.map((_, i) => {
-        const size = Math.random() * 5 + 3;
+        const size = Math.random() * 3 + 2.5; // Tiny sizes (2.5px to 5.5px)
         const startX = Math.random() * 100;
-        const delay = Math.random() * 10;
-        const duration = Math.random() * 12 + 10;
+        const delay = Math.random() * 8;
+        const duration = Math.random() * 15 + 18; // Very slow drift
         return (
           <motion.div
             key={i}
@@ -90,11 +92,11 @@ function AnimatedBackground() {
               backgroundColor: '#3E5C4B',
               left: `${startX}%`,
               bottom: '-5%',
-              opacity: Math.random() * 0.08 + 0.03,
+              opacity: Math.random() * 0.06 + 0.04, // Very low opacity (4% to 10%)
             }}
             animate={{
               y: ['-110%', '110%'],
-              x: [0, Math.random() * 40 - 20, 0],
+              x: [0, Math.random() * 30 - 15, 0],
             }}
             transition={{
               duration,

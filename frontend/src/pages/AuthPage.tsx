@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import Logo from '../components/Logo';
 
+import BackgroundEffects from '../components/BackgroundEffects';
+
 // Mode flow: 'login' | 'signup' | 'forgot' | 'reset' | 'verify'
 type Mode = 'login' | 'signup' | 'forgot' | 'reset' | 'verify';
 
@@ -227,6 +229,7 @@ export default function AuthPage() {
   return (
     <div className="bg-brand-100 text-brand-850 min-h-screen flex flex-col items-center justify-center relative px-6 py-12 animate-fade-in"
       style={{ backgroundColor: '#F6F4EF' }}>
+      <BackgroundEffects />
 
       {/* Back button */}
       <div className="w-full max-w-md mb-4 flex justify-start z-10">
