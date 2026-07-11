@@ -216,7 +216,18 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
 
     const fakeObj = detectResults.find(r => r.label.toLowerCase() === 'fake' || r.label.toLowerCase() === 'label_1') || { score: 0 };
     let syntheticScore = fakeObj.score;
-    let isFake = syntheticScore >= 0.50;
+
+    // Check if the audio file uses a compressed codec or originates from social media (WhatsApp, Instagram, etc.)
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const isCompressed = ['.opus', '.ogg', '.amr', '.aac', '.m4a', '.mp3', '.3gp'].includes(ext) || 
+                         req.file.originalname.toLowerCase().includes('whatsapp') || 
+                         req.file.originalname.toLowerCase().includes('instagram') ||
+                         req.file.originalname.toLowerCase().includes('voice') ||
+                         req.file.originalname.toLowerCase().includes('audio');
+
+    // Default threshold is 0.72. If compressed, raise it to 0.85 to avoid codec false positives.
+    const threshold = isCompressed ? 0.85 : 0.72;
+    let isFake = syntheticScore >= threshold;
 
     let similarityScore = null;
     let matchedMember = null;
