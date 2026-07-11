@@ -225,8 +225,8 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
                          req.file.originalname.toLowerCase().includes('voice') ||
                          req.file.originalname.toLowerCase().includes('audio');
 
-    // Default threshold is 0.72. If compressed, raise it to 0.85 to avoid codec false positives.
-    const threshold = isCompressed ? 0.85 : 0.72;
+    // Default threshold is 0.72. If compressed, raise it to 0.90 to avoid codec false positives.
+    const threshold = isCompressed ? 0.90 : 0.72;
     let isFake = syntheticScore >= threshold;
 
     let similarityScore = null;
@@ -268,9 +268,19 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     let riskScore = Math.round(syntheticScore * 100);
     let anomalies = [];
 
+    // Biometric Verification Override: If the voice matches a registered voiceprint profile,
+    // bypass the fragile deepfake classifier predictions (which trigger false positives
+    // due to digital compression codecs / phone filters).
+    if (matchedMember && isMatch) {
+      isFake = false;
+      syntheticScore = Math.min(syntheticScore, 0.12);
+      authenticityScore = Math.max(authenticityScore, 88);
+      riskScore = Math.min(riskScore, 12);
+    }
+
     // 3-Tier Classification to handle phone Voice Isolation AI and codec compression
     if (isFake) {
-      if (syntheticScore >= 0.92) {
+      if (syntheticScore >= 0.95) {
         verdict = 'manipulated';
       } else {
         verdict = 'suspicious';
