@@ -57,10 +57,13 @@ export default function App() {
     };
   }, [token, user]);
 
+  const [mousePos, setMousePos] = useState({ x: -999, y: -999 });
+
   // Mousemove listener for dynamic background spotlight
   useEffect(() => {
     if (!token) return;
     const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
       const container = document.getElementById('main-app-container');
       if (container) {
         container.style.setProperty('--mouse-x', `${e.clientX}px`);
@@ -85,9 +88,35 @@ export default function App() {
 
   // Sidebar Layout for logged-in PARAKH users
   return (
-    <div id="main-app-container" className="min-h-screen spotlight-bg text-brand-800 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/15">
+    <div id="main-app-container" className="min-h-screen spotlight-bg text-brand-800 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/15 relative overflow-hidden">
+      {/* Dynamic Cursor Spotlight Blob */}
+      <div 
+        className="pointer-events-none fixed rounded-full bg-accent-teal/8 blur-[120px] z-0 transition-all duration-300 ease-out hidden md:block"
+        style={{
+          left: `${mousePos.x - 220}px`,
+          top: `${mousePos.y - 220}px`,
+          width: '440px',
+          height: '440px',
+        }}
+      />
+
+      {/* Background Holographic Radars / Technical blueprint rings */}
+      <svg className="fixed -right-24 -top-24 w-[480px] h-[480px] pointer-events-none opacity-20 z-0 select-none animate-[spin_260s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke="#3E5C4B" strokeWidth="0.3">
+        <circle cx="50" cy="50" r="48" strokeDasharray="3 3" />
+        <circle cx="50" cy="50" r="38" />
+        <circle cx="50" cy="50" r="28" strokeDasharray="6 6" />
+        <line x1="50" y1="2" x2="50" y2="98" />
+        <line x1="2" y1="50" x2="98" y2="50" />
+      </svg>
+
+      <svg className="fixed -left-20 -bottom-20 w-[380px] h-[380px] pointer-events-none opacity-15 z-0 select-none animate-[spin_180s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke="#3E5C4B" strokeWidth="0.25">
+        <circle cx="50" cy="50" r="45" />
+        <polygon points="50,12 54,26 68,26 57,36 61,50 50,41 39,50 43,36 32,26 46,26" />
+        <circle cx="50" cy="50" r="6" />
+      </svg>
+
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-white border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
+      <aside className="w-full md:w-64 bg-white/95 backdrop-blur-md border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
         <div>
           {/* Brand logo */}
           <div className="p-4 border-b border-brand-200 flex items-center justify-center cursor-pointer" onClick={() => useStore.setState({ activeTab: 'landing' })}>
@@ -189,7 +218,7 @@ export default function App() {
       </aside>
 
       {/* Main View Panel */}
-      <main className="flex-grow min-h-screen bg-brand-100 overflow-y-auto">
+      <main className="flex-grow min-h-screen bg-transparent overflow-y-auto relative z-10">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'cases' && <CaseWorkspace />}
         {activeTab === 'voice' && <VoiceVerify />}
