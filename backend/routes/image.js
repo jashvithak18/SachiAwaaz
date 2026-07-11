@@ -178,9 +178,20 @@ function getImageInfo(buffer, filename) {
   ) {
     creator = 'Stable Diffusion';
     warnings.push('Stable Diffusion synthesis generation markers or prompt parameters matched.');
-  } else if (lowerBuffer.includes('dall-e') || lowerBuffer.includes('dalle') || lowerName.includes('dalle') || lowerName.includes('dall_e') || lowerName.includes('dall-e')) {
-    creator = 'DALL-E AI';
-    warnings.push('DALL-E generative synthetic metadata matched.');
+  } else if (
+    lowerBuffer.includes('dall-e') || 
+    lowerBuffer.includes('dalle') || 
+    lowerBuffer.includes('openai') || 
+    lowerBuffer.includes('chatgpt') || 
+    lowerBuffer.includes('dall·e') || 
+    lowerName.includes('dalle') || 
+    lowerName.includes('dall_e') || 
+    lowerName.includes('dall-e') || 
+    lowerName.includes('chatgpt') || 
+    lowerName.includes('openai')
+  ) {
+    creator = 'DALL-E 3 (OpenAI)';
+    warnings.push('ChatGPT / DALL-E generative synthetic metadata matched.');
   } else if (lowerBuffer.includes('adobe firefly') || lowerBuffer.includes('firefly') || lowerName.includes('firefly')) {
     creator = 'Adobe Firefly AI';
     warnings.push('Adobe Firefly generative AI signature matched.');
@@ -244,6 +255,8 @@ router.post('/verify', authMiddleware, upload.single('image'), async (req, res) 
         (info.width === 768 && info.height === 1344) ||  // SDXL ratio
         (info.width === 1536 && info.height === 640) ||  // SDXL ratio
         (info.width === 640 && info.height === 1536) ||  // SDXL ratio
+        (info.width === 1792 && info.height === 1024) || // DALL-E 3 Landscape
+        (info.width === 1024 && info.height === 1792) || // DALL-E 3 Portrait
         (info.format === 'PNG')                          // PNG without camera info
       )
     ) {
