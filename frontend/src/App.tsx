@@ -57,6 +57,20 @@ export default function App() {
     };
   }, [token, user]);
 
+  // Mousemove listener for dynamic background spotlight
+  useEffect(() => {
+    if (!token) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      const container = document.getElementById('main-app-container');
+      if (container) {
+        container.style.setProperty('--mouse-x', `${e.clientX}px`);
+        container.style.setProperty('--mouse-y', `${e.clientY}px`);
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [token]);
+
   // Public views or landing page view even when logged in
   if (activeTab === 'landing') {
     return <Landing />;
@@ -71,7 +85,7 @@ export default function App() {
 
   // Sidebar Layout for logged-in PARAKH users
   return (
-    <div className="min-h-screen bg-brand-100 text-brand-800 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/15">
+    <div id="main-app-container" className="min-h-screen spotlight-bg text-brand-800 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/15">
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-white border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
         <div>

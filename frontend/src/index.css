@@ -118,3 +118,54 @@
   top: -2px;
   animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+
+/* Dynamic background with mouse-spotlight and technical dot grid */
+.spotlight-bg {
+  position: relative;
+  background-color: #F6F4EF;
+  background-image: 
+    radial-gradient(rgba(62, 92, 75, 0.05) 1px, transparent 1px),
+    radial-gradient(
+      circle 600px at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      rgba(62, 92, 75, 0.06) 0%,
+      rgba(62, 92, 75, 0.02) 45%,
+      transparent 85%
+    );
+  background-size: 24px 24px, 100% 100%;
+  background-attachment: fixed;
+}
+
+/* Global feature upgrades for cards */
+div[class*="bg-white"][class*="border-brand-200"],
+form[class*="bg-white"][class*="border-brand-200"],
+section[class*="bg-white"][class*="border-brand-200"] {
+  @apply transition-all duration-300 rounded-3xl;
+  box-shadow: 0 4px 20px rgba(19, 34, 25, 0.02);
+}
+
+div[class*="bg-white"][class*="border-brand-200"]:hover,
+form[class*="bg-white"][class*="border-brand-200"]:hover,
+section[class*="bg-white"][class*="border-brand-200"]:hover {
+  transform: translateY(-4px) scale(1.004);
+  border-color: #3E5C4B40;
+  box-shadow: 0 12px 30px rgba(19, 34, 25, 0.05), 0 0 1px #3E5C4B15;
+}
+
+/* Global input focus upgrades */
+input[class*="bg-brand-50"],
+select[class*="bg-brand-50"],
+textarea[class*="bg-brand-50"] {
+  @apply focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-all duration-200;
+}
+
+input[class*="bg-brand-50"]:focus,
+select[class*="bg-brand-50"]:focus,
+textarea[class*="bg-brand-50"]:focus {
+  background-color: #fff !important;
+  box-shadow: 0 4px 12px rgba(62, 92, 75, 0.04);
+}
+
+/* Page load animations for all tabs */
+main > div {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
