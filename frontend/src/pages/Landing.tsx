@@ -298,8 +298,9 @@ function VerifyCard({ icon, label, desc, delay }: { icon: string; label: string;
       initial={{ opacity: 0, y: 28 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1], delay }}
-      className="rounded-3xl p-6 flex flex-col gap-3 border-2 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
-      style={{ backgroundColor: C.card, borderColor: C.border }}
+      whileHover={{ y: -4, borderColor: C.green, boxShadow: '0 12px 30px -10px rgba(62,92,75,0.15)' }}
+      className="rounded-3xl p-6 flex flex-col gap-3 border-2 transition-all duration-300 cursor-pointer"
+      style={{ background: `linear-gradient(135deg, ${C.card} 0%, #F5F2EA 100%)`, borderColor: C.border }}
     >
       <span className="text-[32px] select-none">{icon}</span>
       <p className="text-[16px] font-extrabold leading-snug" style={{ color: C.text }}>{label}</p>
@@ -349,8 +350,9 @@ function StoryText({ quote, badge, news, newsSrc, flags }: {
         initial={{ opacity: 0, y: 18 }}
         animate={newsInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.55, delay: 0.12 }}
-        className="rounded-3xl p-6 border-2 shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-        style={{ backgroundColor: C.card, borderColor: C.border }}
+        whileHover={{ y: -4, borderColor: C.green, boxShadow: '0 12px 30px -10px rgba(62,92,75,0.15)' }}
+        className="rounded-3xl p-6 border-2 shadow-md transition-all duration-300"
+        style={{ background: `linear-gradient(135deg, ${C.card} 0%, #F5F2EA 100%)`, borderColor: C.border }}
       >
         <p className="text-[10px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: C.red }}>
           <span>📰</span><span>Real Incident</span>
@@ -1071,25 +1073,33 @@ export default function Landing() {
             </div>
 
             <Reveal delay={0.12}>
-              <div className="flex justify-center gap-2 mb-8">
+              <div className="flex justify-center gap-2 mb-8 bg-[#EFECE5]/80 p-1.5 rounded-2xl border max-w-max mx-auto" style={{ borderColor: C.border }}>
                 {[
                   { key: 'voice', label: copy.tabVoice },
                   { key: 'doc',   label: copy.tabDoc },
                   { key: 'image', label: copy.tabImage },
                   { key: 'live',  label: copy.tabLive },
-                ].map(({ key, label }) => (
-                  <button key={key}
-                    onClick={() => { setTab(key); setDemoState('idle'); setProgress(0); }}
-                    className="px-5 py-3 rounded-xl text-[14px] font-bold transition-all"
-                    style={{
-                      backgroundColor: activeTab === key ? C.text : 'transparent',
-                      color: activeTab === key ? '#fff' : C.muted,
-                      border: activeTab === key ? 'none' : `2px solid ${C.border}`,
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
+                ].map(({ key, label }) => {
+                  const isActive = activeTab === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => { setTab(key); setDemoState('idle'); setProgress(0); }}
+                      className="relative px-6 py-2.5 rounded-xl text-[14px] font-bold transition-colors duration-200 focus:outline-none"
+                      style={{ color: isActive ? '#fff' : C.muted }}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeTabPill"
+                          className="absolute inset-0 rounded-xl shadow-sm z-0"
+                          style={{ backgroundColor: C.text }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                      <span className="relative z-10">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
               <div className="rounded-3xl p-8 border-2 shadow-sm max-w-[640px] mx-auto" style={{ backgroundColor: C.card, borderColor: C.border }}>
                 {demoState === 'idle' && (
