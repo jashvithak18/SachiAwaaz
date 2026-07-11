@@ -268,16 +268,25 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
     let riskScore = Math.round(syntheticScore * 100);
     let anomalies = [];
 
+    // 3-Tier Classification to handle phone Voice Isolation AI and codec compression
+    if (isFake) {
+      if (syntheticScore >= 0.92) {
+        verdict = 'manipulated';
+      } else {
+        verdict = 'suspicious';
+      }
+    }
+
     if (matchedMember) {
       // Speaker was compared against a registered profile
-      if (isFake) {
-        // ML says AI regardless of match
-        verdict = 'manipulated';
+      if (verdict === 'manipulated') {
         if (isMatch) {
           anomalies.push(`Deepfake clone detected — synthesised to impersonate ${matchedMember.name}.`);
         } else {
           anomalies.push(`AI generated voice — does not match ${matchedMember.name}'s profile.`);
         }
+      } else if (verdict === 'suspicious') {
+        anomalies.push(`Acoustic anomaly detected — audio contains high digital compression or Voice Isolation processing.`);
       } else if (isMatch) {
         // Real human, matches registered member
         verdict = 'safe';
@@ -292,9 +301,11 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
       }
     } else {
       // No specific member selected — open verification
-      if (isFake) {
+      if (verdict === 'manipulated') {
         verdict = 'manipulated';
         anomalies.push('AI generated voice detected. Synthetic speech patterns identified by acoustic analysis.');
+      } else if (verdict === 'suspicious') {
+        anomalies.push('Acoustic processing detected. Audio matches patterns of smartphone Voice Isolation or high codec compression.');
       } else {
         // Authentic audio profile, no cloning detected
         verdict = 'safe';
@@ -313,7 +324,7 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
         aiExplanation = `Authentic audio profile. No AI voice synthesis, deepfake cloning, or speech manipulation was detected. (Note: If this clip does not contain human speech—such as music, chimes, sound effects, or background hum—it will be classified as safe/authentic since no synthetic deepfake voice was identified.)`;
       }
     } else if (verdict === 'suspicious') {
-      aiExplanation = `The voice shows some uncertainty in acoustic markers. Recommend manual verification.`;
+      aiExplanation = `UNRESOLVED: High digital processing detected. This typically happens when a real voice is recorded using smartphone 'Voice Isolation' / 'AI Noise Cancellation' features, or transmitted over highly compressed social channels. While no explicit deepfake cloning was confirmed, the compression signatures resemble synthetic acoustics. Confidence: ${riskScore}%.`;
     } else {
       aiExplanation = `ALERT: This audio was flagged as AI-generated. Forensic acoustic analysis detected unnatural pitch modulation, missing micro-tremor variations, and digital compression patterns typical of AI voice synthesis engines (e.g. ElevenLabs, Resemble AI, VALL-E). Synthetic confidence: ${riskScore}%.`;
     }
