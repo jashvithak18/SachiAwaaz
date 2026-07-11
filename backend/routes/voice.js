@@ -296,9 +296,9 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
         verdict = 'manipulated';
         anomalies.push('AI generated voice detected. Synthetic speech patterns identified by acoustic analysis.');
       } else {
-        // Real human voice, not registered in system
+        // Authentic audio profile, no cloning detected
         verdict = 'safe';
-        anomalies.push('Authentic human voice — speaker is not registered in the system (Unknown Person).');
+        anomalies.push('Authentic audio profile — no synthetic speech cloning detected.');
       }
     }
 
@@ -310,7 +310,7 @@ router.post('/verify', authMiddleware, upload.single('audio'), async (req, res) 
       } else if (matchedMember && !isMatch) {
         aiExplanation = `This is a real, authentic human voice. However, it does not match the enrolled profile for ${matchedMember.name}. The speaker appears to be a genuine person, but their identity could not be confirmed against the registered voiceprint. Similarity: ${similarityScore ? (similarityScore * 100).toFixed(1) + '%' : 'N/A'}.`;
       } else {
-        aiExplanation = `Authentic human voice confirmed. This speaker is not enrolled in the system — they are an unknown but real person. No AI synthesis, deepfake cloning, or voice manipulation was detected.`;
+        aiExplanation = `Authentic audio profile. No AI voice synthesis, deepfake cloning, or speech manipulation was detected. (Note: If this clip does not contain human speech—such as music, chimes, sound effects, or background hum—it will be classified as safe/authentic since no synthetic deepfake voice was identified.)`;
       }
     } else if (verdict === 'suspicious') {
       aiExplanation = `The voice shows some uncertainty in acoustic markers. Recommend manual verification.`;
