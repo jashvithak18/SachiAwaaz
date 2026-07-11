@@ -101,11 +101,14 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
         possibleManipulation = 'Re-saved/Re-compressed PDF structure detected.';
       }
 
-      // Check text streams
-      if (bufferString.includes('/Text') || bufferString.includes('BT') || bufferString.includes('ET') || (extractedText && extractedText.trim().length > 10)) {
+      // Count extractable words to determine if PDF is text-readable or vector/scanned
+      const englishWords = (extractedText || '').match(/[a-zA-Z]{3,}/g) || [];
+      const isTextReadable = englishWords.length >= 8;
+
+      if (isTextReadable || bufferString.includes('/Text') || bufferString.includes('BT') || bufferString.includes('ET')) {
         ocrConsistency = 'Consistent';
       } else {
-        ocrConsistency = 'Potential Inconsistency: Image-only PDF lacking structural text streams.';
+        ocrConsistency = 'Unextractable Text Layer (Scanned or Vector PDF)';
       }
     } else if (ext === '.docx') {
       try {
@@ -333,9 +336,9 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     // Add results to metadata object for UI display
     metadata.isInternshipDoc = isInternshipDoc;
     metadata.recipientName = registeredName || 'Unspecified Recipient';
-    metadata.nameVerified = hasNameMatch ? 'Verified Match' : 'Unverified / Name Mismatch';
+    metadata.nameVerified = isTextReadable ? (hasNameMatch ? 'Verified Match' : 'Unverified / Name Mismatch') : 'Not Text-Readable';
     metadata.organization = organization;
-    metadata.signaturesVerified = hasSignatureBlock ? 'Signature Block Located' : 'None Detected';
+    metadata.signaturesVerified = isTextReadable ? (hasSignatureBlock ? 'Signature Block Located' : 'None Detected') : (hasSignatureBlock ? 'Signature Block Located' : 'Not Text-Readable');
 
     // === Structural & Content Risk Scoring ===
     let riskScore = 8; // very low default
@@ -374,14 +377,19 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     }
 
     if (isInternshipDoc && !companyInfo.isScam) {
-      // For general internship docs: check student name alignment and signatures
-      if (!hasNameMatch && registeredName) {
-        riskScore = Math.max(riskScore, 35);
-        anomalies.push(`Recipient Name Mismatch: The document text does not contain the registered user's name ("${registeredName}").`);
-      }
-      if (!hasSignatureBlock) {
-        riskScore = Math.max(riskScore, 40);
-        anomalies.push('Missing Signatures: Document lacks authorized signatory fields, signature blocks, or stamp structures.');
+      // For general internship docs: check student name alignment and signatures only if the PDF is text-readable
+      if (isTextReadable) {
+        if (!hasNameMatch && registeredName) {
+          riskScore = Math.max(riskScore, 35);
+          anomalies.push(`Recipient Name Mismatch: The document text does not contain the registered user's name ("${registeredName}").`);
+        }
+        if (!hasSignatureBlock) {
+          riskScore = Math.max(riskScore, 40);
+          anomalies.push('Missing Signatures: Document lacks authorized signatory fields, signature blocks, or stamp structures.');
+        }
+      } else {
+        // If it's a scanned/vector PDF with no text layer, add an informational note but bypass penalties to avoid false positives
+        anomalies.push('Unextractable text layer: This document is a scanned image or uses vector graphics (Type3 fonts) without standard extractable text encoding. Name and signature verification was bypassed to avoid false positives.');
       }
     }
 
