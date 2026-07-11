@@ -171,6 +171,8 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
 
     let aiPhraseHits = 0;
     const textLower = extractedText.toLowerCase();
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const emails = textLower.match(emailRegex) || [];
     aiPhrases.forEach(ph => { if (textLower.includes(ph)) aiPhraseHits++; });
 
     // PDF metadata absence check: AI-generated PDFs typically have no Author, no Creator (or generic creator like LibreOffice/Word)
