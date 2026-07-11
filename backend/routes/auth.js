@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 const User = require('../models/User');
 const Setting = require('../models/Setting');
 const { authMiddleware, JWT_SECRET } = require('../auth');
@@ -109,24 +110,7 @@ router.post('/forgot-password', async (req, res) => {
     user.resetCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
-    // Send email via Gmail (using secure SSL port 465 to bypass cloud firewall blocks on port 587 and force IPv4)
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      family: 4,
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
-      },
-      connectionTimeout: 15000, // 15 seconds connection timeout
-    });
-
-    await transporter.sendMail({
-      from: `"PARAKH" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: `${code} is your PARAKH password reset code`,
-      html: `
+    const htmlContent = `
         <!DOCTYPE html>
         <html>
         <body style="margin:0;padding:0;background:#F6F4EF;font-family:Inter,system-ui,sans-serif;">
@@ -166,14 +150,49 @@ router.post('/forgot-password', async (req, res) => {
           </table>
         </body>
         </html>
-      `,
-    });
+    `;
 
-    console.log(`[Auth] Reset code sent to ${email}`);
+    if (process.env.RESEND_API_KEY) {
+      console.log(`[Auth] Sending email via Resend HTTP API to ${email}`);
+      await axios.post('https://api.resend.com/emails', {
+        from: 'PARAKH <onboarding@resend.dev>',
+        to: email,
+        subject: `${code} is your PARAKH password reset code`,
+        html: htmlContent,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 12000 // 12 seconds request timeout
+      });
+    } else {
+      console.log(`[Auth] Sending email via SMTP fallback to ${email}`);
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        family: 4,
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_PASS,
+        },
+        connectionTimeout: 10000, // 10 seconds connection timeout
+      });
+
+      await transporter.sendMail({
+        from: `"PARAKH" <${process.env.GMAIL_USER}>`,
+        to: email,
+        subject: `${code} is your PARAKH password reset code`,
+        html: htmlContent,
+      });
+    }
+
+    console.log(`[Auth] Reset code sent successfully to ${email}`);
     res.json({ message: 'Reset code sent. Please check your email.' });
   } catch (err) {
-    console.error('[Auth] forgot-password error:', err);
-    res.status(500).json({ message: 'Failed to send reset email: ' + err.message });
+    console.error('[Auth] forgot-password error:', err.response ? err.response.data : err.message);
+    res.status(500).json({ message: 'Failed to send reset email: ' + (err.response ? JSON.stringify(err.response.data) : err.message) });
   }
 });
 
