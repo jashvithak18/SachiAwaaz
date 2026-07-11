@@ -196,6 +196,35 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+// Verify Reset Code — verify 6-digit OTP code before password entry
+router.post('/verify-reset-code', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ message: 'Email and code are required.' });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user || !user.resetCode || !user.resetCodeExpiry) {
+      return res.status(400).json({ message: 'No reset was requested for this email.' });
+    }
+    if (user.resetCode !== code.trim()) {
+      return res.status(400).json({ message: 'Incorrect reset code. Please check your email.' });
+    }
+    if (new Date() > user.resetCodeExpiry) {
+      user.resetCode = null;
+      user.resetCodeExpiry = null;
+      await user.save();
+      return res.status(400).json({ message: 'Reset code has expired. Please request a new one.' });
+    }
+
+    res.json({ message: 'Code verified successfully.' });
+  } catch (err) {
+    console.error('[Auth] verify-reset-code error:', err);
+    res.status(500).json({ message: 'Server error: ' + err.message });
+  }
+});
+
 // Reset Password — verify 6-digit OTP and set new password
 router.post('/reset-password', async (req, res) => {
   const { email, code, newPassword } = req.body;
