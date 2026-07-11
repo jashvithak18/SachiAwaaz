@@ -136,7 +136,7 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
 
 // ── Nodemailer transporter (Gmail) ──────────────────────────────
 function createTransporter() {
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
