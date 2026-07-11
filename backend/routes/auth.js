@@ -109,9 +109,12 @@ router.post('/forgot-password', async (req, res) => {
     user.resetCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
-    // Send email via Gmail
+    // Send email via Gmail (forcing IPv4 to bypass Render's IPv6 networking restrictions)
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      family: 4,
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASS,
