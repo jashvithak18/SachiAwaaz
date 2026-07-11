@@ -46,3 +46,6 @@ out/
 # Log files
 logs/
 *.log
+
+# Presentations
+*.pptx
