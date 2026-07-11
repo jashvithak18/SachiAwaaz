@@ -387,12 +387,25 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* Cursor spotlight */
+  /* Cursor spotlight with active motion detection */
   const [cursor, setCursor] = useState({ x: -999, y: -999 });
+  const [isMoving, setIsMoving] = useState(false);
+  const movingTimeout = useRef<any>(null);
+
   useEffect(() => {
-    const h = (e: MouseEvent) => setCursor({ x: e.clientX, y: e.clientY });
+    const h = (e: MouseEvent) => {
+      setCursor({ x: e.clientX, y: e.clientY });
+      setIsMoving(true);
+      if (movingTimeout.current) clearTimeout(movingTimeout.current);
+      movingTimeout.current = setTimeout(() => {
+        setIsMoving(false);
+      }, 150);
+    };
     window.addEventListener('mousemove', h);
-    return () => window.removeEventListener('mousemove', h);
+    return () => {
+      window.removeEventListener('mousemove', h);
+      if (movingTimeout.current) clearTimeout(movingTimeout.current);
+    };
   }, []);
 
   /* Verify button nudge */
@@ -487,14 +500,18 @@ export default function Landing() {
   return (
     <>
       {/* Cursor spotlight */}
-      <div
-        className="fixed pointer-events-none z-[200]"
-        style={{
-          left: cursor.x - 200, top: cursor.y - 200,
-          width: 400, height: 400, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(246,244,235,0.10) 0%, transparent 70%)',
-          transition: 'left 0.12s ease-out, top 0.12s ease-out',
+      <motion.div
+        className="fixed pointer-events-none z-[200] rounded-full"
+        animate={{
+          width: isMoving ? 520 : 320,
+          height: isMoving ? 520 : 320,
+          x: cursor.x - (isMoving ? 260 : 160),
+          y: cursor.y - (isMoving ? 260 : 160),
+          background: isMoving
+            ? 'radial-gradient(circle, rgba(62, 92, 75, 0.12) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(62, 92, 75, 0.05) 0%, transparent 70%)',
         }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220, mass: 0.8 }}
       />
 
       {/* Loading screen */}
