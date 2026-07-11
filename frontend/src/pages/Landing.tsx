@@ -7,9 +7,9 @@ import Logo from '../components/Logo';
 const C = {
   bg:     '#F6F4EF',
   card:   '#FBFAF8',
-  text:   '#181818',
-  muted:  '#4b4845',
-  subtle: '#666666',
+  text:   '#132219',
+  muted:  '#2C4235',
+  subtle: '#476150',
   green:  '#3E5C4B',
   red:    '#A1493F',
   border: '#E4E1DA',
