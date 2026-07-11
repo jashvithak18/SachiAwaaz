@@ -184,7 +184,7 @@ export default function Dashboard() {
   const greetingName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto animate-slide-up">
       
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -336,7 +336,7 @@ export default function Dashboard() {
 
       {/* Analytics Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+        <div className="metric-card flex flex-col justify-between space-y-2">
           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
             <span>Total Audits</span>
             <span>🛡️</span>
@@ -347,7 +347,7 @@ export default function Dashboard() {
           <p className="text-[10px] text-brand-500 leading-snug">Completed verification sessions across all modules.</p>
         </div>
 
-        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+        <div className="metric-card flex flex-col justify-between space-y-2">
           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
             <span>Average Trust Score</span>
             <span>🧠</span>
@@ -360,7 +360,7 @@ export default function Dashboard() {
           <p className="text-[10px] text-brand-500 leading-snug">Average integrity score of scanned digital artifacts.</p>
         </div>
 
-        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+        <div className="metric-card flex flex-col justify-between space-y-2">
           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
             <span>Most Active Tool</span>
             <span>⚡</span>
@@ -371,7 +371,7 @@ export default function Dashboard() {
           <p className="text-[10px] text-brand-500 leading-snug">Forensic engine with highest volume of scans.</p>
         </div>
 
-        <div className="bg-white border border-brand-200 p-5 rounded-3xl shadow-sm flex flex-col justify-between space-y-2">
+        <div className="metric-card flex flex-col justify-between space-y-2">
           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
             <span>Authentic vs Suspicious</span>
             <span>⚖️</span>
@@ -387,7 +387,7 @@ export default function Dashboard() {
       {/* Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Weekly & Monthly Verification Trend */}
-        <div className="lg:col-span-2 bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
+        <div className="lg:col-span-2 premium-card space-y-6">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">Verification Trends</h3>
             <p className="text-xs text-brand-400 mt-0.5">Audit scan volumes monitored over time</p>
@@ -398,8 +398,8 @@ export default function Dashboard() {
             <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#3E5C4B" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#3E5C4B" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               {/* Grid lines */}
@@ -410,13 +410,13 @@ export default function Dashboard() {
               {/* Area path */}
               <path d="M 0 200 L 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30 L 500 200 Z" fill="url(#chartGrad)" />
               {/* Line path */}
-              <path d="M 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30" fill="none" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" />
+              <path d="M 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30" fill="none" stroke="#3E5C4B" strokeWidth="3" strokeLinecap="round" />
 
               {/* Data points */}
-              <circle cx="80" cy="140" r="4" fill="#3B82F6" />
-              <circle cx="240" cy="100" r="4" fill="#3B82F6" />
-              <circle cx="320" cy="80" r="4" fill="#3B82F6" />
-              <circle cx="500" cy="30" r="4" fill="#3B82F6" />
+              <circle cx="80" cy="140" r="4" fill="#3E5C4B" />
+              <circle cx="240" cy="100" r="4" fill="#3E5C4B" />
+              <circle cx="320" cy="80" r="4" fill="#3E5C4B" />
+              <circle cx="500" cy="30" r="4" fill="#3E5C4B" />
             </svg>
           </div>
 
@@ -429,7 +429,7 @@ export default function Dashboard() {
         </div>
 
         {/* Risk Distribution Pie / Ring Chart */}
-        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="premium-card flex flex-col justify-between space-y-6">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">Risk Distribution</h3>
             <p className="text-xs text-brand-400 mt-0.5">Scanned file classification breakdown</p>
@@ -517,22 +517,21 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Tables Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-6">
+        <div className="lg:col-span-2 premium-card space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h3 className="text-lg font-black text-brand-800">Forensics Log History</h3>
             
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <input
                 type="text"
-                className="bg-brand-50 border border-brand-200 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue rounded-xl px-4 py-2 text-xs focus:outline-none placeholder-brand-400 transition w-full sm:w-44 text-brand-850"
+                className="glass-input !py-2 !px-3 text-xs w-full sm:w-44 text-brand-850"
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <select
-                className="bg-brand-50 border border-brand-200 focus:border-accent-blue rounded-xl px-3 py-2 text-xs focus:outline-none transition text-brand-600"
+                className="glass-input !py-2 !px-3 text-xs text-brand-600 bg-brand-50"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
               >
@@ -570,7 +569,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-brand-100">
                   {filteredReports.slice(0, 8).map((report) => (
-                    <tr key={report._id} className="hover:bg-brand-50/50 transition group">
+                    <tr key={report._id} className="premium-row hover:bg-brand-50/50 transition group">
                       <td className="py-3 px-3 text-brand-500">
                         {new Date(report.createdAt).toLocaleDateString()}
                       </td>
@@ -607,7 +606,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Cases */}
-        <div className="bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="premium-card space-y-4">
           <h3 className="text-lg font-black text-brand-800 border-b border-brand-100 pb-2">Recent Cases</h3>
           
           {casesLoading ? (
