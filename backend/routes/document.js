@@ -309,7 +309,7 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       }
     };
 
-    const detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => textLower.includes(k) || nameLower.includes(k));
+    const detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => textLower.includes(k) || bufStrLow.includes(k) || nameLower.includes(k));
     const companyInfo = detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey] : {
       name: 'Unregistered Entity',
       type: 'Unknown',
