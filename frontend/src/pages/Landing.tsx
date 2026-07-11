@@ -408,7 +408,7 @@ function NewsClipping({ text, src, rotate, variant, idx }: {
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════════ */
 export default function Landing() {
-  const { setActiveTab } = useStore();
+  const { setActiveTab, token } = useStore();
 
   /* Loading */
   const [loading, setLoading] = useState(true);
@@ -624,13 +624,13 @@ export default function Landing() {
                   <Logo className="w-36 h-auto" showTagline />
                 </motion.div>
                 <motion.button
-                  onClick={() => setActiveTab('auth_signup')}
+                  onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')}
                   animate={btnNudge ? { y: -3, boxShadow: '0 8px 24px rgba(0,0,0,0.14)' } : { y: 0, boxShadow: '0 0 0 rgba(0,0,0,0)' }}
                   transition={{ duration: 0.35, ease: 'easeInOut' }}
                   className="text-[13px] font-bold text-white px-6 py-3.5 rounded-2xl"
                   style={{ backgroundColor: C.text }}
                 >
-                  {copy.navVerify}
+                  {token ? 'Go to Dashboard' : copy.navVerify}
                 </motion.button>
               </div>
             </motion.header>
@@ -646,13 +646,13 @@ export default function Landing() {
               <Logo className="w-36 h-auto" showTagline />
             </motion.div>
             <motion.button
-              onClick={() => setActiveTab('auth_signup')}
+              onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')}
               animate={btnNudge ? { y: -3, boxShadow: '0 8px 24px rgba(0,0,0,0.14)' } : { y: 0, boxShadow: '0 0 0 rgba(0,0,0,0)' }}
               transition={{ duration: 0.35, ease: 'easeInOut' }}
               className="text-[13px] font-bold text-white px-6 py-3.5 rounded-2xl"
               style={{ backgroundColor: C.text }}
             >
-              {copy.navVerify}
+              {token ? 'Go to Dashboard' : copy.navVerify}
             </motion.button>
           </div>
 
@@ -702,13 +702,13 @@ export default function Landing() {
                   className="mt-8 flex items-center gap-6"
                 >
                   <motion.button
-                    onClick={() => setActiveTab('auth_signup')}
+                    onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')}
                     animate={btnNudge ? { y: -4, boxShadow: '0 10px 28px rgba(0,0,0,0.16)' } : { y: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                     transition={{ duration: 0.35, ease: 'easeInOut' }}
                     className="text-[15px] font-bold text-white px-8 py-4 rounded-2xl"
                     style={{ backgroundColor: C.text }}
                   >
-                    {copy.btnVerify}
+                    {token ? 'Go to Dashboard' : copy.btnVerify}
                   </motion.button>
                   <button onClick={scrollToStories} className="text-[15px] font-bold transition-colors hover:opacity-70" style={{ color: C.muted }}>
                     ↓ {copy.btnStories}
@@ -1126,8 +1126,8 @@ export default function Landing() {
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <p className="text-[18px] font-extrabold" style={{ color: C.green }}>{copy.interDone}</p>
-                    <button onClick={() => setActiveTab('auth_signup')} className="text-[13px] underline underline-offset-4 font-bold" style={{ color: C.muted }}>
-                      Sign up for full reports
+                    <button onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')} className="text-[13px] underline underline-offset-4 font-bold" style={{ color: C.muted }}>
+                      {token ? 'View full reports in Dashboard' : 'Sign up for full reports'}
                     </button>
                   </motion.div>
                 )}
@@ -1239,13 +1239,13 @@ export default function Landing() {
             </Reveal>
             <Reveal delay={0.15}>
               <motion.button
-                onClick={() => setActiveTab('auth_signup')}
+                onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')}
                 animate={btnNudge ? { y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.18)' } : { y: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                 transition={{ duration: 0.35, ease: 'easeInOut' }}
                 className="mt-10 text-[16px] font-bold text-white px-9 py-4 rounded-2xl"
                 style={{ backgroundColor: C.text }}
               >
-                {copy.ctaBtn}
+                {token ? 'Return to your Dashboard' : copy.ctaBtn}
               </motion.button>
             </Reveal>
           </div>
@@ -1266,10 +1266,21 @@ export default function Landing() {
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] mb-4" style={{ color: C.green }}>Verify</p>
                 <ul className="space-y-2.5">
-                  {['Voice & Audio', 'Documents & PDFs', 'Images & Screenshots', 'Websites & Links', 'QR Codes', 'Emails'].map((item) => (
-                    <li key={item}>
-                      <button onClick={() => setActiveTab('auth_signup')} className="text-[13px] font-medium hover:underline underline-offset-4" style={{ color: C.green }}>
-                        {item}
+                  {[
+                    { label: 'Voice & Audio', tab: 'voice' },
+                    { label: 'Documents & PDFs', tab: 'document' },
+                    { label: 'Images & Screenshots', tab: 'image' },
+                    { label: 'Websites & Links', tab: 'website' },
+                    { label: 'QR Codes', tab: 'qr' },
+                    { label: 'Emails', tab: 'email' }
+                  ].map((item) => (
+                    <li key={item.label}>
+                      <button 
+                        onClick={() => setActiveTab(token ? item.tab : 'auth_signup')} 
+                        className="text-[13px] font-medium hover:underline underline-offset-4" 
+                        style={{ color: C.green }}
+                      >
+                        {item.label}
                       </button>
                     </li>
                   ))}
@@ -1280,10 +1291,12 @@ export default function Landing() {
                 <p className="text-[13px] font-medium leading-relaxed" style={{ color: C.green }}>
                   Built for people who want to be sure before they trust. Every verification is private, instant, and yours.
                 </p>
-                <button onClick={() => setActiveTab('auth_signup')}
+                <button 
+                  onClick={() => setActiveTab(token ? 'dashboard' : 'auth_signup')}
                   className="mt-5 inline-block text-[13px] font-extrabold px-5 py-2.5 rounded-xl border-2 transition-all hover:-translate-y-0.5"
-                  style={{ color: C.green, borderColor: `${C.green}44`, backgroundColor: `${C.green}08` }}>
-                  Get started free →
+                  style={{ color: C.green, borderColor: `${C.green}44`, backgroundColor: `${C.green}08` }}
+                >
+                  {token ? 'Go to Dashboard →' : 'Get started free →'}
                 </button>
               </div>
             </div>

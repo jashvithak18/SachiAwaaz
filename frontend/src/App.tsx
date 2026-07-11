@@ -57,7 +57,11 @@ export default function App() {
     };
   }, [token, user]);
 
-  // Public views
+  // Public views or landing page view even when logged in
+  if (activeTab === 'landing') {
+    return <Landing />;
+  }
+
   if (!token) {
     if (activeTab === 'auth_login' || activeTab === 'auth_signup' || activeTab === 'auth_forgot') {
       return <AuthPage />;
@@ -72,7 +76,7 @@ export default function App() {
       <aside className="w-full md:w-64 bg-white border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
         <div>
           {/* Brand logo */}
-          <div className="p-4 border-b border-brand-200 flex items-center justify-center cursor-pointer" onClick={() => useStore.setState({ activeTab: 'dashboard' })}>
+          <div className="p-4 border-b border-brand-200 flex items-center justify-center cursor-pointer" onClick={() => useStore.setState({ activeTab: 'landing' })}>
             <Logo className="w-36 h-auto" showTagline={true} />
           </div>
 
