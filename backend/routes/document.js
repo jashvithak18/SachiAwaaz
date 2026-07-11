@@ -214,21 +214,101 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       nameLower.includes(registeredName.toLowerCase().replace(/\s+/g, '_'))
     );
 
-    // 2. Identify issuing organization
-    const orgs = [
-      { key: 'microsoft', label: 'Microsoft' },
-      { key: 'google', label: 'Google' },
-      { key: 'amazon', label: 'Amazon' },
-      { key: 'tcs', label: 'Tata Consultancy Services (TCS)' },
-      { key: 'infosys', label: 'Infosys' },
-      { key: 'wipro', label: 'Wipro' },
-      { key: 'anurag', label: 'Anurag Engineering College' },
-      { key: 'corizo', label: 'Corizo' },
-      { key: 'goldman', label: 'Goldman Sachs' },
-      { key: 'adobe', label: 'Adobe' }
-    ];
-    const detectedOrgObj = orgs.find(o => textLower.includes(o.key) || nameLower.includes(o.key));
-    const organization = detectedOrgObj ? detectedOrgObj.label : 'Unknown Organisation';
+    // 2. Company registry lookup & scam database
+    const COMPANY_REGISTRY = {
+      google: {
+        name: 'Google LLC',
+        type: 'Enterprise',
+        reputation: 'Trusted',
+        domain: 'google.com',
+        reviews: 'Highly reputable global tech company. Official internships are fully paid and never require payment or certificate fees. Scammers frequently forge Google offer letters requesting training fees.',
+        isScam: false
+      },
+      microsoft: {
+        name: 'Microsoft Corporation',
+        type: 'Enterprise',
+        reputation: 'Trusted',
+        domain: 'microsoft.com',
+        reviews: 'Highly reputable global technology corporation. Official internships never ask for fees. Note: A common scam (like Corizo) falsely claims association with Microsoft to sell paid courses.',
+        isScam: false
+      },
+      amazon: {
+        name: 'Amazon',
+        type: 'Enterprise',
+        reputation: 'Trusted',
+        domain: 'amazon.com',
+        reviews: 'Trusted global e-commerce and cloud organization. Official internships are highly competitive and paid. Watch out for fake recruiter telegram channels offering easy tasks.',
+        isScam: false
+      },
+      tcs: {
+        name: 'Tata Consultancy Services (TCS)',
+        type: 'Enterprise',
+        reputation: 'Trusted',
+        domain: 'tcs.com',
+        reviews: 'Major IT services company. Official entry-level hiring and internships are conducted through TCS iON or NextStep. TCS never requests payment for training or offer letters.',
+        isScam: false
+      },
+      infosys: {
+        name: 'Infosys',
+        type: 'Enterprise',
+        reputation: 'Trusted',
+        domain: 'infosys.com',
+        reviews: 'Global IT consulting leader. Internships are paid and structured. Beware of fake email domains sending congrats templates.',
+        isScam: false
+      },
+      wipro: {
+        name: 'Wipro',
+        type: 'Enterprise',
+        reputation: 'Trusted',
+        domain: 'wipro.com',
+        reviews: 'Trusted global information technology company. Official letters are sent via official wipro.com emails.',
+        isScam: false
+      },
+      corizo: {
+        name: 'Corizo / Corizo Technologies',
+        type: 'Paid-Training',
+        reputation: 'High-Risk Scam',
+        domain: 'corizo.in',
+        reviews: 'High Risk. Numerous student complaints on Quora, Reddit, and Trustpilot. Corizo attracts students by promising a Microsoft internship, but subsequently forces them to pay ₹4,000–₹10,000 for mandatory training before providing a certificate.',
+        isScam: true
+      },
+      verzeo: {
+        name: 'Verzeo',
+        type: 'Paid-Training',
+        reputation: 'High-Risk Scam',
+        domain: 'verzeo.com',
+        reviews: 'High Risk. Known for selling certification courses disguised as internship opportunities. They mandate payment for training modules before certifying students.',
+        isScam: true
+      },
+      oasis: {
+        name: 'Oasis Infobyte',
+        type: 'Micro-Internship',
+        reputation: 'Spam Warning',
+        domain: 'oasisinfobyte.com',
+        reviews: 'Spam/Low Value. Conducts bulk unpaid micro-internships with no active mentorship. While not a financial scam, the certificates hold very low academic or corporate weight because they are issued in mass.',
+        isScam: false
+      },
+      codeclause: {
+        name: 'CodeClause',
+        type: 'Micro-Internship',
+        reputation: 'Spam Warning',
+        domain: 'codeclause.com',
+        reviews: 'Low Value. Offers bulk virtual internships with zero mentorship. Frequently charges small administrative fees for certificates. Certificates have negligible value in the industry.',
+        isScam: false
+      }
+    };
+
+    const detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => textLower.includes(k) || nameLower.includes(k));
+    const companyInfo = detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey] : {
+      name: 'Unregistered Entity',
+      type: 'Unknown',
+      reputation: 'Neutral / Verification Required',
+      domain: null,
+      reviews: 'Company is not registered in our verified registry. Recommend checking Google Reviews, Quora, and the Ministry of Corporate Affairs (MCA) portal. Genuine internships never ask for security deposits, course purchases, or processing fees.',
+      isScam: false
+    };
+
+    const organization = companyInfo.name;
 
     // 3. Identify signature block presence
     const hasSignatureBlock =
@@ -259,11 +339,20 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       anomalies.push(`Text content exhibits AI writing patterns (${aiPhraseHits} AI-style phrases detected). The text may have been generated by ChatGPT, Claude, or a similar tool.`);
     }
 
-    // Corizo paid training program scam check
-    const isCorizoScam = textLower.includes('corizo') || nameLower.includes('corizo');
-    if (isCorizoScam) {
+    // Company registry scam status verification
+    if (companyInfo.isScam) {
       riskScore = Math.max(riskScore, 85);
-      anomalies.push('Flagged Paid-Training Scam: Document is associated with Corizo, which solicits training program fees under the guise of Microsoft internships.');
+      anomalies.push(`Flagged Scam Advisory: Document is associated with "${companyInfo.name}", which is widely reported to run paid training fee structures disguised as internships.`);
+    }
+
+    // Email Domain spoofing verification
+    if (emails.length > 0 && companyInfo.domain) {
+      const domains = emails.map(email => email.split('@')[1].toLowerCase());
+      const mismatch = domains.find(dom => dom !== companyInfo.domain && !dom.endsWith('.' + companyInfo.domain) && dom !== 'gmail.com' && dom !== 'yahoo.com' && dom !== 'outlook.com');
+      if (mismatch) {
+        riskScore = Math.max(riskScore, 75);
+        anomalies.push(`Sender Domain Mismatch: Document references company "${companyInfo.name}" (official domain: ${companyInfo.domain}), but contains contact emails from unverified domain "${mismatch}".`);
+      }
     }
 
     // Logo & Creator Alignment Verification: Official certificates from premium companies (Google, Microsoft, Amazon, etc.) 
@@ -277,7 +366,7 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       anomalies.push(`Alignment anomaly: Document claims official association with a major corporation (${organization}), but metadata reveals it was custom-designed or modified via a consumer design tool (${metadata.creator || metadata.producer}).`);
     }
 
-    if (isInternshipDoc && !isCorizoScam) {
+    if (isInternshipDoc && !companyInfo.isScam) {
       // For general internship docs: check student name alignment and signatures
       if (!hasNameMatch && registeredName) {
         riskScore = Math.max(riskScore, 35);
@@ -317,26 +406,28 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
     const authenticityScore = Math.max(100 - riskScore, 5);
 
     // === AI Explanation Builder ===
+    const companyAdvisory = `\n\n🏢 [Company Forensics Profile]\n- Issuer: ${companyInfo.name}\n- Category: ${companyInfo.type}\n- Reputation Status: ${companyInfo.reputation}\n- Reviews & Advisory: ${companyInfo.reviews}`;
+
     let aiExplanation = '';
     if (verdict === 'safe') {
       if (isInternshipDoc) {
-        aiExplanation = `Genuine Internship Document verified successfully. Issuer: "${organization}". Recipient Name: "${registeredName}" (Verified). Signature blocks: Present & Intact. The document format, digital structure, and content checks confirm its authenticity. Confidence: ${authenticityScore}%.`;
+        aiExplanation = `Genuine Internship Document verified successfully. Issuer: "${organization}". Recipient Name: "${registeredName}" (Verified). Signature blocks: Present & Intact. The document format, digital structure, and content checks confirm its authenticity. Confidence: ${authenticityScore}%.` + companyAdvisory;
       } else if (isAIText) {
-        aiExplanation = `Document structural integrity verified — the file format, layout, and encoding are authentic. However, Natural Language Processing detected ${aiPhraseHits} writing patterns characteristic of AI text assistants (ChatGPT, Claude, Gemini). The document itself is genuine, but the written content appears to be AI-assisted. Authenticity confidence: ${authenticityScore}%.`;
+        aiExplanation = `Document structural integrity verified — the file format, layout, and encoding are authentic. However, Natural Language Processing detected ${aiPhraseHits} writing patterns characteristic of AI text assistants (ChatGPT, Claude, Gemini). The document itself is genuine, but the written content appears to be AI-assisted. Authenticity confidence: ${authenticityScore}%.` + companyAdvisory;
       } else {
-        aiExplanation = `Document integrity verified. Font encoding, metadata structure, and text layer alignment check out. No structural manipulation, forged metadata, or AI-generated text patterns were detected. Authenticity confidence: ${authenticityScore}%.`;
+        aiExplanation = `Document integrity verified. Font encoding, metadata structure, and text layer alignment check out. No structural manipulation, forged metadata, or AI-generated text patterns were detected. Authenticity confidence: ${authenticityScore}%.` + companyAdvisory;
       }
     } else if (verdict === 'suspicious') {
       if (isInternshipDoc) {
-        aiExplanation = `Internship document flagged as suspicious. Issues: ${anomalies.join(' | ')}. Recommend verifying the certificate ID or contacting the issuer ("${organization}") directly.`;
+        aiExplanation = `Internship document flagged as suspicious. Issues: ${anomalies.join(' | ')}. Recommend verifying the certificate ID or contacting the issuer ("${organization}") directly.` + companyAdvisory;
       } else {
-        aiExplanation = `Document flagged with structural warnings. Detected indicators: ${anomalies.join(' | ')}. Recommend manual review before accepting this document as official.`;
+        aiExplanation = `Document flagged with structural warnings. Detected indicators: ${anomalies.join(' | ')}. Recommend manual review before accepting this document as official.` + companyAdvisory;
       }
     } else {
-      if (isCorizoScam) {
-        aiExplanation = `SCAM WARNING: This document is flagged as a fake internship or paid-training scam associated with Corizo. They are known to send unsolicited student offers, claiming Microsoft industry collaborations to charge registration fees. Do NOT pay any money or share sensitive credentials.`;
+      if (companyInfo.isScam) {
+        aiExplanation = `SCAM WARNING: This document is flagged as a fake internship or paid-training scam associated with ${companyInfo.name}. Reputation status: ${companyInfo.reputation}. Reviews & Advisory: ${companyInfo.reviews} Do NOT pay any money or share sensitive credentials.` + companyAdvisory;
       } else {
-        aiExplanation = `Document flagged as manipulated. Critical structural or content issues found: ${anomalies.join(' | ')}. High likelihood of forgery or modification. Do not accept this document without independent verification.`;
+        aiExplanation = `Document flagged as manipulated. Critical structural or content issues found: ${anomalies.join(' | ')}. High likelihood of forgery or modification. Do not accept this document without independent verification.` + companyAdvisory;
       }
     }
 

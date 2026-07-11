@@ -286,7 +286,7 @@ export default function ForensicReport({ reportId }: ForensicReportProps) {
                 {isSafe ? 'High Trust' : (isSusp ? 'Moderate Risk' : 'High Threat')}
               </span>
             </div>
-            <p className="text-xs text-brand-700 leading-relaxed font-medium">{report.aiExplanation}</p>
+            <p className="text-xs text-brand-700 leading-relaxed font-medium whitespace-pre-wrap" style={{ whiteSpace: 'pre-wrap' }}>{report.aiExplanation}</p>
           </div>
 
           {/* Content Details Switcher per type */}
