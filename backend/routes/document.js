@@ -309,10 +309,55 @@ router.post('/verify', authMiddleware, upload.single('document'), async (req, re
       }
     };
 
-    const detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => textLower.includes(k) || bufStrLow.includes(k) || nameLower.includes(k));
+    // Smart Company Identification (prevents false binary collisions on raw buffer streams)
+    let detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => 
+      textLower.includes(k) || 
+      nameLower.includes(k)
+    );
+
+    // Metadata search fallback
+    if (!detectedCompanyKey) {
+      const metaStr = JSON.stringify(metadata).toLowerCase();
+      detectedCompanyKey = Object.keys(COMPANY_REGISTRY).find(k => metaStr.includes(k));
+    }
+
+    // High-specificity binary search fallback (prevents random byte collisions on short abbreviations like 'tcs')
+    if (!detectedCompanyKey) {
+      const companyFullNames = {
+        google: 'google llc',
+        microsoft: 'microsoft corporation',
+        amazon: 'amazon',
+        tcs: 'tata consultancy services',
+        infosys: 'infosys limited',
+        wipro: 'wipro',
+        corizo: 'corizo technologies',
+        verzeo: 'verzeo',
+        oasis: 'oasis infobyte',
+        codeclause: 'codeclause'
+      };
+      detectedCompanyKey = Object.keys(companyFullNames).find(key => 
+        bufStrLow.includes(companyFullNames[key])
+      );
+    }
+
+    // Extract company name from emails if still not found
+    let customCompany = null;
+    if (!detectedCompanyKey) {
+      if (emails && emails.length > 0) {
+        for (const email of emails) {
+          const domain = email.split('@')[1].toLowerCase();
+          if (!['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'protonmail.com', 'zoho.com', 'mail.com'].includes(domain)) {
+            const companyPart = domain.split('.')[0];
+            customCompany = companyPart.charAt(0).toUpperCase() + companyPart.slice(1);
+            break;
+          }
+        }
+      }
+    }
+
     const companyInfo = detectedCompanyKey ? COMPANY_REGISTRY[detectedCompanyKey] : {
-      name: 'Unregistered Entity',
-      type: 'Unknown',
+      name: customCompany || 'Unregistered Entity',
+      type: customCompany ? 'Enterprise' : 'Unknown',
       reputation: 'Neutral / Verification Required',
       domain: null,
       reviews: 'Company is not registered in our verified registry. Recommend checking Google Reviews, Quora, and the Ministry of Corporate Affairs (MCA) portal. Genuine internships never ask for security deposits, course purchases, or processing fees.',
