@@ -43,6 +43,8 @@ export default function Dashboard() {
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,24 +56,66 @@ export default function Dashboard() {
     }
   }, [chatMessages]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      if (ext === 'pdf' || file.type.startsWith('image/')) {
+        if (file.size > 10 * 1024 * 1024) {
+          alert('File size must be under 10MB.');
+          return;
+        }
+        setAttachedFile(file);
+      } else {
+        alert('Only Images (.png, .jpg, .jpeg) and PDFs (.pdf) are supported.');
+      }
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim() || chatLoading) return;
+    if ((!chatInput.trim() && !attachedFile) || chatLoading) return;
 
-    const userMsg = { role: 'user' as const, content: chatInput.trim() };
+    const displayContent = attachedFile 
+      ? `[📎 Attached: ${attachedFile.name}]\n${chatInput.trim()}` 
+      : chatInput.trim();
+
+    const userMsg = { role: 'user' as const, content: displayContent };
+    const chatHistory = [...chatMessages, userMsg];
+    
     setChatMessages(prev => [...prev, userMsg]);
     setChatInput('');
     setChatLoading(true);
 
+    const fileToUpload = attachedFile;
+    setAttachedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
     try {
-      const response = await fetch(`${API_URL}/ai/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ messages: [...chatMessages, userMsg] })
-      });
+      let response;
+      if (fileToUpload) {
+        const formData = new FormData();
+        formData.append('messages', JSON.stringify(chatHistory));
+        formData.append('file', fileToUpload);
+
+        response = await fetch(`${API_URL}/ai/chat`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+      } else {
+        response = await fetch(`${API_URL}/ai/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ messages: chatHistory })
+        });
+      }
+
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'AI error');
       
@@ -470,18 +514,51 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* File Attachment Preview */}
+          {attachedFile && (
+            <div className="flex items-center justify-between bg-brand-50 border border-brand-200 rounded-xl px-3 py-1.5 text-[10px] text-brand-700 animate-fadeIn">
+              <span className="truncate max-w-[220px] flex items-center gap-1.5 font-semibold">
+                {attachedFile.type === 'application/pdf' ? '📄' : '🖼️'} {attachedFile.name}
+                <span className="text-[8px] font-normal text-brand-450">({Math.round(attachedFile.size / 1024)} KB)</span>
+              </span>
+              <button 
+                type="button" 
+                onClick={() => setAttachedFile(null)} 
+                className="text-accent-red font-bold hover:text-red-700 transition ml-2 text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 border-t border-[#E4E1DA]">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".pdf,image/png,image/jpeg,image/jpg"
+              className="hidden"
+            />
+            <button
+              type="button"
+              disabled={chatLoading}
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center justify-center p-2.5 bg-brand-50 hover:bg-brand-100 border border-[#E4E1DA] rounded-xl text-brand-600 hover:text-brand-850 transition disabled:opacity-50 text-xs font-bold"
+              title="Attach PDF or Image"
+            >
+              📎
+            </button>
             <input
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               disabled={chatLoading}
-              placeholder="Ask a question (e.g. 'What is a voice cloning deepfake?')..."
+              placeholder={attachedFile ? "Ask a question about this file..." : "Ask a question (e.g. 'What is a voice cloning deepfake?')..."}
               className="flex-1 bg-brand-50/50 border border-[#E4E1DA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#3E5C4B] disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={chatLoading || !chatInput.trim()}
+              disabled={chatLoading || (!chatInput.trim() && !attachedFile)}
               className="bg-[#3E5C4B] text-[#F9F8F6] rounded-xl px-4 py-2 text-xs font-bold hover:bg-[#344E3F] transition-all disabled:opacity-50 flex items-center justify-center min-w-[70px]"
             >
               {chatLoading ? 'Thinking...' : 'Send'}
