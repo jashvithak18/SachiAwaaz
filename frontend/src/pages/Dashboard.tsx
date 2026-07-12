@@ -39,7 +39,7 @@ export default function Dashboard() {
   const [saveSuccess, setSaveSuccess] = useState('');
 
   const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
-    { role: 'assistant', content: 'Hello! I am PARAKH AI, your digital trust companion. Ask me any doubts about scams, security audits, deepfakes, or verify anything suspicious.' }
+    { role: 'assistant', content: 'Hello! I am Ask Saarthi, your digital trust companion. Ask me any doubts about scams, security audits, deepfakes, or verify anything suspicious.' }
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
@@ -129,7 +129,7 @@ export default function Dashboard() {
 
   const handleClearChat = () => {
     setChatMessages([
-      { role: 'assistant', content: 'Hello! I am PARAKH AI, your digital trust companion. Ask me any doubts about scams, security audits, deepfakes, or verify anything suspicious.' }
+      { role: 'assistant', content: 'Hello! I am Ask Saarthi, your digital trust companion. Ask me any doubts about scams, security audits, deepfakes, or verify anything suspicious.' }
     ]);
     handleRefresh();
   };
@@ -482,12 +482,12 @@ export default function Dashboard() {
 
       {/* Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* PARAKH AI Assistant */}
+        {/* Ask Saarthi Assistant */}
         <div className="lg:col-span-2 premium-card flex flex-col justify-between h-[340px] space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-[#E4E1DA]">
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500 flex items-center gap-1.5">
-                <span>🧠</span> PARAKH AI
+                <span>🧠</span> Ask Saarthi
               </h3>
               <p className="text-xs text-brand-400 mt-0.5">Your cyber security & digital trust assistant</p>
             </div>

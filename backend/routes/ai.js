@@ -63,7 +63,7 @@ router.post('/chat', authMiddleware, upload.single('file'), async (req, res) => 
   let tempFilePath = null;
   try {
     if (!GROQ_API_KEY) {
-      return res.status(500).json({ message: 'PARAKH AI assistant is temporarily unavailable (missing API configuration).' });
+      return res.status(500).json({ message: 'Ask Saarthi assistant is temporarily unavailable (missing API configuration).' });
     }
 
     let messages = req.body.messages;
@@ -95,7 +95,7 @@ router.post('/chat', authMiddleware, upload.single('file'), async (req, res) => 
       const fileBuffer = fs.readFileSync(tempFilePath);
       const ext = path.extname(fileName).toLowerCase();
 
-      console.log(`PARAKH AI: processing attachment "${fileName}" (${req.file.size} bytes)`);
+      console.log(`Ask Saarthi: processing attachment "${fileName}" (${req.file.size} bytes)`);
 
       if (ext === '.pdf') {
         try {
@@ -134,7 +134,7 @@ router.post('/chat', authMiddleware, upload.single('file'), async (req, res) => 
       messages: [
         {
           role: 'system',
-          content: 'You are PARAKH AI, a professional cyber forensic and digital trust assistant. You help investigators verify claims, analyze scams (like phishing, job scams, voice cloning, fake certificates, typosquatting), and explain threat indicators. Answer questions clearly, accurately, and contextually. If the user attaches a file, inspect its extracted content for signs of phishing, scams, credentials, fake certificates, or altered values, and offer a detailed risk assessment. Keep your answers concise, professional, and directly helpful.'
+          content: 'You are Ask Saarthi, a professional cyber forensic and digital trust assistant. You help investigators verify claims, analyze scams (like phishing, job scams, voice cloning, fake certificates, typosquatting), and explain threat indicators. Answer questions clearly, accurately, and contextually. If the user attaches a file, inspect its extracted content for signs of phishing, scams, credentials, fake certificates, or altered values, and offer a detailed risk assessment. Keep your answers concise, professional, and directly helpful.'
         },
         ...formattedMessages
       ],
@@ -148,16 +148,12 @@ router.post('/chat', authMiddleware, upload.single('file'), async (req, res) => 
     });
 
     const aiMessage = response.data.choices[0].message;
-    res.json({ 
-      message: aiMessage,
-      extractedText: hasAttachment ? extractedText : undefined,
-      fileName: hasAttachment ? fileName : undefined
-    });
+    return res.json({ message: aiMessage.content });
   } catch (error) {
-    console.error('Error calling Groq API:', error.response?.data || error.message);
-    res.status(500).json({
-      message: 'Failed to communicate with PARAKH AI.',
-      error: error.response?.data || error.message
+    console.error('Groq AI API failed:', error.response?.data || error.message);
+    return res.status(500).json({
+      message: 'Failed to communicate with Ask Saarthi.',
+      error: error.message
     });
   } finally {
     // Safely delete temp upload file
