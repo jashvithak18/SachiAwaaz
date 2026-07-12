@@ -35,15 +35,17 @@ export default function ParticleBackground() {
     resizeCanvas();
 
     const createParticle = (fromLeft = false): Particle => {
-      const size = Math.random() * 1.5 + 1.0; // 1px to 2.5px
+      // Different sizes: 1.0px to 2.8px
+      const size = Math.random() * 1.8 + 1.0;
       return {
         x: fromLeft ? -10 : Math.random() * (canvas?.width || 800),
         y: Math.random() * (canvas?.height || 600),
-        vx: Math.random() * 0.9 + 0.3, // different speeds, mostly moving horizontally
-        vy: (Math.random() - 0.5) * 0.25, // diagonal drift angle
+        // Distinct speed variance: slow drift (0.15) to swift flow (1.65)
+        vx: Math.random() * 1.5 + 0.15,
+        vy: (Math.random() - 0.5) * 0.3,
         size,
-        opacity: Math.random() * 0.14 + 0.06, // extremely subtle opacity: 0.06 to 0.20
-        pulseSpeed: 0.01 + Math.random() * 0.03,
+        opacity: Math.random() * 0.14 + 0.06, // subtle
+        pulseSpeed: 0.015 + Math.random() * 0.035,
         pulseTime: Math.random() * Math.PI
       };
     };
@@ -69,21 +71,22 @@ export default function ParticleBackground() {
         p.y += p.vy;
         p.pulseTime += p.pulseSpeed;
 
-        // Splitting behavior: extremely low chance to split if particle size is big enough
-        if (p.size > 1.7 && Math.random() < 0.0015 && particles.length < maxParticles + 8) {
-          const sizeSplit = p.size * 0.65;
+        // Splitting behavior: increased split chance (0.005) for visible splits
+        if (p.size > 1.8 && Math.random() < 0.005 && particles.length < maxParticles + 12) {
+          const sizeSplit = p.size * 0.6;
+          // Spawn two daughter particles moving at different speeds & trajectories
           nextParticles.push({
             ...p,
             size: sizeSplit,
-            vx: p.vx * 1.15,
-            vy: p.vy + 0.12
+            vx: p.vx * 1.3, // speeds up
+            vy: p.vy + 0.18
           });
           nextParticles.push({
             ...p,
-            x: p.x - 2,
+            x: p.x - 3,
             size: sizeSplit,
-            vx: p.vx * 0.85,
-            vy: p.vy - 0.12
+            vx: p.vx * 0.75, // slows down
+            vy: p.vy - 0.18
           });
           continue;
         }
@@ -97,14 +100,16 @@ export default function ParticleBackground() {
           const dy = other.y - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 18) { // 18px boundary to merge
-            const newSize = Math.min(p.size + other.size * 0.35, 3.5);
+          if (dist < 20) { // 20px merge radius
+            // Fuse properties: increase size and bump opacity/glow temporarily
+            const newSize = Math.min(p.size + other.size * 0.4, 4.0);
             p.x = (p.x + other.x) / 2;
             p.y = (p.y + other.y) / 2;
             p.size = newSize;
+            // Weighted average speed
             p.vx = (p.vx + other.vx) / 2;
             p.vy = (p.vy + other.vy) / 2;
-            p.opacity = Math.min(p.opacity + 0.04, 0.35); // merge splits glow slightly
+            p.opacity = Math.min(p.opacity + 0.06, 0.4); // brief bright flare on merge
 
             mergedIndices.add(j);
             break;
