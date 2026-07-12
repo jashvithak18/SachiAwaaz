@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
 import Logo from '../components/Logo';
+import ParticleBackground from '../components/ParticleBackground';
 
 /* ─── Brand palette ─── */
 const C = {
@@ -824,6 +825,7 @@ export default function Landing() {
 
         {/* Background textures */}
         <AnimatedBackground />
+        <ParticleBackground />
 
         {/* Margin guides */}
         <div className="hidden lg:block fixed left-[5%] top-0 bottom-0 w-[1px] pointer-events-none z-0" style={{ backgroundColor: `${C.border}60` }} />

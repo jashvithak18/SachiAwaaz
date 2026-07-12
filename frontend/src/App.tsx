@@ -15,6 +15,7 @@ import EmailVerify from './pages/EmailVerify';
 import QRVerify from './pages/QRVerify';
 
 import ScamCenter from './pages/ScamCenter';
+import ParticleBackground from './components/ParticleBackground';
 
 export default function App() {
   const { token, user, activeTab, connectSocket, disconnectSocket, logout } = useStore();
@@ -89,6 +90,7 @@ export default function App() {
   // Sidebar Layout for logged-in PARAKH users
   return (
     <div id="main-app-container" className="min-h-screen spotlight-bg text-brand-800 flex flex-col md:flex-row font-sans antialiased selection:bg-accent-blue/15 relative overflow-hidden">
+      <ParticleBackground />
       {/* Dynamic Cursor Spotlight Blob */}
       <div 
         className="pointer-events-none fixed rounded-full bg-accent-teal/8 blur-[120px] z-0 transition-all duration-300 ease-out hidden md:block"
