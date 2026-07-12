@@ -38,6 +38,53 @@ export default function Dashboard() {
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
 
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
+    { role: 'assistant', content: 'Hello! I am PARAKH AI, your digital trust companion. Ask me any doubts about scams, security audits, deepfakes, or verify anything suspicious.' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || chatLoading) return;
+
+    const userMsg = { role: 'user' as const, content: chatInput.trim() };
+    setChatMessages(prev => [...prev, userMsg]);
+    setChatInput('');
+    setChatLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ messages: [...chatMessages, userMsg] })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'AI error');
+      
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.message.content }]);
+    } catch (err: any) {
+      setChatMessages(prev => [...prev, { role: 'assistant', content: `Sorry, I couldn't process your request: ${err.message}` }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleClearChat = () => {
+    setChatMessages([
+      { role: 'assistant', content: 'Hello! I am PARAKH AI, your digital trust companion. Ask me any doubts about scams, security audits, deepfakes, or verify anything suspicious.' }
+    ]);
+    handleRefresh();
+  };
+
   useEffect(() => {
     if (user) {
       setEditName(user.profile?.name || '');
@@ -386,46 +433,56 @@ export default function Dashboard() {
 
       {/* Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Weekly & Monthly Verification Trend */}
-        <div className="lg:col-span-2 premium-card space-y-6">
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">Verification Trends</h3>
-            <p className="text-xs text-brand-400 mt-0.5">Audit scan volumes monitored over time</p>
-          </div>
-          
-          <div className="relative h-[200px] flex items-end">
-            {/* SVG line chart */}
-            <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3E5C4B" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#3E5C4B" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-              {/* Grid lines */}
-              <line x1="0" y1="50" x2="500" y2="50" stroke="#F1F5F9" strokeWidth="1" />
-              <line x1="0" y1="100" x2="500" y2="100" stroke="#F1F5F9" strokeWidth="1" />
-              <line x1="0" y1="150" x2="500" y2="150" stroke="#F1F5F9" strokeWidth="1" />
-
-              {/* Area path */}
-              <path d="M 0 200 L 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30 L 500 200 Z" fill="url(#chartGrad)" />
-              {/* Line path */}
-              <path d="M 0 160 L 80 140 L 160 170 L 240 100 L 320 80 L 400 120 L 500 30" fill="none" stroke="#3E5C4B" strokeWidth="3" strokeLinecap="round" />
-
-              {/* Data points */}
-              <circle cx="80" cy="140" r="4" fill="#3E5C4B" />
-              <circle cx="240" cy="100" r="4" fill="#3E5C4B" />
-              <circle cx="320" cy="80" r="4" fill="#3E5C4B" />
-              <circle cx="500" cy="30" r="4" fill="#3E5C4B" />
-            </svg>
+        {/* PARAKH AI Assistant */}
+        <div className="lg:col-span-2 premium-card flex flex-col justify-between h-[340px] space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-[#E4E1DA]">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500 flex items-center gap-1.5">
+                <span>🧠</span> PARAKH AI
+              </h3>
+              <p className="text-xs text-brand-400 mt-0.5">Your cyber security & digital trust assistant</p>
+            </div>
+            <button 
+              type="button"
+              onClick={handleClearChat} 
+              className="text-[10px] px-2 py-1 border border-brand-200 rounded-lg text-brand-500 hover:bg-brand-50 hover:text-brand-700 transition"
+            >
+              Clear Chat
+            </button>
           </div>
 
-          <div className="flex justify-between text-[10px] font-bold text-brand-500 pt-2 uppercase">
-            <span>Week 1</span>
-            <span>Week 2</span>
-            <span>Week 3</span>
-            <span>Week 4 (Current)</span>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1 py-1 text-xs scrollbar-thin">
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 leading-relaxed ${
+                  msg.role === 'user' 
+                    ? 'bg-[#3E5C4B] text-[#F9F8F6] rounded-br-none shadow-sm' 
+                    : 'bg-brand-50 text-brand-800 border border-brand-100 rounded-bl-none'
+                }`}>
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
+
+          <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 border-t border-[#E4E1DA]">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              disabled={chatLoading}
+              placeholder="Ask a question (e.g. 'What is a voice cloning deepfake?')..."
+              className="flex-1 bg-brand-50/50 border border-[#E4E1DA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#3E5C4B] disabled:opacity-50"
+            />
+            <button
+              type="submit"
+              disabled={chatLoading || !chatInput.trim()}
+              className="bg-[#3E5C4B] text-[#F9F8F6] rounded-xl px-4 py-2 text-xs font-bold hover:bg-[#344E3F] transition-all disabled:opacity-50 flex items-center justify-center min-w-[70px]"
+            >
+              {chatLoading ? 'Thinking...' : 'Send'}
+            </button>
+          </form>
         </div>
 
         {/* Risk Distribution Pie / Ring Chart */}
@@ -607,7 +664,14 @@ export default function Dashboard() {
 
         {/* Recent Cases */}
         <div className="premium-card space-y-4">
-          <h3 className="text-lg font-black text-brand-800 border-b border-brand-100 pb-2">Recent Cases</h3>
+          <h3 className="text-lg font-black text-brand-800 border-b border-brand-100 pb-2 flex justify-between items-center">
+            <span>Recent Cases</span>
+            {activeCasesCount > 0 && (
+              <span className="bg-accent-blue/10 text-accent-blue text-[10px] font-black px-2 py-0.5 rounded-full">
+                {activeCasesCount} Active
+              </span>
+            )}
+          </h3>
           
           {casesLoading ? (
             <p className="text-center py-10 text-xs text-brand-400">Loading cases...</p>

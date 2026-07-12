@@ -76,6 +76,7 @@ app.use('/api/website', require('./routes/website'));
 app.use('/api/email', require('./routes/email'));
 app.use('/api/qr', require('./routes/qr'));
 app.use('/api/link', require('./routes/link'));
+app.use('/api/ai', require('./routes/ai'));
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
