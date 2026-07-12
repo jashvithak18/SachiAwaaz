@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const authMiddleware = require('../auth');
+const { authMiddleware } = require('../auth');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
