@@ -79,7 +79,10 @@ export const useStore = create<AppState>((set, get) => ({
     const existingSocket = get().socket;
     if (existingSocket) return;
 
-    const socket = io(SERVER_URL);
+    const socket = io(SERVER_URL, {
+      transports: ['polling', 'websocket'],
+      upgrade: true
+    });
     socket.emit('join', userId);
 
     socket.on('notification', (notif: any) => {
