@@ -119,7 +119,10 @@ export default function Dashboard() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'AI error');
       
-      setChatMessages(prev => [...prev, { role: 'assistant', content: data.message.content }]);
+      const assistantContent = typeof data.message === 'string'
+        ? data.message
+        : (data.message?.content || 'Sorry, I couldn\'t retrieve a response.');
+      setChatMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
     } catch (err: any) {
       setChatMessages(prev => [...prev, { role: 'assistant', content: `Sorry, I couldn't process your request: ${err.message}` }]);
     } finally {

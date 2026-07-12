@@ -148,7 +148,7 @@ router.post('/chat', authMiddleware, upload.single('file'), async (req, res) => 
     });
 
     const aiMessage = response.data.choices[0].message;
-    return res.json({ message: aiMessage.content });
+    return res.json({ message: aiMessage });
   } catch (error) {
     console.error('Groq AI API failed:', error.response?.data || error.message);
     return res.status(500).json({
