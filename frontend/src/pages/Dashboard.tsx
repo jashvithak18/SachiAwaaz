@@ -283,12 +283,12 @@ export default function Dashboard() {
   const greetingName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto animate-slide-up">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto animate-slide-up">
       
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-brand-800">Welcome back, {greetingName}!</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-brand-800">Welcome back, {greetingName}!</h2>
           <p className="text-brand-500 text-xs mt-1">
             Investigator: <span className="text-accent-blue font-bold">
               {user?.profile?.name && user.profile.name.trim().length > 0
@@ -325,7 +325,7 @@ export default function Dashboard() {
               <p className="text-xs font-black text-brand-850">
                 {user?.profile?.name || 'Investigator'}
               </p>
-              <p className="text-[10px] text-brand-500 truncate max-w-[150px]">
+              <p className="text-[10px] text-brand-500 truncate max-w-[100px] sm:max-w-[150px]">
                 {user?.email}
               </p>
             </div>
@@ -334,7 +334,7 @@ export default function Dashboard() {
 
           {/* Edit Modal Popover */}
           {showProfileEdit && (
-            <div className="absolute right-0 mt-3 w-80 bg-white border border-brand-250 p-5 rounded-2xl shadow-2xl z-50 space-y-4 animate-fade-in">
+            <div className="absolute right-0 sm:right-0 left-0 sm:left-auto mt-3 w-[calc(100vw-2rem)] sm:w-80 bg-white border border-brand-250 p-4 sm:p-5 rounded-2xl shadow-2xl z-50 space-y-4 animate-fade-in">
               <div className="flex justify-between items-center border-b border-brand-100 pb-2">
                 <span className="text-xs font-bold text-brand-850 uppercase tracking-wide">Edit Investigator Profile</span>
                 <button 
@@ -434,59 +434,59 @@ export default function Dashboard() {
       </div>
 
       {/* Analytics Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="metric-card flex flex-col justify-between space-y-2">
-          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <div className="metric-card flex flex-col justify-between space-y-1 sm:space-y-2">
+          <div className="flex justify-between items-center text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-brand-500">
             <span>Total Audits</span>
             <span>🛡️</span>
           </div>
           <div>
-            <h3 className="text-3xl font-black text-brand-850">{totalCount}</h3>
+            <h3 className="text-2xl sm:text-3xl font-black text-brand-850">{totalCount}</h3>
           </div>
-          <p className="text-[10px] text-brand-500 leading-snug">Completed verification sessions across all modules.</p>
+          <p className="text-[8px] sm:text-[10px] text-brand-500 leading-snug hidden sm:block">Completed verification sessions across all modules.</p>
         </div>
 
-        <div className="metric-card flex flex-col justify-between space-y-2">
-          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
-            <span>Average Trust Score</span>
+        <div className="metric-card flex flex-col justify-between space-y-1 sm:space-y-2">
+          <div className="flex justify-between items-center text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-brand-500">
+            <span>Avg Trust Score</span>
             <span>🧠</span>
           </div>
           <div>
-            <h3 className={`text-3xl font-black ${avgTrustScore >= 75 ? 'text-accent-green' : avgTrustScore >= 45 ? 'text-accent-amber' : 'text-accent-red'}`}>
+            <h3 className={`text-2xl sm:text-3xl font-black ${avgTrustScore >= 75 ? 'text-accent-green' : avgTrustScore >= 45 ? 'text-accent-amber' : 'text-accent-red'}`}>
               {avgTrustScore}%
             </h3>
           </div>
-          <p className="text-[10px] text-brand-500 leading-snug">Average integrity score of scanned digital artifacts.</p>
+          <p className="text-[8px] sm:text-[10px] text-brand-500 leading-snug hidden sm:block">Average integrity score of scanned digital artifacts.</p>
         </div>
 
-        <div className="metric-card flex flex-col justify-between space-y-2">
-          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
-            <span>Most Active Tool</span>
+        <div className="metric-card flex flex-col justify-between space-y-1 sm:space-y-2">
+          <div className="flex justify-between items-center text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-brand-500">
+            <span>Most Active</span>
             <span>⚡</span>
           </div>
           <div>
-            <h3 className="text-base font-black text-brand-800 truncate">{mostUsedTool}</h3>
+            <h3 className="text-xs sm:text-base font-black text-brand-800 truncate">{mostUsedTool}</h3>
           </div>
-          <p className="text-[10px] text-brand-500 leading-snug">Forensic engine with highest volume of scans.</p>
+          <p className="text-[8px] sm:text-[10px] text-brand-500 leading-snug hidden sm:block">Forensic engine with highest volume of scans.</p>
         </div>
 
-        <div className="metric-card flex flex-col justify-between space-y-2">
-          <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-brand-500">
-            <span>Authentic vs Suspicious</span>
+        <div className="metric-card flex flex-col justify-between space-y-1 sm:space-y-2">
+          <div className="flex justify-between items-center text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-brand-500">
+            <span>Ok vs Flagged</span>
             <span>⚖️</span>
           </div>
-          <div className="flex gap-3 text-xs font-bold pt-1.5">
-            <span className="text-accent-green">✓ {authenticCount} Ok</span>
-            <span className="text-accent-red">⚠ {suspiciousCount + dangerousCount} Flagged</span>
+          <div className="flex gap-2 sm:gap-3 text-[10px] sm:text-xs font-bold pt-1.5">
+            <span className="text-accent-green">✓ {authenticCount}</span>
+            <span className="text-accent-red">⚠ {suspiciousCount + dangerousCount}</span>
           </div>
-          <p className="text-[10px] text-brand-500 leading-snug">Ratio of clean logs against flagged risk detections.</p>
+          <p className="text-[8px] sm:text-[10px] text-brand-500 leading-snug hidden sm:block">Ratio of clean logs against flagged risk detections.</p>
         </div>
       </div>
 
       {/* Analytics Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Ask Saarthi Assistant */}
-        <div className="lg:col-span-2 premium-card flex flex-col justify-between h-[340px] space-y-4">
+        <div className="lg:col-span-2 premium-card flex flex-col justify-between h-[280px] sm:h-[340px] space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-[#E4E1DA]">
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500 flex items-center gap-1.5">
@@ -556,7 +556,7 @@ export default function Dashboard() {
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               disabled={chatLoading}
-              placeholder={attachedFile ? "Ask a question about this file..." : "Ask a question (e.g. 'What is a voice cloning deepfake?')..."}
+              placeholder={attachedFile ? "Ask about this file..." : "Ask a question..."}
               className="flex-1 bg-brand-50/50 border border-[#E4E1DA] rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#3E5C4B] disabled:opacity-50"
             />
             <button
@@ -658,10 +658,10 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 premium-card space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 premium-card space-y-4 sm:space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h3 className="text-lg font-black text-brand-800">Forensics Log History</h3>
+            <h3 className="text-base sm:text-lg font-black text-brand-800">Forensics Log History</h3>
             
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <input
@@ -700,40 +700,40 @@ export default function Dashboard() {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-brand-200 text-[10px] uppercase tracking-wider text-brand-500 font-bold">
-                    <th className="py-2.5 px-3">Date</th>
-                    <th className="py-2.5 px-3">Target / Name</th>
-                    <th className="py-2.5 px-3">Format</th>
-                    <th className="py-2.5 px-3">Verdict</th>
-                    <th className="py-2.5 px-3 text-right">Authenticity</th>
-                    <th className="py-2.5 px-3 text-center">Action</th>
+                    <th className="py-2.5 px-2 sm:px-3 hidden sm:table-cell">Date</th>
+                    <th className="py-2.5 px-2 sm:px-3">Target / Name</th>
+                    <th className="py-2.5 px-2 sm:px-3 hidden md:table-cell">Format</th>
+                    <th className="py-2.5 px-2 sm:px-3">Verdict</th>
+                    <th className="py-2.5 px-2 sm:px-3 text-right hidden sm:table-cell">Authenticity</th>
+                    <th className="py-2.5 px-2 sm:px-3 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-100">
                   {filteredReports.slice(0, 8).map((report) => (
                     <tr key={report._id} className="premium-row hover:bg-brand-50/50 transition group">
-                      <td className="py-3 px-3 text-brand-500">
+                      <td className="py-3 px-2 sm:px-3 text-brand-500 hidden sm:table-cell">
                         {new Date(report.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="py-3 px-3 font-bold text-brand-800 max-w-[140px] truncate">
+                      <td className="py-3 px-2 sm:px-3 font-bold text-brand-800 max-w-[100px] sm:max-w-[140px] truncate">
                         {report.fileName}
                       </td>
-                      <td className="py-3 px-3 capitalize text-brand-650">
+                      <td className="py-3 px-2 sm:px-3 capitalize text-brand-650 hidden md:table-cell">
                         {report.mediaType}
                       </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border uppercase ${
+                      <td className="py-3 px-2 sm:px-3">
+                        <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-extrabold border uppercase ${
                           report.verdict === 'safe'
                             ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
                             : (report.verdict === 'suspicious' ? 'bg-accent-amber/10 text-accent-amber border-accent-amber/20' : 'bg-accent-red/10 text-accent-red border-accent-red/20')
                         }`}>{report.verdict}</span>
                       </td>
-                      <td className="py-3 px-3 text-right font-black text-brand-800">
+                      <td className="py-3 px-2 sm:px-3 text-right font-black text-brand-800 hidden sm:table-cell">
                         {report.authenticityScore}%
                       </td>
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-3 px-2 sm:px-3 text-center">
                         <button 
                           onClick={() => setActiveTab(`report_detail:${report._id}`)}
-                          className="text-[10px] bg-brand-100 hover:bg-accent-blue text-brand-700 hover:text-white px-2.5 py-1 rounded-lg transition"
+                          className="text-[9px] sm:text-[10px] bg-brand-100 hover:bg-accent-blue text-brand-700 hover:text-white px-2 sm:px-2.5 py-1 rounded-lg transition"
                         >
                           Details
                         </button>

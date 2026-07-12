@@ -61,26 +61,30 @@
 }
 
 .premium-card {
-  @apply bg-white border border-brand-200 rounded-3xl p-6 transition-all duration-300;
+  @apply bg-white border border-brand-200 rounded-3xl p-4 sm:p-6 transition-all duration-300;
   box-shadow: 0 4px 20px rgba(19, 34, 25, 0.02);
 }
 
-.premium-card:hover {
-  transform: translateY(-4px) scale(1.006);
-  border-color: #3E5C4B40;
-  box-shadow: 0 12px 30px rgba(19, 34, 25, 0.06), 0 0 1px #3E5C4B20;
+@media (hover: hover) {
+  .premium-card:hover {
+    transform: translateY(-4px) scale(1.006);
+    border-color: #3E5C4B40;
+    box-shadow: 0 12px 30px rgba(19, 34, 25, 0.06), 0 0 1px #3E5C4B20;
+  }
 }
 
 /* 3D tilt effects for primary metric blocks */
 .metric-card {
-  @apply bg-white border border-brand-200 p-5 rounded-3xl transition-all duration-300 relative overflow-hidden;
+  @apply bg-white border border-brand-200 p-3 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-300 relative overflow-hidden;
   box-shadow: 0 4px 15px rgba(19, 34, 25, 0.01);
 }
 
-.metric-card:hover {
-  transform: translateY(-2px) rotateX(1deg) rotateY(1deg);
-  border-color: #3E5C4B33;
-  box-shadow: 0 8px 24px rgba(19, 34, 25, 0.05);
+@media (hover: hover) {
+  .metric-card:hover {
+    transform: translateY(-2px) rotateX(1deg) rotateY(1deg);
+    border-color: #3E5C4B33;
+    box-shadow: 0 8px 24px rgba(19, 34, 25, 0.05);
+  }
 }
 
 /* Clean glass inputs */
@@ -98,9 +102,11 @@
   @apply transition-all duration-200;
 }
 
-.premium-row:hover {
-  background-color: rgba(62, 92, 75, 0.025);
-  transform: scale(1.002);
+@media (hover: hover) {
+  .premium-row:hover {
+    background-color: rgba(62, 92, 75, 0.025);
+    transform: scale(1.002);
+  }
 }
 
 /* Pulse badge */
@@ -143,12 +149,14 @@ section[class*="bg-white"][class*="border-brand-200"] {
   box-shadow: 0 4px 20px rgba(19, 34, 25, 0.02);
 }
 
-div[class*="bg-white"][class*="border-brand-200"]:hover,
-form[class*="bg-white"][class*="border-brand-200"]:hover,
-section[class*="bg-white"][class*="border-brand-200"]:hover {
-  transform: translateY(-4px) scale(1.004);
-  border-color: #3E5C4B40;
-  box-shadow: 0 12px 30px rgba(19, 34, 25, 0.05), 0 0 1px #3E5C4B15;
+@media (hover: hover) {
+  div[class*="bg-white"][class*="border-brand-200"]:hover,
+  form[class*="bg-white"][class*="border-brand-200"]:hover,
+  section[class*="bg-white"][class*="border-brand-200"]:hover {
+    transform: translateY(-4px) scale(1.004);
+    border-color: #3E5C4B40;
+    box-shadow: 0 12px 30px rgba(19, 34, 25, 0.05), 0 0 1px #3E5C4B15;
+  }
 }
 
 /* Global input focus upgrades */

@@ -19,6 +19,12 @@ import ParticleBackground from './components/ParticleBackground';
 
 export default function App() {
   const { token, user, activeTab, connectSocket, disconnectSocket, logout } = useStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close sidebar on tab change (mobile nav tap)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [activeTab]);
 
   useEffect(() => {
     if (token) {
@@ -117,9 +123,42 @@ export default function App() {
         <circle cx="50" cy="50" r="6" />
       </svg>
 
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-brand-200 flex items-center justify-between px-4 py-3 shadow-sm">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-brand-50 border border-brand-200 text-brand-700 hover:bg-brand-100 transition"
+          aria-label="Toggle menu"
+        >
+          {sidebarOpen ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          )}
+        </button>
+        <div className="cursor-pointer" onClick={() => useStore.setState({ activeTab: 'landing' })}>
+          <Logo className="w-28 h-auto" showTagline={false} />
+        </div>
+        <div className="w-9" /> {/* Spacer for centering */}
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40 animate-fade-in"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-white/95 backdrop-blur-md border-r border-brand-200 flex flex-col justify-between shrink-0 shadow-sm z-30">
-        <div>
+      <aside className={`
+        fixed md:relative top-0 left-0 h-full md:h-auto w-72 md:w-64 
+        bg-white/95 backdrop-blur-md border-r border-brand-200 
+        flex flex-col justify-between shrink-0 shadow-lg md:shadow-sm z-50 md:z-30
+        transform transition-transform duration-300 ease-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <div className="overflow-y-auto">
           {/* Brand logo */}
           <div className="p-4 border-b border-brand-200 flex items-center justify-center cursor-pointer" onClick={() => useStore.setState({ activeTab: 'landing' })}>
             <Logo className="w-36 h-auto" showTagline={true} />
@@ -220,7 +259,7 @@ export default function App() {
       </aside>
 
       {/* Main View Panel */}
-      <main className="flex-grow min-h-screen bg-transparent overflow-y-auto relative z-10">
+      <main className="flex-grow min-h-screen bg-transparent overflow-y-auto relative z-10 pt-14 md:pt-0">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'cases' && <CaseWorkspace />}
         {activeTab === 'voice' && <VoiceVerify />}
