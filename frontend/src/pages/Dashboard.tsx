@@ -43,10 +43,15 @@ export default function Dashboard() {
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const chatContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [chatMessages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -451,7 +456,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1 py-1 text-xs scrollbar-thin">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-1 py-1 text-xs scrollbar-thin">
             {chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 leading-relaxed ${
@@ -463,7 +468,6 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 border-t border-[#E4E1DA]">
